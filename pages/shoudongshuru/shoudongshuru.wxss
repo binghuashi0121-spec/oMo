@@ -1,0 +1,134 @@
+.page {
+  padding: 47.71rpx 28.63rpx 93.51rpx 38.17rpx;
+  background-color: #f4f0eb;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100%;
+}
+
+.section {
+  margin-right: 11.47rpx;
+  padding: 36.26rpx 0 49.62rpx;
+  background-image: linear-gradient(268.8deg, #eadcdc 9.6%, #f7dbbe 97.4%);
+  border-radius: 76.34rpx;
+  box-shadow: none;
+  border: none;
+}
+
+.group {
+  margin-left: 38.17rpx;
+  padding-top: 129.77rpx;
+  width: 517.18rpx;
+  height: 227.1rpx;
+}
+
+.image-wrapper {
+  padding: 20.99rpx 0 30.53rpx;
+  background-color: #efe7dc;
+  border-radius: 1906.49rpx;
+  width: 110.69rpx;
+  box-shadow: none;
+  border: none;
+}
+
+.image_2 {
+  width: 45.8rpx;
+  height: 45.8rpx;
+}
+
+.image {
+  width: 438.93rpx;
+  height: 154.58rpx;
+}
+
+.pos {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.image-wrapper_2 {
+  padding: 22.9rpx 0 28.63rpx;
+  background-color: #efe7dc;
+  border-radius: 1906.49rpx;
+  width: 110.69rpx;
+  box-shadow: none;
+  border: none;
+}
+
+.pos_2 {
+  position: absolute;
+  right: 30.53rpx;
+  top: 167.94rpx;
+}
+
+.image_3 {
+  margin: 51.53rpx 11.47rpx 0 11.45rpx;
+  border-radius: 38.17rpx;
+  width: 660.31rpx;
+  height: 103.05rpx;
+}
+
+.text-wrapper {
+  margin-left: 9.54rpx;
+  margin-top: 603.05rpx;
+  padding: 28.28rpx 0 26.64rpx;
+  background-color: #ef5b24;
+  border-radius: 38.17rpx;
+}
+
+.text {
+  color: #ffffff;
+  font-size: 45.8rpx;
+  font-family: Inter;
+  line-height: 42.4rpx;
+}
+
+.section_2 {
+  margin-left: 11.45rpx;
+  margin-top: 135.5rpx;
+  padding: 45.8rpx 80.15rpx 26.72rpx;
+  background-color: #f2d3b3;
+  border-radius: 38.17rpx;
+  box-shadow: none;
+  border: none;
+}
+
+.image_4 {
+  width: 66.79rpx;
+  height: 106.87rpx;
+}
+
+.image_5 {
+  margin-right: 15.27rpx;
+  width: 116.41rpx;
+  height: 106.87rpx;
+}
+
+.manual-input-bar {
+  margin: 18.17rpx 11.45rpx 0 11.45rpx;
+  padding: 16.07rpx 19.08rpx;
+  background-color: #efe7dc;
+  border-radius: 76.34rpx;
+  box-shadow: 0 6rpx 12rpx rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+}
+
+.manual-input-label {
+  color: #757575;
+  font-size: 28rpx;
+  margin-right: 16rpx;
+}
+
+.manual-input {
+  flex: 1;
+  background-color: #ffffff;
+  border-radius: 38.17rpx;
+  padding: 10rpx 16rpx;
+}
+
+.scan-icon {
+  margin-left: 16rpx;
+}

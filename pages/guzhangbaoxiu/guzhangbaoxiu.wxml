@@ -1,0 +1,86 @@
+<view class="page">
+  <!-- Header -->
+  <view class="header">
+    <view class="nav-btn" bind:tap="onClick">
+      <image class="nav-icon" src="../../pictures/guzhangbaoxiu/back.png" />
+    </view>
+    <view class="nav-btn" bind:tap="onClick_1">
+      <image class="nav-icon" src="../../pictures/guzhangbaoxiu/help_cemter.png" />
+    </view>
+  </view>
+
+  <!-- Brand Logo -->
+  <view class="brand-logo-container">
+    <image class="brand-logo" src="../../pictures/guzhangbaoxiu/oMo_logo.png" />
+  </view>
+
+  <!-- Card 1: Vehicle ID Input -->
+  <view class="card">
+    <text class="section-title">车辆编号</text>
+    <view class="input-row">
+      <input 
+        class="vehicle-input" 
+        placeholder="扫描或输入车辆编号" 
+        placeholder-style="color: var(--text-body); opacity: 0.6;"
+        value="{{vehicleId}}"
+        bindinput="onIdInput"
+      />
+      <view class="scan-btn" bind:tap="onScanTap">
+        <image class="scan-icon" src="../../pictures/guzhangbaoxiu/sousuokuang.png" mode="aspectFit" />
+      </view>
+    </view>
+  </view>
+
+  <!-- Card 2: Fault Selection -->
+  <view class="card">
+    <text class="section-title">请选择故障部位</text>
+    <view class="fault-grid">
+      <view class="fault-item {{selectedFault === '刹车损坏' ? 'selected' : ''}}" bind:tap="onSelectFault" data-type="刹车损坏">
+        <text class="fault-text">刹车损坏</text>
+      </view>
+      <view class="fault-item {{selectedFault === '车锁损坏' ? 'selected' : ''}}" bind:tap="onSelectFault" data-type="车锁损坏">
+        <text class="fault-text">车锁损坏</text>
+      </view>
+      <view class="fault-item {{selectedFault === '二维码损坏' ? 'selected' : ''}}" bind:tap="onSelectFault" data-type="二维码损坏">
+        <text class="fault-text">二维码损坏</text>
+      </view>
+      <view class="fault-item {{selectedFault === '车轮损坏' ? 'selected' : ''}}" bind:tap="onSelectFault" data-type="车轮损坏">
+        <text class="fault-text">车轮损坏</text>
+      </view>
+      <view class="fault-item {{selectedFault === '方向盘损坏' ? 'selected' : ''}}" bind:tap="onSelectFault" data-type="方向盘损坏">
+        <text class="fault-text">方向盘损坏</text>
+      </view>
+      <view class="fault-item {{selectedFault === '其他故障' ? 'selected' : ''}}" bind:tap="onSelectFault" data-type="其他故障">
+        <text class="fault-text">其他故障</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Card 3: Fault Description -->
+  <view class="card">
+    <text class="section-title">故障详情</text>
+    <textarea 
+      class="input-area" 
+      placeholder="请输入故障详情" 
+      placeholder-style="color: var(--text-body); opacity: 0.6;"
+      bindinput="onDescriptionInput"
+    />
+  </view>
+
+  <!-- Card 4: Camera Section -->
+  <view class="card">
+    <view class="camera-section" bind:tap="onCameraTap">
+      <block wx:if="{{tempFilePaths.length > 0}}">
+        <image class="preview-image" src="{{tempFilePaths[0].tempFilePath}}" mode="aspectFill" />
+      </block>
+      <block wx:else>
+        <image class="camera-icon" src="../../pictures/guzhangbaoxiu/camera.png" />
+      </block>
+    </view>
+  </view>
+
+  <!-- Submit Button -->
+  <view class="submit-btn" bind:tap="onSubmit">
+    <text>提交</text>
+  </view>
+</view>

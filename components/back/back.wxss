@@ -1,0 +1,10 @@
+.image {
+  width: 45.8rpx;
+  height: 45.8rpx;
+  transition: transform 120ms ease-out;
+  transform-origin: center center;
+}
+
+.tap-press {
+  transform: scale(1.16);
+}

@@ -1,0 +1,38 @@
+.section {
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  height: 138.35rpx;
+  width: 265.63rpx;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.image {
+  width: 105.88rpx;
+  height: 105.88rpx;
+}
+
+.pos {
+  position: absolute;
+  left: 317.65rpx;
+  top: 44.12rpx;
+}
+
+.font {
+  font-size: 52.94rpx;
+  font-family: Inter;
+  line-height: 63.97rpx;
+  color: #494949;
+}
+
+.pos_2 {
+  position: absolute;
+  right: 235.96rpx;
+  bottom: 151.5rpx;
+}
+
+.pos_3 {
+  position: absolute;
+  right: 183rpx;
+  bottom: 87.79rpx;
+}

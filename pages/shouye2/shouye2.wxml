@@ -1,0 +1,80 @@
+<view class="oMo-flex-col oMo-justify-start oMo-relative page {{showLoginMask ? 'blurred' : ''}}" bindtap="onFirstTapAnywhere">
+  <view class="section">
+    <image class="top-logo" src="../../pictures/shouye/oMo_logo.png" mode="widthFix" />
+    <!-- <image class="section-bg" src="../../pictures/shouye/background.png" mode="aspectFill" /> -->
+    <view class="map-frame">
+      <view class="map-inner">
+        <map
+          id="homeMap"
+          class="map-component"
+          latitude="{{mapLatitude}}"
+          longitude="{{mapLongitude}}"
+          scale="{{mapScale}}"
+          markers="{{carMarkers}}"
+          bindmarkertap="onMarkerTap"
+          bindtap="onMapTap"
+          show-location="true"
+        ></map>
+        <view wx:if="{{selectedCar}}" class="car-status-panel">
+          <view class="car-status-row">
+            <text class="car-status-label">车型</text>
+            <text class="car-status-value">{{selectedCar.model}}</text>
+          </view>
+          <view class="car-status-row">
+            <text class="car-status-label">剩余里程</text>
+            <text class="car-status-value">{{selectedCar.range}}</text>
+          </view>
+          <view class="car-status-row">
+            <text class="car-status-label">载客量</text>
+            <text class="car-status-value">{{selectedCar.capacity}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+  <view class="oMo-flex-col oMo-justify-start oMo-items-center text-wrapper pos" bindtap="onScanCode">
+    <text class="font">即时用车</text>
+  </view>
+  <view class="oMo-flex-col oMo-justify-start oMo-items-center text-wrapper_2 pos_2" bindtap="onClick_1">
+    <text class="font text">快捷叫车</text>
+  </view>
+  <view class="oMo-flex-row equal-division section_2">
+    <view class="oMo-flex-col oMo-items-center group group_1">
+      <image
+        class="image"
+        src="../../pictures/shouye/smallhouse.png"
+      />
+      <text class="font_2 text_2 mt-7">首页</text>
+    </view>
+    <view class="oMo-flex-col group group_4 ml-5" bindtap="onClick_2" hover-class="tap-press">
+      <image
+        class="oMo-shrink-0 oMo-self-center image_2"
+        src="../../pictures/shouye/wode1.png"
+      />
+      <view class="oMo-flex-col oMo-justify-start oMo-items-center oMo-self-stretch oMo-relative group_2">
+        <text class="font_2 text_3">我的</text>
+        <image
+          class="image_3 pos_3"
+          src="../../pictures/shouye/wode2.png"
+        />
+      </view>
+    </view>
+  </view>
+  <view
+    wx:if="{{isLoggedIn && showSuspendedTripEntry}}"
+    class="suspended-trip-entry"
+    bindtap="onResumeSuspendedTripTap"
+    hover-class="tap-press"
+  >
+    <image class="suspended-trip-icon" src="/pictures/mingxi/dingdan.png" />
+    <view class="suspended-trip-text-wrap">
+      <text class="suspended-trip-title">继续订单</text>
+      <text class="suspended-trip-subtitle">{{suspendedTripStatusText}}</text>
+    </view>
+  </view>
+  <view wx:if="{{!isLoggedIn && !showLoginMask}}" class="first-tap-overlay" catchtap="onFirstTapAnywhere"></view>
+  <view wx:if="{{showLoginMask}}" class="login-mask" catchtap="onRequireLoginTap">
+    <view wx:if="{{loginLoading}}" class="login-loader"></view>
+    <text class="login-tip">{{loginLoading ? '正在进入登录...' : '点击任意处进入登录'}}</text>
+  </view>
+</view>

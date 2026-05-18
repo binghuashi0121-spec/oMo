@@ -1,0 +1,59 @@
+<view class="oMo-flex-col page {{leaving ? 'page-leave-right' : ''}}">
+  <view class="oMo-flex-col group">
+    <view class="oMo-flex-row oMo-justify-between">
+      <view class="oMo-flex-col oMo-justify-start oMo-items-center image-wrapper" bind:tap="onClick" hover-class="tap-press">
+        <image
+          class="image"
+          src="../../pictures/jiaochejiemian/back.png"
+        />
+      </view>
+      <view class="oMo-flex-col oMo-justify-start oMo-items-center image-wrapper_2" bind:tap="onClick_1" hover-class="tap-press">
+        <image
+          class="image"
+          src="../../pictures/jiaochejiemian/help_center.png"
+        />
+      </view>
+    </view>
+    <image class="top-logo" src="./oMo_logo.png" mode="widthFix" />
+    <view class="oMo-flex-col oMo-mt-2">
+      <view class="oMo-flex-col map-section">
+        <view class="map-frame">
+          <view class="map-inner">
+            <map
+              id="callMap"
+              class="map-component"
+              latitude="{{mapLatitude}}"
+              longitude="{{mapLongitude}}"
+              scale="{{mapScale}}"
+              markers="{{carMarkers}}"
+              bindmarkertap="onMarkerTap"
+              bindtap="onMapTap"
+              show-location="true"
+            ></map>
+            <view wx:if="{{selectedCar}}" class="car-status-panel">
+              <view class="car-status-row">
+                <text class="car-status-label">车型</text>
+                <text class="car-status-value">{{selectedCar.model}}</text>
+              </view>
+              <view class="car-status-row">
+                <text class="car-status-label">剩余里程</text>
+                <text class="car-status-value">{{selectedCar.range}}</text>
+              </view>
+              <view class="car-status-row">
+                <text class="car-status-label">载客量</text>
+                <text class="car-status-value">{{selectedCar.capacity}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view class="oMo-flex-row section_2 mt-15" bind:tap="onLocationTap">
+        <view class="oMo-self-start section_3"></view>
+        <text class="oMo-self-center text_2 pickup-text oMo-ml-28">{{pickupDisplayText}}</text>
+      </view>
+    </view>
+  </view>
+  <view class="oMo-flex-col oMo-justify-start oMo-items-center text-wrapper_2" bind:tap="onClick_2">
+    <text class="text_3">确认叫车</text>
+  </view>
+</view>

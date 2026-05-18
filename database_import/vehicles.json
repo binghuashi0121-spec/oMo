@@ -1,0 +1,7 @@
+{"_id":"AB101","lat":39.910187,"lng":116.398451,"model":"oMo 1.0","range":"58公里","capacity":"2人","status":"available","battery":85,"faultCode":null,"lastUsedTime":{"$date":"2024-02-09T08:00:00.000Z"}}
+{"_id":"CD102","lat":39.908187,"lng":116.396451,"model":"oMo 2.0","range":"72公里","capacity":"4人","status":"in_use","battery":60,"faultCode":null,"lastUsedTime":{"$date":"2024-02-09T10:30:00.000Z"}}
+{"_id":"EF103","lat":39.909587,"lng":116.400451,"model":"oMo 1.0","range":"45公里","capacity":"2人","status":"faulty","battery":15,"faultCode":"301","lastUsedTime":{"$date":"2024-02-08T16:20:00.000Z"}}
+{"_id":"GH104","lat":39.911187,"lng":116.395451,"model":"oMo Pro","range":"80公里","capacity":"2人","status":"maintenance","battery":100,"faultCode":"401","lastUsedTime":{"$date":"2024-02-05T08:00:00.000Z"}}
+{"_id":"IJ105","lat":39.907187,"lng":116.399451,"model":"oMo 2.0","range":"66公里","capacity":"4人","status":"available","battery":74,"faultCode":null,"lastUsedTime":{"$date":"2024-02-08T20:45:00.000Z"}}
+{"_id":"KL106","lat":39.906187,"lng":116.401451,"model":"oMo 1.0","range":"10公里","capacity":"2人","status":"faulty","battery":5,"faultCode":"101","lastUsedTime":{"$date":"2024-02-09T09:00:00.000Z"}}
+{"_id":"MN107","lat":39.912187,"lng":116.397451,"model":"oMo 2.0","range":"0公里","capacity":"4人","status":"faulty","battery":45,"faultCode":"203","lastUsedTime":{"$date":"2024-02-08T14:00:00.000Z"}}

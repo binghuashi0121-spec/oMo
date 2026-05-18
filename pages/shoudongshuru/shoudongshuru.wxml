@@ -1,0 +1,43 @@
+<view class="oMo-flex-col page">
+  <view class="oMo-flex-col oMo-justify-start oMo-items-start oMo-relative section">
+    <view class="oMo-flex-col oMo-justify-start oMo-items-start oMo-relative group">
+      <view class="oMo-flex-col oMo-justify-start oMo-items-center image-wrapper" bind:tap="onClick" hover-class="tap-press">
+        <image
+          class="image_2"
+          src="../../pictures/shoudongshuru/home_page.png"
+        />
+      </view>
+      <image
+        class="image pos"
+        src="../../pictures/shoudongshuru/oMo_logo.png"
+      />
+    </view>
+    <view class="oMo-flex-col oMo-justify-start oMo-items-center image-wrapper_2 pos_2" bind:tap="onClick_1" hover-class="tap-press">
+      <image
+        class="image_2"
+        src="../../pictures/shoudongshuru/help_center.png"
+      />
+    </view>
+  </view>
+  <view class="oMo-flex-row oMo-items-center oMo-self-stretch manual-input-bar">
+    <text class="manual-input-label">手动输入</text>
+    <input class="manual-input" placeholder="请输入车辆编号" value="{{vehicleId}}" bindinput="onManualInput" bindtap="onManualTap"/>
+    <image class="image_4 scan-icon" src="../../pictures/shoudongshuru/scan_input.png" bind:tap="onScan"/>
+  </view>
+
+  <view class="oMo-flex-col oMo-justify-start oMo-items-center text-wrapper" bind:tap="onClick_2">
+    <text class="text">确定</text>
+  </view>
+
+  <view class="oMo-flex-row oMo-justify-between section_2">
+    <image
+      class="image_4"
+      src="../../pictures/shoudongshuru/scan_input.png"
+      bind:tap="onScan"
+    />
+    <image
+      class="image_5"
+      src="../../pictures/shoudongshuru/Manual_input.png"
+    />
+  </view>
+</view>

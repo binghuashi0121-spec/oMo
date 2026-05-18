@@ -1,0 +1,30 @@
+<view class="oMo-flex-col page" bind:tap="onClick">
+  <view class="oMo-flex-col oMo-justify-start oMo-items-start oMo-relative group">
+    <view class="oMo-flex-col oMo-justify-start oMo-items-center image-wrapper oMo-relative">
+      <image class="bg-image" src="../../pictures/zhifu_success/5023aafc0d454062100d513b3389d97a.png" />
+      <image
+        class="image oMo-relative"
+        src="../../pictures/zhifu_success/13971102c62f3ecd61ec7c32576dd6e2.png"
+      />
+    </view>
+    <view class="oMo-flex-col oMo-justify-start oMo-items-center image-wrapper_2 pos oMo-relative">
+      <image class="bg-image" src="../../pictures/zhifu_success/12fbd00d3d7430ac15cd656293470149.png" />
+      <image
+        class="image_2 oMo-relative"
+        src="../../pictures/zhifu_success/4b38461c94e1d033aa53e7f0877f3d4a.png"
+      />
+    </view>
+    <view class="oMo-flex-col oMo-justify-start section pos_2">
+      <view class="oMo-flex-col oMo-justify-start oMo-items-center image-wrapper_3">
+        <image
+          class="image_3"
+          src="../../pictures/zhifu_success/yuan_logo.png"
+        />
+      </view>
+    </view>
+  </view>
+  <view class="group_2 oMo-mt-38">
+    <view><text class="font text">支付成功！</text></view>
+    <view><text class="font text_2">祝您用车愉快</text></view>
+  </view>
+</view>

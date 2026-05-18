@@ -1,0 +1,68 @@
+.page {
+  padding-left: 17.13rpx;
+  padding-bottom: 34.26rpx;
+  background-color: #f4f0eb;
+  border: solid 1.9rpx #00000000;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100%;
+}
+.group {
+  padding: 41.88rpx 0 43.78rpx;
+}
+.image-wrapper {
+  margin-left: 22.84rpx;
+  margin-right: 39.97rpx;
+  padding: 112.31rpx 0 45.69rpx;
+  background-image: linear-gradient(268.8deg, #eadcdc 9.6%, #f7dbbe 97.4%);
+  border-radius: 76.14rpx;
+}
+.image {
+  width: 437.82rpx;
+  height: 154.19rpx;
+}
+.group_2 {
+  margin-right: 2.87rpx;
+  padding-top: 34.26rpx;
+  overflow-y: auto;
+}
+.section {
+  margin-right: 23.78rpx;
+  padding: 36.4rpx 29.92rpx 89.52rpx 31.29rpx;
+  background-color: #efe7dc;
+  border-radius: 38.07rpx 38.07rpx 0 0;
+  box-shadow: 0rpx 7.61rpx 7.61rpx #00000040;
+}
+.text {
+  color: #ef5b24;
+  font-size: 88rpx;
+  font-family: Inter;
+  line-height: 71.35rpx;
+  font-weight: bold;
+}
+.group_3 {
+}
+.font {
+  font-size: 38.07rpx;
+  font-family: Inter;
+  line-height: 45.69rpx;
+  color: #757575;
+}
+.text_2 {
+  margin-top: -15.76rpx;
+}
+.text-wrapper {
+  padding: 23.87rpx 0 20.33rpx;
+  background-color: #e3e3e3;
+  border-radius: 15.23rpx;
+  overflow: hidden;
+  width: 437.82rpx;
+  border: solid 1.9rpx #767676;
+}
+.text_3 {
+  color: #1e1e1e;
+  font-size: 30.46rpx;
+  font-family: Inter;
+  line-height: 28.13rpx;
+}

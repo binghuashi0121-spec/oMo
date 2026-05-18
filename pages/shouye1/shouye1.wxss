@@ -1,0 +1,136 @@
+.mt-7 {
+  margin-top: 13.36rpx;
+}
+
+.ml-5 {
+  margin-left: 9.54rpx;
+}
+
+.page {
+  background-color: #ffffff;
+  background-image: linear-gradient(180deg, #e0d4c333 3.4%, #f3a48733 51.4%, #ef5b2433 100%);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100%;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.section {
+  background-image: linear-gradient(180deg, #e0d4c333 3.4%, #f3a48733 51.4%, #ef5b2433 100%);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  width: 750rpx;
+  height: 1625.95rpx;
+}
+
+.text-wrapper {
+  padding: 34.54rpx 0 34.92rpx;
+  background-color: #494949;
+  border-radius: 17.18rpx;
+  width: 316.79rpx;
+  z-index: 2;
+}
+
+.pos {
+  position: absolute;
+  left: 40.08rpx;
+  top: 1244.27rpx;
+}
+
+.font {
+  font-size: 38.17rpx;
+  font-family: Inter;
+  line-height: 35.5rpx;
+  color: #ffffff;
+}
+
+.text-wrapper_2 {
+  padding: 36.45rpx 0 33.05rpx;
+  background-color: #ef5b24;
+  border-radius: 17.18rpx;
+  width: 318.7rpx;
+  z-index: 2;
+}
+
+.pos_2 {
+  position: absolute;
+  right: 38.17rpx;
+  top: 1246.18rpx;
+}
+
+.text {
+  line-height: 35.46rpx;
+}
+
+.equal-division {
+  position: absolute;
+  left: 40.08rpx;
+  right: 38.17rpx;
+  top: 1391.22rpx;
+  z-index: 1;
+}
+
+.section_2 {
+  padding: 20.88rpx 0 21.97rpx;
+  background-color: #f5f5f5;
+  border-radius: 38.17rpx;
+}
+
+.group {
+  flex: 1 1 330.8rpx;
+}
+
+.group_1 {
+  padding: 10rpx 0 14.96rpx;
+}
+
+.image {
+  width: 74.43rpx;
+  height: 73.24rpx;
+}
+
+.font_2 {
+  font-size: 28.63rpx;
+  font-family: Inter;
+  line-height: 26.55rpx;
+}
+
+.text_2 {
+  color: #fc9063;
+}
+
+.group_4 {
+  padding: 13.47rpx 0 10rpx;
+}
+
+.image_2 {
+  border-radius: 50%;
+  width: 45.8rpx;
+  height: 45.8rpx;
+}
+
+.group_2 {
+  margin-top: -7.63rpx;
+  padding-top: 50.27rpx;
+}
+
+.text_3 {
+  color: #9a9a9a;
+}
+
+.image_3 {
+  border-radius: 50%;
+  width: 70.61rpx;
+  height: 70.61rpx;
+}
+
+.pos_3 {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}

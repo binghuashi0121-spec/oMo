@@ -1,0 +1,138 @@
+.mt-11 {
+  margin-top: 21.26rpx;
+}
+.page {
+  padding: 763.53rpx 0 388.53rpx;
+  background-color: #f4f0eb;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100%;
+}
+.image_2 {
+  border-radius: 19.33rpx;
+  mix-blend-mode: SOFT_LIGHT;
+  width: 663.02rpx;
+  height: 440.72rpx;
+}
+.image_3 {
+  margin-left: 52.19rpx;
+  margin-right: 34.79rpx;
+}
+.pos_3 {
+  position: absolute;
+  left: 28.99rpx;
+  top: 355.67rpx;
+}
+.section {
+  padding: 169.25rpx 5.8rpx 179.77rpx 38.66rpx;
+  background-image: linear-gradient(270deg, #f2eae433 0%, #d6cec966 23.6%, #d6cec9 98.6%);
+  border-radius: 69.59rpx;
+}
+.pos_2 {
+  position: absolute;
+  left: 27.06rpx;
+  right: 42.53rpx;
+  top: 336.34rpx;
+}
+.group {
+  padding: 0 35.39rpx;
+}
+.font {
+  font-size: 30.93rpx;
+  font-family: Inter;
+  line-height: 28.45rpx;
+  color: #494949;
+}
+.text_1 {
+  margin-left: 2.88rpx;
+}
+.text-wrapper {
+  margin-right: 13.3rpx;
+}
+.view {
+  padding: 14.23rpx 0 19.91rpx;
+  height: 58.96rpx;
+  border: solid 0.97rpx #757575;
+}
+.font_2 {
+  font-size: 25.13rpx;
+  font-family: Inter;
+  line-height: 22.89rpx;
+  font-weight: 300;
+  color: #757575;
+}
+.text_2 {
+  margin-left: 15.95rpx;
+}
+.view_2 {
+  margin-top: 60.31rpx;
+}
+.text_3 {
+  margin-left: 2.3rpx;
+  line-height: 28.51rpx;
+}
+.view_3 {
+  padding: 4.29rpx 6.34rpx 6.34rpx 15.95rpx;
+  border: solid 0.97rpx #757575;
+}
+.text_4 {
+  line-height: 22.94rpx;
+}
+.text-wrapper_2 {
+  padding: 13.22rpx 0 11.6rpx;
+  background-color: #fc9063;
+  width: 158.51rpx;
+  height: 46.39rpx;
+}
+.text_5 {
+  color: #ffffff;
+  font-size: 23.2rpx;
+  line-height: 21.57rpx;
+  font-weight: unset;
+}
+.group_2 {
+  margin-top: 43.98rpx;
+  padding-bottom: 40.11rpx;
+  border-bottom: solid 0.97rpx #757575;
+}
+.text-wrapper_3 {
+  padding: 27.29rpx 0 19.83rpx;
+  background-color: #fc9063;
+  width: 550.9rpx;
+}
+.font_3 {
+  font-size: 38.66rpx;
+  font-family: Inter;
+  line-height: 35.99rpx;
+  color: #ffffff;
+}
+.text-wrapper_4 {
+  margin: 78.77rpx 46.39rpx 0 38.66rpx;
+  padding: 25.32rpx 0 21.69rpx;
+  background-color: #fc9063;
+}
+.text_6 {
+  line-height: 36.11rpx;
+}
+.image {
+  width: 587.63rpx;
+  height: 434.92rpx;
+}
+.pos {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 0;
+}
+.text {
+  color: #db511e;
+  font-size: 46.39rpx;
+  font-family: Inter;
+  line-height: 43.05rpx;
+}
+.pos_4 {
+  position: absolute;
+  left: 103.47rpx;
+  top: 395.91rpx;
+}

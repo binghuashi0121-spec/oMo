@@ -1,0 +1,6 @@
+<image
+  class="image"
+  src="../../pictures/jiaochejiemian/back.png"
+  bind:tap="onBackTap"
+  hover-class="tap-press"
+/>

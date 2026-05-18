@@ -1,0 +1,63 @@
+<view class="oMo-flex-col page">
+  <view class="oMo-flex-col oMo-justify-start oMo-items-center oMo-self-stretch oMo-relative section">
+    <view class="oMo-flex-col oMo-justify-start oMo-items-center image-wrapper pos" bind:tap="onClick" hover-class="tap-press">
+      <image
+        class="image"
+        src="../../pictures/shiyongxuzhi/back.png"
+      />
+    </view>
+    <image
+      class="oMo-relative image_2"
+      src="../../pictures/shiyongxuzhi/oMo_logo.png"
+    />
+  </view>
+  <view class="oMo-flex-col oMo-justify-start oMo-self-stretch group oMo-mt-14">
+    <view class="oMo-flex-col section_2">
+      <text class="oMo-self-center text">使用须知</text>
+      <view class="oMo-flex-col oMo-self-stretch group_2 oMo-mt-16">
+        <text class="oMo-self-start font">尊敬的用戶：</text>
+        <text class="oMo-self-stretch font">
+          欢迎使用鸥眸共享车小程序。本小程序由湖南大学“鸥眸共享”项目团队开发并运营，旨在为景区游客提供智能共享车的预约、使用及相关信息服务。为明确双方权利义务，特此制定本免责声明。请您在使用前仔细阅读并充分理解全部条款，您的使用行为即视为同意并接受本声明的约束。
+        </text>
+        <text class="oMo-self-start font">一、服务范围与使用条件</text>
+        <text class="oMo-self-stretch font text_2">
+          本小程序作为景区智能共享车的线上预约、订单管理、费用查询及使用指引平台，其功能依赖于景区实际投放的“鸥眸共享车”硬件设备及相关现场运营支持。
+        </text>
+        <text class="oMo-self-stretch font">
+          用户应保证在使用本小程序及相关服务时已年满18周岁，且具备完全民事行为能力。未满18周岁的用户，须由其法定监护人陪同使用，并由监护人承担全部责任。同时，用户应严格遵守景区管理规定及共享车操作指南，不得实施任何违规操作行为。
+        </text>
+
+        <text class="oMo-self-start font">二、信息与数据免责</text>
+        <text class="oMo-self-stretch font">我们将尽力确保通过本小程序提供的共享车位置、可预约数量、费用标准、续航里程等信息的准确性与及时性。但鉴于景区人流量动态变化、车辆临时调度、网络延迟或不可抗力等因素，相关信息可能存在一定偏差。我们不对上述信息的实时性与准确性提供任何明示或默示的担保，建议用户在使用前通过小程序客服或景区现场工作人员进行核实。</text>
+        <text class="oMo-self-stretch font">用户的个人信息（如手机号码、预约信息等）将依法受到保护。我们已采取合理的技术与管理措施防范信息泄露，但仍存在因网络攻击、第三方漏洞等非我方主观可控因素导致数据泄露的风险。除非因我方故意或重大过失所致，我们不承担相关法律责任。</text>
+
+        <text class="oMo-self-start font">三、车辆使用与安全责任</text>
+        <text class="oMo-self-stretch font">用户通过本小程序预约并使用共享车时，应在取车前认真检查车辆外观、刹车系统、电量及安全装置等状态，确认无误后方可启动。如发现车辆存在故障或异常，应立即停止使用，并通过小程序“故障反馈”功能或联系景区工作人员报修。如因用户未及时反馈并继续使用所造成的任何人身或财产损失，须由用户自行承担。</text>
+        <text class="oMo-self-stretch font">使用共享车期间，用户须严格遵守交通法规及景区行车规定，不得超速、逆行、违规载人载物或驶入禁行区域。凡因用户违规操作、疏忽驾驶或违反景区管理要求导致的自身或第三方人身伤害与财产损失，均应由用户承担全部责任，我们不承担任何赔偿或连带责任。</text>
+        <text class="oMo-self-stretch font">尽管我们已为共享车配备多传感器融合定位技术及三重安全保障体系（包括实时环境监控、超声波感知与触边开关制动等），但仍无法完全排除因极端天气（如暴雨、大风、冰雪）、复杂地形（如陡坡、障碍物遮挡）或不可预见的设备故障等不可控因素引发的风险。如因上述情况造成车辆损坏或人身伤害，我们将协助用户联系相关部门处理，但不直接承担赔偿责任。</text>
+
+        <text class="oMo-self-start font">四、服务中断与不可抗力</text>
+        <text class="oMo-self-stretch font">如因系统维护、技术升级、网络故障、电力中断或政府监管要求等原因，本小程序可能需暂停服务。我们将尽合理努力通过公告或短信等方式提前通知用户，但对因突发性服务中断所导致的预约失败、行程延误等间接损失，不承担责任。</text>
+        <text class="oMo-self-stretch font">如因地震、洪水、台风、疫情等不可抗力，或战争、社会动荡、景区临时闭园等无法预见、避免及克服的事件，导致小程序无法正常提供服务或共享车无法使用的，我们不承担违约责任，相关服务调整将视实际情况另行通告。</text>
+
+        <text class="oMo-self-start font">五、第三方责任免责</text>
+        <text class="oMo-self-stretch font">本小程序可能包含由第三方提供的景区地图、周边服务推荐等信息或链接。我们仅对自身提供的功能模块负责，对第三方所提供内容的真实性、合法性及服务质量不作任何担保。用户因使用第三方信息或服务所产生的一切争议，应直接与该第三方协商解决。</text>
+        <text class="oMo-self-stretch font">共享车硬件设备由山东开普勒专用车制造公司生产。我们虽对车辆生产标准予以审核，但车辆本身存在的质量问题（如潜在设备缺陷）所引发的故障，应由生产厂商依其质量保修条款承担责任。我们将协助用户与厂商沟通处理，但不直接承担与硬件质量相关的赔偿责任。</text>
+
+        <text class="oMo-self-start font">六、其他条款</text>
+        <text class="oMo-self-stretch font">本免责声明适用于我们及本小程序的运营合作方（包括景区管理方、车辆生产商等）。用户与上述合作方因使用共享车服务发生争议的，可参照本声明及相关协议协商解决。</text>
+        <text class="oMo-self-stretch font">我们有权根据法律法规的变更及服务内容的调整，适时修改本声明。修改后的版本将于小程序公告栏公示，自公示次日起生效。如用户继续使用本小程序，即视为接受修订后的条款。</text>
+        <text class="oMo-self-stretch font">若用户与我们就本小程序的使用或本声明的解释与履行发生争议，应首先通过友好协商解决；协商不成的，任何一方均有权向湖南大学所在地有管辖权的人民法院提起诉讼。</text>
+
+        <text class="oMo-self-stretch font">“鸥眸共享”项目团队</text>
+        <text class="oMo-self-stretch font">发布日期 2025.11.13</text>
+      </view>
+    </view>
+  </view>
+  <view
+    class="oMo-flex-col oMo-justify-start oMo-items-center oMo-self-center text-wrapper oMo-mt-14"
+    bind:tap="onClick_1"
+  >
+    <text class="text_3">我已知悉</text>
+  </view>
+</view>

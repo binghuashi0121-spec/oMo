@@ -1,0 +1,56 @@
+{
+  "pages": [
+    "pages/shouye2/shouye2",
+    "pages/shiyongxuzhi_2/shiyongxuzhi_2",
+    "pages/bangzhu_I/bangzhu_I",
+    "pages/bangzhu_J/bangzhu_J",
+    "pages/bangzhu_H/bangzhu_H",
+    "pages/bangzhu_G/bangzhu_G",
+    "pages/bangzhu_F/bangzhu_F",
+    "pages/bangzhu_E/bangzhu_E",
+    "pages/bangzhu_D/bangzhu_D",
+    "pages/bangzhu_C/bangzhu_C",
+    "pages/bangzhu_B/bangzhu_B",
+    "pages/bangzhu_A/bangzhu_A",
+    "pages/yinsizhengce/yinsizhengce",
+    "pages/shiyongxuzhi_1/shiyongxuzhi_1",
+    "pages/zhifu/zhifu",
+    "pages/shoudongshuru/shoudongshuru",
+    "pages/jiaochejiemian/jiaochejiemian",
+    "pages/tuijianshangchedian/tuijianshangchedian",
+    "pages/querenyongche1/querenyongche1",
+    "pages/yiwancheng/yiwancheng",
+    "pages/dengdaiquche/dengdaiquche",
+    "pages/jinhangzhong/jinhangzhong",
+    "pages/wode/wode",
+    "pages/fatiao/fatiao",
+    "pages/tanchuang_1/tanchuang_1",
+    "pages/tanchuang_2/tanchuang_2",
+    "pages/tanchuang_3/tanchuang_3",
+    "pages/guzhangbaoxiu/guzhangbaoxiu",
+    "pages/dengluyemian/dengluyemian",
+    "pages/tijiaochenggong/tijiaochenggong",
+    "pages/wodexiaoxi/wodexiaoxi",
+    "pages/zhifuchenggong/zhifuchenggong",
+    "pages/mingxi/mingxi",
+    "pages/tuikuan/tuikuan",
+    "pages/shouye1/shouye1",
+    "pages/tanchuang_4/tanchuang_4",
+    "pages/tanchuang_5/tanchuang_5"
+  ],
+  "window": {
+    "backgroundColor": "#f4f0eb",
+    "navigationBarBackgroundColor": "#f4f0eb",
+    "navigationBarTextStyle": "black",
+    "navigationStyle": "custom"
+  },
+  "requiredPrivateInfos": [
+    "getLocation",
+    "chooseLocation"
+  ],
+  "permission": {
+    "scope.userLocation": {
+      "desc": "你的位置信息将用于地图展示和车辆定位"
+    }
+  }
+}

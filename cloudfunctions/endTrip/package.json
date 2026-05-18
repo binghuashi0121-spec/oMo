@@ -1,0 +1,11 @@
+{
+  "name": "endTrip",
+  "version": "1.0.0",
+  "description": "End trip and calculate cost",
+  "main": "index.js",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

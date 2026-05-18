@@ -1,0 +1,114 @@
+<view class="oMo-flex-col page">
+  <view class="oMo-flex-col section">
+    <view class="oMo-flex-row oMo-justify-between oMo-self-stretch">
+      <view class="oMo-flex-col oMo-justify-start oMo-items-center image-wrapper" bind:tap="onClick" hover-class="tap-press">
+        <image class="image" src="../../pictures/mingxi/back.png" />
+      </view>
+      <view class="oMo-flex-col oMo-justify-start oMo-items-center image-wrapper_2" bind:tap="onClick_1" hover-class="tap-press">
+        <image class="image" src="../../pictures/mingxi/help_center.png" />
+      </view>
+    </view>
+    <image class="oMo-self-center image_2" src="../../pictures/mingxi/oMo_logo.png" />
+  </view>
+
+  <view class="oMo-flex-col group" wx:if="{{trip}}">
+    <view class="oMo-flex-col oMo-self-stretch group_2">
+      <view class="oMo-flex-col section_2">
+        <view class="oMo-flex-col oMo-justify-start oMo-items-start oMo-relative group_3">
+          <image class="image_3" src="../../pictures/mingxi/small_oMo_logo.png" />
+          <text class="font text pos">OMO共享车</text>
+        </view>
+        <view class="oMo-flex-col group_4">
+          <view class="oMo-flex-row oMo-justify-between">
+            <text class="font_2 text_19">车辆编号</text>
+            <text class="font_3 text_2">{{trip.displayVehicleId}}</text>
+          </view>
+          <view class="oMo-flex-row oMo-justify-between">
+            <text class="font_2">服务区</text>
+            <text class="font_3 text_3">{{trip.displayVehicleModel}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="oMo-flex-col section_3 mt-25">
+        <view class="oMo-flex-row oMo-items-center group_5">
+          <text class="font text_4">订单明细</text>
+          <image class="image_4" src="../../pictures/mingxi/dingdan.png" />
+        </view>
+        <view class="oMo-flex-col group_6 oMo-mt-10">
+          <view class="oMo-flex-row oMo-justify-between">
+            <text class="font_4">预付金额</text>
+            <text class="font_5">{{trip.depositText}}</text>
+          </view>
+          <view class="oMo-flex-row oMo-justify-between">
+            <text class="font_4">预估费用</text>
+            <text class="font_5">{{trip.estimatedCostText}}</text>
+          </view>
+          <view class="oMo-flex-row oMo-justify-between">
+            <text class="font_4">实付费用</text>
+            <text class="font_5">{{trip.paidCostText}}</text>
+          </view>
+          <view class="oMo-flex-row oMo-justify-between">
+            <text class="font_4 text_17">支付流水号</text>
+            <text class="font_5 text_18">{{trip.settleId || trip._id}}</text>
+          </view>
+          <view class="oMo-flex-row oMo-justify-between">
+            <text class="font_4 text_1">订单编号</text>
+            <text class="font_5 text_16">{{trip._id}}</text>
+          </view>
+          <view class="oMo-flex-row oMo-justify-between">
+            <text class="font_4">订单类型</text>
+            <text class="font_5">OMO共享车</text>
+          </view>
+          <view class="oMo-flex-row oMo-justify-between">
+            <text class="font_4">订单状态</text>
+            <text class="font_5 text_5">{{trip.orderStatusText}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="oMo-flex-col oMo-self-start section_4">
+      <view class="oMo-flex-row group_7">
+        <image class="oMo-self-center image" src="../../pictures/mingxi/time_clock.png" />
+        <text class="oMo-self-start font text_6 oMo-ml-32">时间明细</text>
+      </view>
+      <view class="oMo-flex-row oMo-justify-between group_8 oMo-mt-20">
+        <view class="oMo-flex-col oMo-items-start">
+          <text class="font_4">支付时间</text>
+          <text class="font_4">开始时间</text>
+          <text class="font_4">结束时间</text>
+          <text class="font_4">退款时间</text>
+          <text class="font_4">骑行时长</text>
+        </view>
+        <view class="oMo-flex-col oMo-items-end">
+          <text class="font_4">{{trip.formattedPaymentTime}}</text>
+          <text class="font_4">{{trip.formattedStartTime}}</text>
+          <text class="font_4">{{trip.formattedEndTime}}</text>
+          <text class="font_4">{{trip.refundTimeText}}</text>
+          <text class="font_4">{{trip.formattedDuration}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="oMo-flex-col group" wx:elif="{{loading}}">
+    <view class="section_4">
+      <text class="font_4">订单加载中...</text>
+    </view>
+  </view>
+
+  <view class="oMo-flex-row oMo-items-center equal-division section_5">
+    <view class="oMo-flex-col oMo-justify-start oMo-items-center equal-division-item equal-division-item_2" bind:tap="onClick_2">
+      <text class="font_6 text_8">故障申报</text>
+      <image class="button-bg pos_3" src="../../pictures/mingxi/square.png" />
+    </view>
+    <view class="oMo-flex-col oMo-justify-start oMo-items-center equal-division-item_3 ml-19" bind:tap="onClick_3">
+      <text class="font_6 text_9">再来一单</text>
+    </view>
+    <view class="oMo-flex-col oMo-justify-start oMo-items-center equal-division-item group_9 ml-19">
+      <text class="font_6 text_10">开具发票</text>
+      <image class="image_5 pos_3" src="../../pictures/mingxi/square.png" />
+    </view>
+  </view>
+</view>

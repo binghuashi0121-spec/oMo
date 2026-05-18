@@ -1,0 +1,58 @@
+.ml-15 {
+  margin-left: 28.63rpx;
+}
+.page {
+  padding: 38.17rpx 15.27rpx 1022.9rpx 15.27rpx;
+  background-color: #f4f0eb;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100%;
+}
+.section {
+  margin-left: 17.18rpx;
+  margin-right: 30.53rpx;
+  padding: 15.27rpx 40.08rpx 45.8rpx;
+  background-image: linear-gradient(268.8deg, #eadcdc 9.6%, #f7dbbe 97.4%);
+  border-radius: 76.34rpx;
+}
+.image-wrapper {
+  padding: 28.63rpx 0 22.9rpx;
+  background-color: #efe7dc;
+  border-radius: 1906.49rpx;
+  width: 110.69rpx;
+}
+.image {
+  width: 45.8rpx;
+  height: 45.8rpx;
+}
+.image_2 {
+  width: 438.93rpx;
+  height: 154.58rpx;
+}
+.section_2 {
+  padding: 30.53rpx 13.53rpx 13.36rpx 26.72rpx;
+  background-color: #fc9063;
+  border-radius: 38.17rpx;
+}
+.font {
+  font-size: 34.35rpx;
+  font-family: Inter;
+  line-height: 32.33rpx;
+  color: #ffffff;
+}
+.image_3 {
+  width: 11.45rpx;
+  height: 17.18rpx;
+}
+.image_4 {
+  margin-top: 8.55rpx;
+}
+.section_3 {
+  padding: 28.63rpx 24.81rpx 15.27rpx;
+  background-color: #fc9063;
+  border-radius: 38.17rpx;
+}
+.text {
+  line-height: 32.16rpx;
+}

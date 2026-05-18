@@ -1,0 +1,15 @@
+<view class="oMo-flex-col page">
+  <image
+    class="oMo-self-center image"
+    src="../../pictures/tanchuang/gantanhao.png"
+  />
+  <view class="oMo-mt-14 oMo-flex-col oMo-self-stretch">
+    <view class="oMo-flex-col oMo-items-center">
+      <text class="font">临时停车30分钟内未启用</text>
+      <text class="font">共享车将自动归还。</text>
+    </view>
+    <view class="oMo-mt-14 oMo-flex-col oMo-justify-start oMo-items-center text-wrapper">
+      <text class="text">确定</text>
+    </view>
+  </view>
+</view>

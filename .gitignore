@@ -1,0 +1,4 @@
+mqtt-bridge/.env
+node_modules/
+*.log
+

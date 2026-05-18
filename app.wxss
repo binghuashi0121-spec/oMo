@@ -1,0 +1,609 @@
+/************************************************************
+** 请将全局样式拷贝到项目的全局 CSS 文件或者当前页面的顶部 **
+** 否则页面将无法正常显示                                  **
+************************************************************/
+
+page {
+  width: 100vw;
+  height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans',
+    'Droid Sans', 'Helvetica Neue', 'Microsoft Yahei', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+view,
+image,
+text {
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.oMo-flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.oMo-flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.oMo-justify-start {
+  justify-content: flex-start;
+}
+
+.oMo-justify-end {
+  justify-content: flex-end;
+}
+
+.oMo-justify-center {
+  justify-content: center;
+}
+
+.oMo-justify-between {
+  justify-content: space-between;
+}
+
+.oMo-justify-around {
+  justify-content: space-around;
+}
+
+.oMo-justify-evenly {
+  justify-content: space-evenly;
+}
+
+.oMo-items-start {
+  align-items: flex-start;
+}
+
+.oMo-items-end {
+  align-items: flex-end;
+}
+
+.oMo-items-center {
+  align-items: center;
+}
+
+.oMo-items-baseline {
+  align-items: baseline;
+}
+
+.oMo-items-stretch {
+  align-items: stretch;
+}
+
+.oMo-self-start {
+  align-self: flex-start;
+}
+
+.oMo-self-end {
+  align-self: flex-end;
+}
+
+.oMo-self-center {
+  align-self: center;
+}
+
+.oMo-self-baseline {
+  align-self: baseline;
+}
+
+.oMo-self-stretch {
+  align-self: stretch;
+}
+
+.oMo-flex-1 {
+  flex: 1 1 0%;
+}
+
+.oMo-flex-auto {
+  flex: 1 1 auto;
+}
+
+.oMo-grow {
+  flex-grow: 1;
+}
+
+.oMo-grow-0 {
+  flex-grow: 0;
+}
+
+.oMo-shrink {
+  flex-shrink: 1;
+}
+
+.oMo-shrink-0 {
+  flex-shrink: 0;
+}
+
+.oMo-relative {
+  position: relative;
+}
+
+.oMo-ml-2 {
+  margin-left: 3.82rpx;
+}
+
+.oMo-mt-2 {
+  margin-top: 3.82rpx;
+}
+
+.oMo-ml-4 {
+  margin-left: 7.63rpx;
+}
+
+.oMo-mt-4 {
+  margin-top: 7.63rpx;
+}
+
+.oMo-ml-6 {
+  margin-left: 11.45rpx;
+}
+
+.oMo-mt-6 {
+  margin-top: 11.45rpx;
+}
+
+.oMo-ml-8 {
+  margin-left: 15.27rpx;
+}
+
+.oMo-mt-8 {
+  margin-top: 15.27rpx;
+}
+
+.oMo-ml-10 {
+  margin-left: 19.08rpx;
+}
+
+.oMo-mt-10 {
+  margin-top: 19.08rpx;
+}
+
+.oMo-ml-12 {
+  margin-left: 22.9rpx;
+}
+
+.oMo-mt-12 {
+  margin-top: 22.9rpx;
+}
+
+.oMo-ml-14 {
+  margin-left: 26.72rpx;
+}
+
+.oMo-mt-14 {
+  margin-top: 26.72rpx;
+}
+
+.oMo-ml-16 {
+  margin-left: 30.53rpx;
+}
+
+.oMo-mt-16 {
+  margin-top: 30.53rpx;
+}
+
+.oMo-ml-18 {
+  margin-left: 34.35rpx;
+}
+
+.oMo-mt-18 {
+  margin-top: 34.35rpx;
+}
+
+.oMo-ml-20 {
+  margin-left: 38.17rpx;
+}
+
+.oMo-mt-20 {
+  margin-top: 38.17rpx;
+}
+
+.oMo-ml-22 {
+  margin-left: 41.98rpx;
+}
+
+.oMo-mt-22 {
+  margin-top: 41.98rpx;
+}
+
+.oMo-ml-24 {
+  margin-left: 45.8rpx;
+}
+
+.oMo-mt-24 {
+  margin-top: 45.8rpx;
+}
+
+.oMo-ml-26 {
+  margin-left: 49.62rpx;
+}
+
+.oMo-mt-26 {
+  margin-top: 49.62rpx;
+}
+
+.oMo-ml-28 {
+  margin-left: 53.44rpx;
+}
+
+.oMo-mt-28 {
+  margin-top: 53.44rpx;
+}
+
+.oMo-ml-30 {
+  margin-left: 57.25rpx;
+}
+
+.oMo-mt-30 {
+  margin-top: 57.25rpx;
+}
+
+.oMo-ml-32 {
+  margin-left: 61.07rpx;
+}
+
+.oMo-mt-32 {
+  margin-top: 61.07rpx;
+}
+
+.oMo-ml-34 {
+  margin-left: 64.89rpx;
+}
+
+.oMo-mt-34 {
+  margin-top: 64.89rpx;
+}
+
+.oMo-ml-36 {
+  margin-left: 68.7rpx;
+}
+
+.oMo-mt-36 {
+  margin-top: 68.7rpx;
+}
+
+.oMo-ml-38 {
+  margin-left: 72.52rpx;
+}
+
+.oMo-mt-38 {
+  margin-top: 72.52rpx;
+}
+
+.oMo-ml-40 {
+  margin-left: 76.34rpx;
+}
+
+.oMo-mt-40 {
+  margin-top: 76.34rpx;
+}
+
+.oMo-ml-42 {
+  margin-left: 80.15rpx;
+}
+
+.oMo-mt-42 {
+  margin-top: 80.15rpx;
+}
+
+.oMo-ml-44 {
+  margin-left: 83.97rpx;
+}
+
+.oMo-mt-44 {
+  margin-top: 83.97rpx;
+}
+
+.oMo-ml-46 {
+  margin-left: 87.79rpx;
+}
+
+.oMo-mt-46 {
+  margin-top: 87.79rpx;
+}
+
+.oMo-ml-48 {
+  margin-left: 91.6rpx;
+}
+
+.oMo-mt-48 {
+  margin-top: 91.6rpx;
+}
+
+.oMo-ml-50 {
+  margin-left: 95.42rpx;
+}
+
+.oMo-mt-50 {
+  margin-top: 95.42rpx;
+}
+
+.oMo-ml-52 {
+  margin-left: 99.24rpx;
+}
+
+.oMo-mt-52 {
+  margin-top: 99.24rpx;
+}
+
+.oMo-ml-54 {
+  margin-left: 103.05rpx;
+}
+
+.oMo-mt-54 {
+  margin-top: 103.05rpx;
+}
+
+.oMo-ml-56 {
+  margin-left: 106.87rpx;
+}
+
+.oMo-mt-56 {
+  margin-top: 106.87rpx;
+}
+
+.oMo-ml-58 {
+  margin-left: 110.69rpx;
+}
+
+.oMo-mt-58 {
+  margin-top: 110.69rpx;
+}
+
+.oMo-ml-60 {
+  margin-left: 114.5rpx;
+}
+
+.oMo-mt-60 {
+  margin-top: 114.5rpx;
+}
+
+.oMo-ml-62 {
+  margin-left: 118.32rpx;
+}
+
+.oMo-mt-62 {
+  margin-top: 118.32rpx;
+}
+
+.oMo-ml-64 {
+  margin-left: 122.14rpx;
+}
+
+.oMo-mt-64 {
+  margin-top: 122.14rpx;
+}
+
+.oMo-ml-66 {
+  margin-left: 125.95rpx;
+}
+
+.oMo-mt-66 {
+  margin-top: 125.95rpx;
+}
+
+.oMo-ml-68 {
+  margin-left: 129.77rpx;
+}
+
+.oMo-mt-68 {
+  margin-top: 129.77rpx;
+}
+
+.oMo-ml-70 {
+  margin-left: 133.59rpx;
+}
+
+.oMo-mt-70 {
+  margin-top: 133.59rpx;
+}
+
+image,
+.icon {
+  transition: transform 120ms ease-out;
+  transform-origin: center center;
+}
+
+.oMo-flex-col,
+.oMo-flex-row {
+  transition: transform 120ms ease-out;
+  transform-origin: center center;
+}
+
+
+.tap-press {
+  transform: scale(1.16);
+}
+
+image.tap-press,
+.icon.tap-press {
+  transform: scale(1.16);
+}
+
+/* Global aesthetic upgrades */
+.section,
+.section_2,
+.section_3,
+.section_4,
+.section_5,
+.section_6,
+.section_7 {
+  border-radius: 42rpx;
+  box-shadow: 0rpx 8rpx 16rpx #0000001a;
+  border: 0.95rpx solid #e7e2da;
+}
+
+.image-wrapper,
+.image-wrapper_2 {
+  box-shadow: 0rpx 6rpx 12rpx #00000014;
+  border: 0.95rpx solid #ece7df;
+}
+
+.text,
+.font,
+.font_2,
+.font_3,
+.font_4,
+.font_5,
+.font_6 {
+  letter-spacing: 0.2rpx;
+}
+
+.equal-division-item_2,
+.equal-division-item_3 {
+  box-shadow: 0rpx 6rpx 10rpx #00000012;
+}
+
+.oMo-ml-72 {
+  margin-left: 137.4rpx;
+}
+
+.oMo-mt-72 {
+  margin-top: 137.4rpx;
+}
+
+.oMo-ml-74 {
+  margin-left: 141.22rpx;
+}
+
+.oMo-mt-74 {
+  margin-top: 141.22rpx;
+}
+
+.oMo-ml-76 {
+  margin-left: 145.04rpx;
+}
+
+.oMo-mt-76 {
+  margin-top: 145.04rpx;
+}
+
+.oMo-ml-78 {
+  margin-left: 148.85rpx;
+}
+
+.oMo-mt-78 {
+  margin-top: 148.85rpx;
+}
+
+.oMo-ml-80 {
+  margin-left: 152.67rpx;
+}
+
+.oMo-mt-80 {
+  margin-top: 152.67rpx;
+}
+
+.oMo-ml-82 {
+  margin-left: 156.49rpx;
+}
+
+.oMo-mt-82 {
+  margin-top: 156.49rpx;
+}
+
+.oMo-ml-84 {
+  margin-left: 160.31rpx;
+}
+
+.oMo-mt-84 {
+  margin-top: 160.31rpx;
+}
+
+.oMo-ml-86 {
+  margin-left: 164.12rpx;
+}
+
+.oMo-mt-86 {
+  margin-top: 164.12rpx;
+}
+
+.oMo-ml-88 {
+  margin-left: 167.94rpx;
+}
+
+.oMo-mt-88 {
+  margin-top: 167.94rpx;
+}
+
+.oMo-ml-90 {
+  margin-left: 171.76rpx;
+}
+
+.oMo-mt-90 {
+  margin-top: 171.76rpx;
+}
+
+.oMo-ml-92 {
+  margin-left: 175.57rpx;
+}
+
+.oMo-mt-92 {
+  margin-top: 175.57rpx;
+}
+
+.oMo-ml-94 {
+  margin-left: 179.39rpx;
+}
+
+.oMo-mt-94 {
+  margin-top: 179.39rpx;
+}
+
+.oMo-ml-96 {
+  margin-left: 183.21rpx;
+}
+
+.oMo-mt-96 {
+  margin-top: 183.21rpx;
+}
+
+.oMo-ml-98 {
+  margin-left: 187.02rpx;
+}
+
+.oMo-mt-98 {
+  margin-top: 187.02rpx;
+}
+
+.oMo-ml-100 {
+  margin-left: 190.84rpx;
+}
+
+.oMo-mt-100 {
+  margin-top: 190.84rpx;
+}
+.login-mask {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(270deg, #f6f2edcc 0%, #e8e0d5cc 50%, #c7c1b8cc 100%);
+  backdrop-filter: blur(6rpx);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  z-index: 9999;
+}
+.login-loader {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  border: 5rpx solid #ef5b24;
+  border-top-color: transparent;
+  animation: spin 700ms linear infinite;
+  margin-bottom: 18rpx;
+}
+.login-tip {
+  color: #494949;
+  font-size: 26rpx;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

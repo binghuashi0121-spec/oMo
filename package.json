@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "cloudbase:check-env": "node scripts/cloudbase/check-env.js",
+    "cloudbase:backup:inspect": "node scripts/cloudbase/inspect-backup.js",
+    "cloudbase:backup:validate": "node scripts/cloudbase/validate-import.js",
+    "mqtt-bridge:ensure": "node scripts/mqtt-bridge/ensure-running.js",
+    "mqtt-bridge:stop": "node scripts/mqtt-bridge/stop.js",
+    "real-device:prepare": "node scripts/real-device/prepare.js"
+  },
+  "dependencies": {}
+}

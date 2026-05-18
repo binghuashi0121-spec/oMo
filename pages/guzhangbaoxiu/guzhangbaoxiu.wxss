@@ -1,0 +1,292 @@
+/* Design System & Variables */
+page {
+  /* Colors - Light Mode Default */
+  --primary: #e15826ff;
+  --primary-hover: #d64b1a;
+  --primary-bg: #FFF0E8;
+  --surface: #FFFFFF;
+  --background: #F4F0EB;
+  --text-main: #333333;
+  --text-body: #666666;
+  --border: #E5E5E5;
+  --divider: rgba(0, 0, 0, 0.05);
+  
+  /* Spacing - 8px Grid (16rpx) */
+  --space-xs: 16rpx;
+  --space-s: 24rpx;
+  --space-m: 32rpx;
+  --space-l: 48rpx;
+  --space-xl: 64rpx;
+
+  /* Typography */
+  --font-h1: 600 48rpx/1.4 -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  --font-h2: 600 40rpx/1.4 -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  --font-h3: 600 32rpx/1.5 -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  --font-body: 500 28rpx/1.5 -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  --font-caption: 500 24rpx/1.5 -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+
+  /* Radius */
+  --radius-s: 16rpx;
+  --radius-m: 24rpx;
+  --radius-l: 32rpx;
+  --radius-full: 9999rpx;
+
+  /* Elevation */
+  --shadow-sm: 0 4rpx 16rpx rgba(62, 51, 51, 0.04);
+  --shadow-md: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
+}
+
+/* Dark Mode Overrides */
+@media (prefers-color-scheme: dark) {
+  page {
+    --primary: #7b5243ff;
+    --primary-hover: #ff9670;
+    --primary-bg: #3E1F14;
+    --surface: #1E1E1E;
+    --background: #121212;
+    --text-main: #693d3dff;
+    --text-body: #572e2eff;
+    --border: #671414ff;
+    --divider: rgba(255, 255, 255, 0.05);
+    --shadow-sm: 0 4rpx 16rpx rgba(141, 68, 68, 0.3);
+    --shadow-md: 0 8rpx 32rpx rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* Reset & Layout */
+.page {
+  background-color: var(--background);
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-l) var(--space-m);
+  box-sizing: border-box;
+  color: var(--text-main);
+  font: var(--font-body);
+}
+
+/* Header Section */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-l);
+  width: 100%;
+}
+
+.nav-btn {
+  width: 96rpx;
+  height: 96rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  border-radius: 50%;
+  border: 4rpx solid var(--primary);
+  box-shadow: var(--shadow-md), 0 0 0 6rpx var(--primary-bg);
+  transition: all 0.2s ease;
+}
+
+.nav-btn:active {
+  transform: scale(0.95);
+  background: var(--border);
+}
+
+.nav-icon {
+  width: 48rpx;
+  height: 48rpx;
+}
+
+/* Brand Logo */
+.brand-logo-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--space-l);
+}
+
+.brand-logo {
+  width: 440rpx;
+  height: 154rpx;
+  object-fit: contain;
+}
+
+/* Main Content Card */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius-l);
+  padding: var(--space-m);
+  box-shadow: var(--shadow-md);
+  margin-bottom: var(--space-m);
+  width: 100%;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--space-m);
+  border-bottom: 1px solid var(--divider);
+  padding-bottom: var(--space-s);
+}
+
+.mini-logo {
+  width: 180rpx;
+  height: 60rpx;
+  opacity: 0.8;
+}
+
+/* Section Title */
+.section-title {
+  font: var(--font-h3);
+  color: var(--text-main);
+  margin-bottom: var(--space-s);
+  display: block;
+}
+
+/* Vehicle ID Input Row */
+.input-row {
+  display: flex;
+  align-items: center;
+  background: var(--background);
+  border-radius: var(--radius-m);
+  padding: 0 var(--space-s);
+  height: 96rpx;
+  border: 2rpx solid transparent;
+  transition: border-color 0.2s;
+}
+
+.input-row:focus-within {
+  border-color: var(--primary);
+}
+
+.vehicle-input {
+  flex: 1;
+  height: 100%;
+  font: var(--font-body);
+  color: var(--text-main);
+}
+
+.scan-btn {
+  width: 64rpx;
+  height: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: var(--space-s);
+  opacity: 0.6;
+}
+
+.scan-btn:active {
+  opacity: 1;
+}
+
+.scan-icon {
+  width: 48rpx;
+  height: 48rpx;
+}
+
+/* Fault Grid */
+.fault-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-s);
+}
+
+.fault-item {
+  background: var(--background);
+  border: 2rpx solid transparent;
+  border-radius: var(--radius-m);
+  padding: var(--space-s) var(--space-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 88rpx;
+  transition: all 0.2s ease;
+}
+
+.fault-item.selected {
+  background: var(--primary-bg);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.fault-item:active {
+  opacity: 0.8;
+}
+
+.fault-text {
+  font-size: 26rpx;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* Input Area */
+.input-area {
+  width: calc(100% - 16rpx);
+  background: var(--background);
+  border-radius: var(--radius-m);
+  padding: var(--space-s);
+  min-height: 200rpx;
+  font: var(--font-body);
+  border: 2rpx solid transparent;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+  transform: translateX(-8rpx);
+}
+
+.input-area:focus-within {
+  border-color: var(--primary);
+}
+
+/* Camera Section */
+.camera-section {
+  width: 100%;
+  height: 240rpx;
+  background: var(--background);
+  border-radius: var(--radius-m);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2rpx dashed var(--border);
+  transition: all 0.2s;
+}
+
+.camera-section:active {
+  background: var(--border);
+}
+
+.camera-icon {
+  width: 80rpx;
+  height: 80rpx;
+  opacity: 0.6;
+}
+
+.preview-image {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-m);
+  object-fit: cover;
+}
+
+/* Submit Button */
+.submit-btn {
+  background: var(--primary);
+  color: #dac9c9ff;
+  height: 104rpx;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: var(--space-l);
+  box-shadow: var(--shadow-sm);
+  width: 100%;
+  font: var(--font-h3);
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.submit-btn:active {
+  background: var(--primary-hover);
+  transform: scale(0.98);
+}

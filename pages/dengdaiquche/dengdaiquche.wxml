@@ -1,0 +1,84 @@
+<view class="oMo-flex-col page {{loaded ? 'fade-in' : ''}}">
+  <view class="oMo-flex-col section">
+    <view class="oMo-flex-row oMo-relative oMo-justify-center oMo-items-center" style="width: 100%;">
+      <view class="oMo-flex-col oMo-justify-start oMo-items-center oMo-self-start image-wrapper pos-left" bind:tap="onClick" hover-class="tap-press">
+        <image class="image" src="/pictures/dengdaiquche/home.png" />
+      </view>
+      <image class="image_2" src="/pictures/dengdaiquche/oMo_logo.png" />
+      <view class="oMo-flex-col oMo-justify-start oMo-items-center image-wrapper_2 pos-right" bind:tap="onClick_1" hover-class="tap-press">
+        <image class="image" src="/pictures/dengdaiquche/help_center.png" />
+      </view>
+    </view>
+    <view class="oMo-flex-col oMo-items-center oMo-mt-16">
+      <text class="font text">等待车辆到达</text>
+      <view class="section_2 mt-7"></view>
+    </view>
+  </view>
+
+  <view class="map-area">
+    <view class="map-frame">
+      <view class="map-inner">
+        <map
+          id="waitMap"
+          class="map-component"
+          latitude="{{mapLatitude}}"
+          longitude="{{mapLongitude}}"
+          scale="{{mapScale}}"
+          markers="{{carMarkers}}"
+          polyline="{{combinedPolyline}}"
+          show-location="true"
+        ></map>
+      </view>
+    </view>
+  </view>
+
+  <view class="bottom-panel">
+    <view class="content-card">
+      <text class="status-text">{{statusText}}</text>
+      <view class="info-grid">
+        <view class="info-column">
+          <text class="info-label">预计到达</text>
+          <text class="info-value highlight">{{etaText}}</text>
+        </view>
+        <view class="info-column">
+          <text class="info-label">剩余距离</text>
+          <text class="info-value">{{distanceText}}</text>
+        </view>
+        <view class="info-column">
+          <text class="info-label">已等待</text>
+          <text class="info-value">{{waitDurationText}}</text>
+        </view>
+      </view>
+      <view class="pickup-row">
+        <text class="pickup-label">上车点</text>
+        <text class="pickup-name">{{pickupName}}</text>
+      </view>
+    </view>
+
+    <view class="content-card tips-card">
+      <text class="tips-main">车辆进入30米范围后会提醒上车确认</text>
+      <text class="tips-emphasis">（若路线规划暂不可用，将自动降级为实时轨迹显示）</text>
+    </view>
+
+    <view class="content-card boarding-card" wx:if="{{showBoardingConfirm}}">
+      <text class="boarding-title">车辆已到达上车点</text>
+      <text class="boarding-desc">请乘客上车并确认安全后，点击下方按钮切换为手动驾驶并开始行程。</text>
+    </view>
+
+    <view class="action-group">
+      <button
+        wx:if="{{showBoardingConfirm}}"
+        class="btn-confirm"
+        bindtap="onConfirmBoarding"
+        loading="{{manualModeConfirming}}"
+        disabled="{{manualModeConfirming}}"
+        hover-class="tap-press"
+      >
+        {{manualModeConfirming ? '正在切换手动模式...' : '我已上车，确认切换手动驾驶'}}
+      </button>
+      <button class="btn-cancel" bindtap="onCancelWait" hover-class="tap-press">
+        取消叫车
+      </button>
+    </view>
+  </view>
+</view>

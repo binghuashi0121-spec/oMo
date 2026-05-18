@@ -1,0 +1,57 @@
+<view class="oMo-flex-col oMo-justify-start oMo-relative page">
+  <image
+    class="image_2 image_3"
+    src="./small_oMo_logo.png"
+  />
+  <image
+    class="image_2 pos_3"
+    src="./small_oMo_logo.png"
+  />
+  <view class="oMo-flex-col section pos_2">
+    <view class="oMo-flex-col group">
+      <text class="oMo-self-start font text_1">手机号</text>
+      <view class="oMo-flex-col oMo-justify-start oMo-items-start oMo-self-stretch text-wrapper view mt-11" bind:tap="onPhoneWrapperTap">
+        <input 
+          class="font_2 text_2" 
+          placeholder="请输入手机号" 
+          placeholder-class="font_2 text_2"
+          value="{{phone}}" 
+          type="number" 
+          maxlength="11"
+          focus="{{focusPhone}}"
+          bindinput="onPhoneInput" 
+        />
+      </view>
+    </view>
+    <view class="oMo-flex-col group view_2">
+      <text class="oMo-self-start font text_3">验证码</text>
+      <view class="oMo-flex-row oMo-justify-between oMo-items-center oMo-self-stretch text-wrapper view_3 mt-11">
+        <input 
+          class="font_2 text_4" 
+          placeholder="请输入验证码" 
+          placeholder-class="font_2 text_4"
+          value="{{code}}" 
+          type="number" 
+          maxlength="6"
+          bindinput="onCodeInput" 
+        />
+        <view class="oMo-flex-col oMo-justify-start oMo-items-center text-wrapper_2" bind:tap="onSendCode">
+          <text class="font_2 text_5">{{countdown > 0 ? countdown + 's' : '发送验证码'}}</text>
+        </view>
+      </view>
+    </view>
+    <view class="oMo-flex-col oMo-justify-start oMo-items-center group_2">
+      <view class="oMo-flex-col oMo-justify-start oMo-items-center text-wrapper_3" bind:tap="onClick_1">
+        <text class="font_3" bind:tap="onClick">立即登录</text>
+      </view>
+    </view>
+    <view class="oMo-flex-col oMo-justify-start oMo-items-center text-wrapper_4" bind:tap="onQuickLogin">
+      <text class="font_3 text_6">快捷登录</text>
+    </view>
+  </view>
+  <image
+    class="image pos"
+    src="./oMo_logo.png"
+  />
+  <text class="text pos_4">登录</text>
+</view>

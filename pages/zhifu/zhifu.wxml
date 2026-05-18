@@ -1,0 +1,32 @@
+<view class="oMo-flex-col page">
+  <view class="oMo-flex-col oMo-items-start group">
+    <image
+      class="oMo-shrink-0 image"
+      src="../../pictures/zhifu_pay/oMo_logo.png"
+    />
+    <text class="font text">订单信息</text>
+  </view>
+  <view class="oMo-flex-col mt-81">
+    <view class="oMo-flex-col oMo-justify-start oMo-items-end oMo-relative group_2">
+      <text class="text_2">应预付：</text>
+      <view class="oMo-flex-col oMo-justify-start group_3 pos">
+        <view class="oMo-flex-col section">
+          <text class="oMo-self-end text_3">￥200</text>
+          <text class="oMo-self-start text_4 mt-19">智能漫游车</text>
+        </view>
+        <image
+          class="image_2 pos_2"
+          src="../../pictures/zhifu_pay/car_model.png"
+        />
+      </view>
+    </view>
+    <view class="oMo-flex-col group_4 oMo-mt-94">
+      <view class="oMo-flex-col oMo-justify-start oMo-items-center text-wrapper" bind:tap="onClick">
+        <text class="font text_5">支付</text>
+      </view>
+      <view class="oMo-flex-col oMo-justify-start oMo-items-center text-wrapper_2 oMo-mt-12" bind:tap="onClick_1">
+        <text class="text_6">取消</text>
+      </view>
+    </view>
+  </view>
+</view>

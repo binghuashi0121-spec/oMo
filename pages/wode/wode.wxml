@@ -1,0 +1,92 @@
+<view class="oMo-flex-col page">
+  <view class="oMo-flex-col page-content">
+    <view class="oMo-flex-col oMo-self-stretch">
+      <view class="oMo-flex-col oMo-justify-start oMo-items-center image-wrapper">
+        <image
+          class="image"
+          src="../../pictures/wode/oMo_logo.png"
+          mode="aspectFit"
+        />
+      </view>
+      
+      <view class="oMo-flex-col menu-list mt-31">
+        <!-- User Profile Card -->
+        <view class="oMo-flex-row section" bindtap="onClick" hover-class="tap-press">
+          <view class="oMo-flex-col oMo-justify-start oMo-items-center oMo-self-center image-wrapper_2">
+            <image
+              class="image_2"
+              src="{{userInfo.avatarUrl || '../../pictures/wode/profile_photo.png'}}"
+            />
+          </view>
+          <view class="oMo-flex-col ml-17">
+            <text class="oMo-self-start font text" style="font-weight: 600; color: #000000;" wx:if="{{isLoggedIn}}">用户：{{userInfo.phone}}</text>
+            <text class="oMo-self-start font text" style="font-weight: 600; color: #000000;" wx:else>点击登录</text>
+          </view>
+        </view>
+
+        <!-- Menu Items -->
+        <view class="oMo-flex-row oMo-justify-between oMo-items-center menu-item" bindtap="onClick" hover-class="tap-press">
+          <view class="oMo-flex-row oMo-items-center">
+            <image class="oMo-shrink-0 image_3" src="../../pictures/wode/order_management.png" />
+            <text class="font text_2 oMo-ml-14" style="font-weight: 600;">订单管理</text>
+          </view>
+          <image class="image_4" src="../../pictures/wode/click_logo.png" />
+        </view>
+
+        <view class="oMo-flex-row oMo-justify-between oMo-items-center menu-item" bindtap="onClick_1" hover-class="tap-press">
+          <view class="oMo-flex-row oMo-items-center">
+            <image class="oMo-shrink-0 image_6" src="../../pictures/wode/my_message.png" />
+            <text class="font text_3 ml-13" style="font-weight: 600;">我的消息</text>
+          </view>
+          <image class="image_4" src="../../pictures/wode/click_logo.png" />
+        </view>
+
+        <view class="oMo-flex-row oMo-justify-between oMo-items-center menu-item" bindtap="onClick_2" hover-class="tap-press">
+          <view class="oMo-flex-row oMo-items-center">
+            <image class="oMo-shrink-0 image_8" src="../../pictures/wode/help_center.png" />
+            <text class="font text_4 oMo-ml-12" style="font-weight: 600;">帮助中心</text>
+          </view>
+          <image class="image_4" src="../../pictures/wode/click_logo.png" />
+        </view>
+
+        <view class="oMo-flex-row oMo-justify-between oMo-items-center menu-item" bindtap="onClick_3" hover-class="tap-press">
+          <view class="oMo-flex-row oMo-items-center">
+            <image class="oMo-shrink-0 image_9" src="../../pictures/wode/laws_policy.png" />
+            <text class="font oMo-ml-10" style="font-weight: 600;">法律条款及隐私政策</text>
+          </view>
+          <image class="image_4" src="../../pictures/wode/click_logo.png" />
+        </view>
+      </view>
+    </view>
+
+    <!-- 临时测试用：退出登录按钮 -->
+    <view class="oMo-flex-row oMo-justify-center oMo-items-center oMo-self-stretch mt-31" style="margin-top: 30rpx; margin-bottom: 30rpx;" wx:if="{{isLoggedIn}}">
+      <button type="warn" size="mini" bindtap="onLogoutTap">退出登录 (测试用)</button>
+    </view>
+  </view>
+  
+  <view class="oMo-flex-col oMo-justify-start section_7 bottom-nav">
+    <view class="oMo-flex-row">
+      <view class="oMo-flex-col oMo-items-center group_3 group_1" bindtap="onClick_4" hover-class="tap-press">
+        <image
+          class="image_10"
+          src="../../pictures/wode/shouye.png"
+        />
+        <text class="font_2 text_5 mt-7">首页</text>
+      </view>
+      <view class="oMo-flex-col group_3 group_6 ml-39">
+        <image
+          class="oMo-shrink-0 oMo-self-center image_11"
+          src="../../pictures/wode/wode2.png"
+        />
+        <view class="oMo-flex-col oMo-justify-start oMo-items-center oMo-self-stretch oMo-relative group_4">
+          <text class="font_2 text_6">我的</text>
+          <image
+            class="image_12 pos_4"
+            src="../../pictures/wode/wode1.png"
+          />
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

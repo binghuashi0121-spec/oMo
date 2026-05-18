@@ -1,0 +1,13 @@
+<view class="oMo-flex-col page">
+  <image
+    class="oMo-self-center image"
+    src="../../pictures/tanchuang/gantanhao.png"
+  />
+  <view class="oMo-flex-col oMo-items-center oMo-self-stretch mt-15">
+    <text class="font">本车电量目前低于15%，</text>
+    <text class="font">建议选择续航更长的车辆。</text>
+  </view>
+  <view class="oMo-flex-col oMo-justify-start oMo-items-center oMo-self-stretch text-wrapper mt-15">
+    <text class="text">确认</text>
+  </view>
+</view>

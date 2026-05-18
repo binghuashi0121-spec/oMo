@@ -1,0 +1,737 @@
+.ml-27 {
+  margin-left: 51.53rpx;
+}
+.mt-13 {
+  margin-top: 24.81rpx;
+}
+.page {
+  padding: 0 22.9rpx 135.5rpx 22.9rpx;
+  background-color: #f4f0eb;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100%;
+}
+.group {
+  padding: 45.8rpx 0 51.53rpx;
+}
+.section {
+  margin-left: 5.73rpx;
+  margin-right: 26.72rpx;
+  padding: 15.27rpx 40.08rpx 45.8rpx;
+  background-image: linear-gradient(268.8deg, #eadcdc 9.6%, #f7dbbe 97.4%);
+  border-radius: 76.34rpx;
+}
+.image-wrapper {
+  padding: 28.63rpx 0 22.9rpx;
+  background-color: #efe7dc;
+  border-radius: 1906.49rpx;
+  width: 110.69rpx;
+  height: 97.33rpx;
+}
+.image {
+  width: 45.8rpx;
+  height: 45.8rpx;
+}
+.image-wrapper_2 {
+  margin-right: 3.82rpx;
+  padding: 22.9rpx 0 28.63rpx;
+  background-color: #efe7dc;
+  border-radius: 1906.49rpx;
+  width: 110.69rpx;
+  height: 97.33rpx;
+}
+.image_2 {
+  width: 438.93rpx;
+  height: 154.58rpx;
+}
+.group_2 {
+  padding: 282.44rpx 0 76.34rpx;
+}
+.text-wrapper_3 {
+  padding: 105.15rpx 0 29.35rpx;
+  background-color: #f9dcc2e6;
+  border-radius: 38.17rpx;
+}
+.title-wrapper {
+  margin-top: 30rpx;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.model-tag {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  background-color: #FFFFFF;
+  border: 4rpx solid #EA5404;
+  border-radius: 50rpx;
+  padding: 16rpx 40rpx;
+  box-shadow: 0 6rpx 16rpx rgba(234, 84, 4, 0.15);
+}
+
+.model-label {
+  color: #EA5404;
+  font-size: 34rpx;
+  font-weight: bold;
+  margin-right: 20rpx;
+  letter-spacing: 2rpx;
+}
+
+.model-value {
+  color: #333333;
+  font-size: 34rpx;
+  font-weight: 600;
+}
+
+.text_7 {
+  margin-left: 87.4rpx;
+  color: #757575;
+  font-size: 38.17rpx;
+  font-family: Kavoon;
+  line-height: 35.34rpx;
+}
+.image_3 {
+  width: 391.22rpx;
+  height: 391.22rpx;
+}
+.pos {
+  position: absolute;
+  left: 5.73rpx;
+  top: 60rpx;
+}
+.group_3 {
+  border-radius: 38.17rpx;
+  overflow: hidden;
+  width: 301.53rpx;
+  height: 328.24rpx;
+}
+.pos_2 {
+  position: absolute;
+  right: 32.44rpx;
+  top: 80rpx;
+}
+.section_2 {
+  margin: 0;
+  padding: 24rpx 20rpx;
+  background-color: #efe7dc;
+  border-radius: 38.17rpx;
+  width: 301.53rpx;
+  box-shadow: 0 8rpx 18rpx rgba(0,0,0,0.08);
+}
+.spec-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 16rpx;
+  margin-top: 16rpx;
+  padding: 8rpx 0;
+}
+.spec-label {
+  display: inline-block;
+  min-width: 140rpx;
+  text-align: center;
+  background-color: #f2d3b3;
+  color: #757575;
+  padding: 8rpx 16rpx;
+  border-radius: 38.17rpx;
+}
+.spec-value {
+  color: #494949;
+  flex: 1;
+}
+.battery { display: inline-flex; }
+.battery-dots { display: inline-flex; gap: 8rpx; }
+.battery-dot { width: 16rpx; height: 16rpx; border-radius: 50%; background-color: #d5e9d0; }
+.battery-dot.on { background-color: #5fb64e; }
+.battery-dot.off { background-color: #d5e9d0; }
+.view {
+  margin-right: 133.59rpx;
+  padding: 16.07rpx 0 18.13rpx;
+  background-color: #ffb987;
+  border-radius: 1906.49rpx;
+}
+.font {
+  font-size: 22.9rpx;
+  font-family: SF Pro;
+  line-height: 21.15rpx;
+  color: #ffffff;
+}
+.text {
+  margin-left: 16.7rpx;
+}
+.group_4 {
+  margin-top: 26.72rpx;
+  padding: 0 2.23rpx;
+}
+.view_2 {
+  margin-left: 243.95rpx;
+  margin-bottom: 3.53rpx;
+  padding: 16.05rpx 0 18.13rpx;
+  background-color: #ffb987;
+  border-radius: 1906.49rpx;
+  height: 55.34rpx;
+}
+.text_3 {
+  margin-left: 10.27rpx;
+  margin-right: 6.91rpx;
+  line-height: 21.16rpx;
+}
+.text_4 {
+  color: #494949;
+  line-height: 20.15rpx;
+}
+.group_5 {
+  margin-top: 23.19rpx;
+  padding-top: 19.08rpx;
+}
+.section_3 {
+  margin-right: 41.98rpx;
+  background-color: #efe7dc;
+  width: 150.76rpx;
+  height: 57.25rpx;
+}
+.text-wrapper {
+  padding: 16.05rpx 0 18.15rpx;
+  background-color: #ffb987;
+  border-radius: 1906.49rpx;
+}
+.pos_3 {
+  position: absolute;
+  right: 95.42rpx;
+  top: 0;
+}
+.text_5 {
+  margin-left: 10.42rpx;
+  margin-right: 6.76rpx;
+}
+.group_6 {
+  margin-top: 9.54rpx;
+}
+.view_3 {
+  margin-left: 246.18rpx;
+  padding: 16.11rpx 0 18.21rpx;
+  background-color: #ffb987;
+  border-radius: 1906.49rpx;
+  height: 55.34rpx;
+}
+.text_6 {
+  margin-left: 10.5rpx;
+  margin-right: 6.68rpx;
+  line-height: 21.03rpx;
+}
+.image_4 {
+  width: 43.89rpx;
+  height: 24.81rpx;
+}
+.section_5 {
+  margin-left: 13.36rpx;
+  margin-right: 19.08rpx;
+  padding-top: 19.08rpx;
+  background-color: #efe7dc;
+  border-radius: 76.34rpx;
+}
+.image_5 {
+  margin-right: 17.18rpx;
+  border-radius: 19.08rpx;
+  mix-blend-mode: SOFT_LIGHT;
+  width: 654.58rpx;
+  height: 435.11rpx;
+}
+.section_4 {
+  padding: 35.76rpx 19.79rpx 26.7rpx 31.39rpx;
+  background-image: linear-gradient(270deg, #f2eae433 0%, #d6cec966 23.6%, #d6cec9 98.6%);
+  border-radius: 68.7rpx;
+}
+.pos_4 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+.text_8 {
+  color: #494949;
+  font-size: 52rpx;
+  font-family: SF Pro;
+  font-weight: bold;
+  line-height: 42.56rpx;
+}
+.font_2 {
+  font-size: 38rpx;
+  font-family: SF Pro;
+  line-height: 53.44rpx;
+  color: #ef5b24;
+  font-weight: bold;
+}
+.font_3 {
+  font-size: 38rpx;
+  font-family: SF Pro;
+  line-height: 53.44rpx;
+  color: #757575;
+  font-weight: bold;
+}
+.text-wrapper_4 {
+  margin-left: 11.45rpx;
+  margin-right: 20.99rpx;
+  padding: 30.73rpx 0 31.11rpx;
+  background-color: #ef5b24;
+  border-radius: 38.17rpx;
+}
+.text_9 {
+  color: #ffffff;
+  font-size: 46rpx;
+  font-family: Roboto;
+  line-height: 35.27rpx;
+  font-weight: bold;
+}
+.group_2 {
+  padding: 100rpx 0 50rpx;
+  align-items: center;
+}
+.vehicle-image {
+  width: 440rpx;
+  height: 340rpx;
+  margin-right: 2.23rpxrpx;
+}
+.info-card {
+  background-color: #fffaf2;
+  border-radius: 60rpx;
+  padding: 24rpx;
+  width: 360rpx;
+  box-shadow: 0 8rpx 18rpx rgba(0,0,0,0.08);
+  margin-left: 0;
+}
+.spec-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16rpx;
+  gap: 12rpx;
+  flex-wrap: nowrap;
+}
+.spec-label {
+  background-color: #e98c30ff;
+  border-radius: 999rpx;
+  padding: 10rpx 20rpx;
+  color: #1a1818ff;
+  font-size: 22rpx;
+  min-width: 180rpx;
+  text-align: center;
+  flex-shrink: 0;
+  font-weight: bold;
+}
+.spec-value {
+  color: #493b3bff;
+  font-size: 30rpx;
+  white-space: nowrap;
+  font-weight: bold;
+}
+.text_7 {
+  color: #131212ff;
+  font-size: 48rpx;
+  font-family: Kavoon;
+  margin-top: 24rpx;
+  text-align: center;
+  width: 100%;
+  margin-left: 0;
+  font-weight: bold;
+}
+
+/* Responsive overrides for real-device layout */
+.page {
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: 0 24rpx 80rpx;
+}
+
+.group {
+  padding: 36rpx 0 44rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 28rpx;
+}
+
+.section {
+  margin-left: 0;
+  margin-right: 0;
+  padding: 16rpx 28rpx 34rpx;
+  box-sizing: border-box;
+}
+
+.image-wrapper,
+.image-wrapper_2 {
+  width: 96rpx;
+  height: 96rpx;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.image_2 {
+  width: 100%;
+  max-width: 440rpx;
+  height: 150rpx;
+}
+
+.group_2 {
+  padding: 28rpx 0 20rpx;
+  align-items: stretch;
+}
+
+.vehicle-summary-row {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 24rpx;
+}
+
+.vehicle-image {
+  width: 320rpx;
+  height: 240rpx;
+  max-width: 100%;
+  margin-right: 0;
+  flex: 0 1 320rpx;
+}
+
+.info-card {
+  width: auto;
+  min-width: 0;
+  flex: 1 1 320rpx;
+  box-sizing: border-box;
+  margin-left: 0;
+  padding: 24rpx;
+  border-radius: 40rpx;
+}
+
+.spec-row {
+  width: 100%;
+  min-height: 64rpx;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14rpx;
+}
+
+.spec-label {
+  min-width: 170rpx;
+  max-width: 200rpx;
+  box-sizing: border-box;
+  padding: 10rpx 18rpx;
+}
+
+.spec-value {
+  flex: 1;
+  min-width: 0;
+  text-align: right;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.35;
+}
+
+.info-card .spec-row:first-child .spec-label {
+  min-width: 132rpx;
+  max-width: 132rpx;
+  padding-left: 12rpx;
+  padding-right: 12rpx;
+}
+
+.info-card .spec-row:first-child .spec-value {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: normal;
+  font-size: 28rpx;
+}
+
+.title-wrapper {
+  margin-top: 24rpx;
+}
+
+.model-tag {
+  width: 100%;
+  max-width: 520rpx;
+  box-sizing: border-box;
+  flex-wrap: wrap;
+  gap: 10rpx 18rpx;
+  padding: 18rpx 28rpx;
+}
+
+.model-label,
+.model-value {
+  font-size: 30rpx;
+  line-height: 1.35;
+}
+
+.section_5 {
+  margin-left: 0;
+  margin-right: 0;
+  padding-top: 0;
+  overflow: hidden;
+}
+
+.image_5 {
+  width: 100%;
+  height: 420rpx;
+  margin-right: 0;
+  display: block;
+}
+
+.section_4 {
+  box-sizing: border-box;
+  padding: 34rpx 28rpx 28rpx;
+  border-radius: 48rpx;
+}
+
+.text_8 {
+  font-size: 44rpx;
+  line-height: 1.2;
+}
+
+.font_2,
+.font_3 {
+  font-size: 34rpx;
+  line-height: 1.45;
+}
+
+.text-wrapper_4 {
+  margin-left: 0;
+  margin-right: 0;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 28rpx 0;
+  border-radius: 32rpx;
+}
+
+.text_9 {
+  font-size: 42rpx;
+  line-height: 1.2;
+}
+
+@media (max-width: 375px) {
+  .page {
+    padding-left: 18rpx;
+    padding-right: 18rpx;
+    padding-bottom: 68rpx;
+  }
+
+  .group {
+    gap: 22rpx;
+    padding-top: 28rpx;
+    padding-bottom: 36rpx;
+  }
+
+  .section {
+    padding-left: 20rpx;
+    padding-right: 20rpx;
+    padding-bottom: 28rpx;
+  }
+
+  .image-wrapper,
+  .image-wrapper_2 {
+    width: 86rpx;
+    height: 86rpx;
+  }
+
+  .image {
+    width: 40rpx;
+    height: 40rpx;
+  }
+
+  .image_2 {
+    max-width: 400rpx;
+    height: 136rpx;
+  }
+
+  .group_2 {
+    padding-top: 20rpx;
+    padding-bottom: 12rpx;
+  }
+
+  .vehicle-summary-row {
+    gap: 18rpx;
+  }
+
+  .vehicle-image {
+    width: 280rpx;
+    height: 210rpx;
+    flex-basis: 280rpx;
+  }
+
+  .info-card {
+    flex-basis: 100%;
+    padding: 20rpx;
+    border-radius: 34rpx;
+  }
+
+  .spec-row {
+    gap: 10rpx;
+    min-height: 58rpx;
+  }
+
+  .spec-label {
+    min-width: 144rpx;
+    max-width: 170rpx;
+    padding: 8rpx 14rpx;
+    font-size: 20rpx;
+  }
+
+  .spec-value {
+    font-size: 28rpx;
+  }
+
+  .info-card .spec-row:first-child .spec-label {
+    min-width: 126rpx;
+    max-width: 126rpx;
+  }
+
+  .info-card .spec-row:first-child .spec-value {
+    font-size: 26rpx;
+  }
+
+  .model-tag {
+    max-width: none;
+    padding: 16rpx 22rpx;
+    border-width: 3rpx;
+    border-radius: 40rpx;
+  }
+
+  .model-label,
+  .model-value {
+    font-size: 28rpx;
+  }
+
+  .section_4 {
+    padding: 28rpx 22rpx 24rpx;
+    border-radius: 40rpx;
+  }
+
+  .image_5 {
+    height: 392rpx;
+  }
+
+  .text_8 {
+    font-size: 38rpx;
+  }
+
+  .font_2,
+  .font_3 {
+    font-size: 30rpx;
+    line-height: 1.42;
+  }
+
+  .text-wrapper_4 {
+    padding: 24rpx 0;
+    border-radius: 28rpx;
+  }
+
+  .text_9 {
+    font-size: 38rpx;
+  }
+}
+
+@media (max-width: 340px) {
+  .page {
+    padding-left: 14rpx;
+    padding-right: 14rpx;
+    padding-bottom: 58rpx;
+  }
+
+  .section {
+    padding-left: 16rpx;
+    padding-right: 16rpx;
+    padding-bottom: 24rpx;
+  }
+
+  .image-wrapper,
+  .image-wrapper_2 {
+    width: 78rpx;
+    height: 78rpx;
+  }
+
+  .image {
+    width: 34rpx;
+    height: 34rpx;
+  }
+
+  .image_2 {
+    max-width: 360rpx;
+    height: 124rpx;
+  }
+
+  .vehicle-image {
+    width: 248rpx;
+    height: 188rpx;
+    flex-basis: 248rpx;
+  }
+
+  .info-card {
+    padding: 18rpx;
+    border-radius: 28rpx;
+  }
+
+  .spec-label {
+    min-width: 132rpx;
+    max-width: 154rpx;
+    font-size: 18rpx;
+    padding: 8rpx 12rpx;
+  }
+
+  .spec-value {
+    font-size: 26rpx;
+  }
+
+  .info-card .spec-row:first-child .spec-label {
+    min-width: 118rpx;
+    max-width: 118rpx;
+  }
+
+  .info-card .spec-row:first-child .spec-value {
+    font-size: 24rpx;
+  }
+
+  .title-wrapper {
+    margin-top: 18rpx;
+  }
+
+  .model-tag {
+    padding: 14rpx 18rpx;
+    gap: 8rpx 14rpx;
+  }
+
+  .model-label,
+  .model-value {
+    font-size: 26rpx;
+  }
+
+  .image_5 {
+    height: 360rpx;
+  }
+
+  .section_4 {
+    padding: 24rpx 18rpx 20rpx;
+  }
+
+  .text_8 {
+    font-size: 34rpx;
+  }
+
+  .font_2,
+  .font_3 {
+    font-size: 26rpx;
+  }
+
+  .text-wrapper_4 {
+    padding: 22rpx 0;
+    border-radius: 24rpx;
+  }
+
+  .text_9 {
+    font-size: 34rpx;
+  }
+}

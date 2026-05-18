@@ -1,0 +1,9 @@
+<view class="oMo-flex-col oMo-justify-start oMo-relative section">
+  <view class="oMo-flex-col oMo-justify-start oMo-relative section"></view>
+  <image
+    class="image pos"
+    src="https://ide.code.fun/api/image?token=691df5f6043f1900118e4b24&name=11f2c2583a3ba424ace6c86a598d37f5.png"
+  />
+  <text class="font pos_2">提交成功！</text>
+  <text class="font pos_3">感谢您的反馈！</text>
+</view>

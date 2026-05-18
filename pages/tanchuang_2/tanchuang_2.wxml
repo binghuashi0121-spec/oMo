@@ -1,0 +1,15 @@
+<view class="oMo-flex-col page">
+  <image
+    class="oMo-self-center image"
+    src="../../pictures/tanchuang/gantanhao.png"
+  />
+  <view class="oMo-mt-20 oMo-flex-col oMo-self-stretch">
+    <view class="oMo-flex-col oMo-items-center oMo-self-stretch">
+      <text class="font">请确认已检查刹车系统正常，</text>
+      <text class="font">车内无遗留物品。</text>
+    </view>
+    <view class="oMo-mt-10 oMo-flex-col oMo-justify-start oMo-items-center oMo-self-center text-wrapper">
+      <text class="text">确认</text>
+    </view>
+  </view>
+</view>

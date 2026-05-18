@@ -1,0 +1,77 @@
+<view class="oMo-flex-col page">
+  <view class="oMo-flex-col group">
+    <view class="oMo-flex-col section">
+      <view class="oMo-flex-row oMo-justify-between oMo-self-stretch">
+        <view class="oMo-flex-col oMo-justify-start oMo-items-center image-wrapper" bind:tap="onClick" hover-class="tap-press">
+          <Back></Back>
+        </view>
+        <view class="oMo-flex-col oMo-justify-start oMo-items-center image-wrapper_2" bind:tap="onClick_1" hover-class="tap-press">
+          <image
+            class="image"
+            src="../../pictures/jiaochejiemian/help_center.png"
+          />
+        </view>
+      </view>
+      <image
+        class="oMo-self-center image_2"
+        src="../../pictures/mingxi/oMo_logo.png"
+      />
+    </view>
+
+    <view class="oMo-flex-col oMo-relative group_2">
+      <view class="oMo-flex-row oMo-justify-start oMo-items-center vehicle-summary-row">
+        <image
+          class="image_3 vehicle-image"
+          src="../../pictures/zhifu_pay/car_model.png"
+          mode="aspectFit"
+        />
+        <view class="oMo-flex-col oMo-justify-start oMo-items-start info-card">
+          <view class="oMo-flex-row oMo-justify-between oMo-items-center oMo-self-stretch spec-row">
+            <text class="spec-label">序号：</text>
+            <text class="spec-value">{{serialText}}</text>
+          </view>
+          <view class="oMo-flex-row oMo-justify-between oMo-items-center oMo-self-stretch spec-row">
+            <text class="spec-label">核载人数：</text>
+            <text class="spec-value">{{capacityText}}</text>
+          </view>
+          <view class="oMo-flex-row oMo-justify-between oMo-items-center oMo-self-stretch spec-row">
+            <text class="spec-label">剩余续航：</text>
+            <text class="spec-value">{{rangeText || '—'}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="oMo-flex-row oMo-justify-center oMo-items-center title-wrapper">
+        <view class="model-tag">
+          <text class="model-label">车辆型号</text>
+          <text class="model-value">{{modelText}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="oMo-flex-col oMo-justify-start oMo-relative section_5">
+      <image
+        class="image_5"
+        src="../../pictures/wode/logo_backgroung.png"
+      />
+      <view class="oMo-flex-col section_4 pos_4">
+        <text class="oMo-self-start text_8">计费规则</text>
+        <view class="oMo-self-stretch mt-13">
+          <text class="font_3">时间费用：</text>
+          <text class="font_2">0.5</text>
+          <text class="font_3">元/min，里程费用：起步价：</text>
+          <text class="font_2">10</text>
+          <text class="font_3">元（含1.5km），超出1.5km部分，按照</text>
+          <text class="font_2">5</text>
+          <text class="font_3">元/km计算（不满1km，按1km计算），需预付</text>
+          <text class="font_2">200</text>
+          <text class="font_3">元，还车后退还剩余预付款</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="oMo-flex-col oMo-justify-start oMo-items-center text-wrapper_4" bind:tap="onClick_2">
+    <text class="text_9">确认用车</text>
+  </view>
+</view>

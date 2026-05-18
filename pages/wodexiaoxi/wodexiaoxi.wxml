@@ -1,0 +1,102 @@
+<view class="oMo-flex-col page">
+  <view class="oMo-flex-col section">
+    <view class="oMo-flex-col oMo-justify-start oMo-items-start oMo-self-stretch">
+      <view class="oMo-flex-col oMo-justify-start oMo-items-center image-wrapper" bind:tap="onClick" hover-class="tap-press">
+        <image
+          class="image"
+          src="../../pictures/wodexiaoxi/back.png"
+        />
+      </view>
+    </view>
+    <image
+      class="oMo-self-center image_2"
+      src="../../pictures/wodexiaoxi/oMo_logo.png"
+    />
+  </view>
+
+  <view class="filter-bar">
+    <view
+      class="filter-item {{currentFilter === item.key ? 'active' : ''}}"
+      wx:for="{{filters}}"
+      wx:key="key"
+      data-key="{{item.key}}"
+      bindtap="onFilterSelect"
+    >
+      {{item.label}}
+    </view>
+  </view>
+
+  <scroll-view
+    class="message-list"
+    scroll-y
+    enable-back-to-top
+    refresher-enabled
+    refresher-triggered="{{isRefresherOpen}}"
+    bindrefresherrefresh="onRefresherRefresh"
+    bindscrolltolower="loadMore"
+  >
+    <view wx:if="{{showSkeleton}}" class="skeleton-container">
+      <view class="skeleton-card" wx:for="{{[1,2,3,4,5]}}" wx:key="*this">
+        <view class="skeleton-avatar"></view>
+        <view class="skeleton-content">
+          <view class="skeleton-line short"></view>
+          <view class="skeleton-line long"></view>
+        </view>
+      </view>
+    </view>
+
+    <block wx:else>
+      <view class="message-wrapper" wx:if="{{displayMessages.length > 0}}">
+        <view
+          class="message-card {{isBatchMode && util.includes(selectedIds, item.id) ? 'selected' : ''}}"
+          wx:for="{{displayMessages}}"
+          wx:key="id"
+          data-id="{{item.id}}"
+          bindtap="onCardTap"
+          bindlongpress="onCardLongPress"
+        >
+          <view class="checkbox-wrapper" wx:if="{{isBatchMode}}">
+            <view class="checkbox {{util.includes(selectedIds, item.id) ? 'checked' : ''}}"></view>
+          </view>
+
+          <view class="card-content">
+            <view class="card-header">
+              <view class="sender-info">
+                <text class="sender-name">{{item.sender}}</text>
+                <view class="red-dot" wx:if="{{!item.isRead}}"></view>
+              </view>
+              <text class="timestamp">{{item.timeStr}}</text>
+            </view>
+            <text class="message-preview">{{item.content}}</text>
+          </view>
+        </view>
+
+        <view class="loading-state">
+          <text wx:if="{{isLoading}}">加载中...</text>
+          <text wx:elif="{{!hasMore}}">没有更多消息了</text>
+        </view>
+      </view>
+
+      <view class="empty-state" wx:else>
+        <text>暂无消息</text>
+      </view>
+    </block>
+  </scroll-view>
+
+  <view class="batch-bar" wx:if="{{isBatchMode}}">
+    <view class="batch-btn cancel" bindtap="exitBatchMode">取消</view>
+    <view class="batch-actions">
+      <view class="batch-btn" bindtap="selectAll">全选</view>
+      <view class="batch-btn" bindtap="batchMarkRead">标记已读</view>
+      <view class="batch-btn delete" bindtap="batchDelete">删除</view>
+    </view>
+  </view>
+</view>
+
+<wxs module="util">
+  module.exports = {
+    includes: function(arr, item) {
+      return arr.indexOf(item) > -1;
+    }
+  }
+</wxs>

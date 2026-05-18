@@ -1,0 +1,19 @@
+// cloudfunctions/wechatLogin/index.js
+const cloud = require('wx-server-sdk')
+
+cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
+
+exports.main = async (event, context) => {
+  const wxContext = cloud.getWXContext()
+
+  return {
+    code: 0,
+    msg: 'success',
+    data: {
+      openid: wxContext.OPENID,
+      appid: wxContext.APPID,
+      unionid: wxContext.UNIONID,
+      token: 'cloud_token_' + Date.now() // 模拟生成 Token
+    }
+  }
+}

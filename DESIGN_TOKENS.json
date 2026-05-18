@@ -1,0 +1,70 @@
+{
+  "meta": {
+    "system": "oMo Design System",
+    "version": "1.0.0",
+    "lastUpdated": "2025-11-29",
+    "compliance": "WCAG 2.1 AA"
+  },
+  "colors": {
+    "light": {
+      "primary": { "value": "#EF5B24", "type": "color" },
+      "primaryHover": { "value": "#D64B1A", "type": "color" },
+      "primaryBg": { "value": "#FFF0E8", "type": "color" },
+      "surface": { "value": "#FFFFFF", "type": "color" },
+      "background": { "value": "#F4F0EB", "type": "color" },
+      "textMain": { "value": "#333333", "type": "color" },
+      "textBody": { "value": "#666666", "type": "color" },
+      "border": { "value": "#E5E5E5", "type": "color" },
+      "error": { "value": "#D32F2F", "type": "color" }
+    },
+    "dark": {
+      "primary": { "value": "#FF7D4D", "type": "color" },
+      "primaryHover": { "value": "#FF9670", "type": "color" },
+      "primaryBg": { "value": "#3E1F14", "type": "color" },
+      "surface": { "value": "#1E1E1E", "type": "color" },
+      "background": { "value": "#121212", "type": "color" },
+      "textMain": { "value": "#E0E0E0", "type": "color" },
+      "textBody": { "value": "#A0A0A0", "type": "color" },
+      "border": { "value": "#333333", "type": "color" },
+      "error": { "value": "#EF5350", "type": "color" }
+    }
+  },
+  "typography": {
+    "fontFamily": {
+      "system": { "value": "-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei', sans-serif" }
+    },
+    "weights": {
+      "regular": { "value": 400 },
+      "medium": { "value": 500 },
+      "semibold": { "value": 600 }
+    },
+    "sizes": {
+      "h1": { "value": "48rpx" },
+      "h2": { "value": "40rpx" },
+      "h3": { "value": "32rpx" },
+      "body": { "value": "28rpx" },
+      "caption": { "value": "24rpx" }
+    },
+    "lineHeights": {
+      "heading": { "value": 1.4 },
+      "body": { "value": 1.5 }
+    }
+  },
+  "spacing": {
+    "xs": { "value": "16rpx", "px": 8 },
+    "s": { "value": "24rpx", "px": 12 },
+    "m": { "value": "32rpx", "px": 16 },
+    "l": { "value": "48rpx", "px": 24 },
+    "xl": { "value": "64rpx", "px": 32 }
+  },
+  "borderRadius": {
+    "s": { "value": "16rpx" },
+    "m": { "value": "24rpx" },
+    "l": { "value": "32rpx" },
+    "full": { "value": "9999rpx" }
+  },
+  "shadows": {
+    "sm": { "value": "0 4rpx 16rpx rgba(0, 0, 0, 0.04)" },
+    "md": { "value": "0 8rpx 32rpx rgba(0, 0, 0, 0.08)" }
+  }
+}

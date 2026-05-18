@@ -1,0 +1,29 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "准备真机联调环境",
+      "type": "shell",
+      "command": "node",
+      "args": [
+        "scripts/real-device/prepare.js"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "停止 mqtt-bridge",
+      "type": "shell",
+      "command": "node",
+      "args": [
+        "scripts/mqtt-bridge/stop.js"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

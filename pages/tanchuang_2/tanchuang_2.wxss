@@ -1,0 +1,32 @@
+.page {
+  padding: 129.94rpx 22.8rpx 72.95rpx;
+  background-color: #efe7dc;
+  border-radius: 45.59rpx;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100%;
+}
+.image {
+  width: 139.06rpx;
+  height: 139.06rpx;
+}
+.font {
+  font-size: 54.71rpx;
+  font-family: Inter;
+  line-height: 66.11rpx;
+  color: #494949;
+}
+.text-wrapper {
+  padding: 31.91rpx 0 9.12rpx;
+  background-color: #ef5b24;
+  border-radius: 36.47rpx;
+  width: 583.59rpx;
+}
+.text {
+  color: #ffffff;
+  font-size: 47.87rpx;
+  font-family: Inter;
+  font-weight: 600;
+  line-height: 45.18rpx;
+}

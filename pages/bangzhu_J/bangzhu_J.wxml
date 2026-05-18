@@ -1,0 +1,132 @@
+<view class="oMo-flex-col page">
+  <view class="oMo-flex-col oMo-justify-start oMo-items-center oMo-relative section">
+  <view class="oMo-flex-col oMo-justify-start oMo-items-center image-wrapper pos" bind:tap="onClick" hover-class="tap-press">
+      <image
+        class="image"
+        src="../../pictures/bangzhu/back.png"
+      />
+    </view>
+    <image
+      class="oMo-relative image_2"
+      src="../../pictures/bangzhu/oMo_logo.png"
+    />
+  </view>
+  <view class="oMo-flex-col group mt-17">
+    <view class="oMo-flex-col section_2">
+      <text class="oMo-self-start font text">一.扫码问题</text>
+      <view class="oMo-self-stretch group_2">
+        <text class="font_2">1.扫码后页面没反应，怎么办？</text>
+        <text class="font_3">
+          您好，请先检查手机网络是否通畅，或尝试下拉页面刷新；若车辆上的二维码模糊无法识别，可更换附近另一辆共享车扫码，也可通过小程序“我要反馈”
+          或拨打客服电话（400-XXXXXXX）联系我们。
+        </text>
+        <text class="font_2">2.扫码提示 “车辆已被占用”，但现场没看到有人用车？</text>
+        <text class="font_3">可能是上一位用户的</text>
+        <text class="font_4">订单未正常结束</text>
+        <text class="font_3">，您可等待</text>
+        <text class="font_4">2 分钟</text>
+        <text class="font_3">后</text>
+        <text class="font_4">再次扫码尝试</text>
+        <text class="font_3">；若仍有问题，可</text>
+        <text class="font_4">联系客服</text>
+        <text class="font_3">核实该车辆的实时使用状态。</text>
+      </view>
+    </view>
+    <view class="oMo-flex-col section_3">
+      <text class="oMo-self-start font">二.计费问题</text>
+      <view class="oMo-self-stretch group_3 mt-13">
+        <text class="font_2">1.鸥眸共享车的计费规则是怎样的？</text>
+        <text class="font_3">共享车采用“</text>
+        <text class="font_4">时长费 + 里程费</text>
+        <text class="font_3">” 的组合计费方式，不同车型（如单人款、亲子款）的具体单价可在小程序“</text>
+        <text class="font_4">我的”-“设置”-“计费规则</text>
+        <text class="font_3">”中查看，订单结束后会生成详细的费用明细供您核对。</text>
+        <text class="font_2">2.订单结束后，发现计费金额和预期不符，该如何处理？</text>
+        <text class="font_3">请先在“</text>
+        <text class="font_4">我的”-“订单”</text>
+        <text class="font_3">中查看行程的时长、里程等信息，确认是否有误解；若仍认为计费异常，可点击该订单，选择“</text>
+        <text class="font_4">异常反馈</text>
+        <text class="font_3">” 提交，我们的工作人员会在 1 - 3 个工作日内核查并回复处理结果。</text>
+      </view>
+    </view>
+    <view class="oMo-flex-col section_4">
+      <text class="oMo-self-start font">三.支付问题</text>
+      <view class="oMo-self-stretch group_4 mt-9">
+        <text class="font_2">1.点击支付后，系统提示支付失败，是什么原因？</text>
+        <text class="font_3">可能是您的支付账户余额不足、网络波动，或支付渠道临时故障。建议您</text>
+        <text class="font_4">检查账户余额</text>
+        <text class="font_3">、</text>
+        <text class="font_4">切换网络</text>
+        <text class="font_3">（如从 5G 切为 Wi‑Fi），或</text>
+        <text class="font_4">更换支付方式</text>
+        <text class="font_3">（如从微信支付换为支付宝支付）；若多次尝试仍失败，可</text>
+        <text class="font_4">联系客服</text>
+        <text class="font_3">协助排查与处理。</text>
+
+        <text class="font_2 mt-13">2.已经完成支付，但小程序里看不到订单，该怎么办？</text>
+        <text class="font_3">可能是支付成功后系统同步有延迟，您可下拉小程序页面</text>
+        <text class="font_4">刷新</text>
+        <text class="font_3">，或前往</text>
+        <text class="font_4">“我的”-“支付记录”</text>
+        <text class="font_3">查看；若仍无订单记录，请</text>
+        <text class="font_4">联系客服</text>
+        <text class="font_3">，并提供</text>
+        <text class="font_4">支付凭证</text>
+        <text class="font_3">（如支付成功截图），我们将尽快为您核实处理。</text>
+      </view>
+    </view>
+    <view class="oMo-flex-col section_3">
+      <text class="oMo-self-start font">四.叫车相关</text>
+      <view class="oMo-self-stretch group_3 mt-13">
+        <text class="font_2">1.预约车辆成功后，需要在多长时间内取车？</text>
+        <text class="font_3">预约成功后，车辆会为您保留</text>
+        <text class="font_4">15 分钟</text>
+        <text class="font_3">，您可通过小程序的</text>
+        <text class="font_4">“取车点导航”</text>
+        <text class="font_3">功能前往车辆位置；若超过</text>
+        <text class="font_4">15 分钟</text>
+        <text class="font_3">未取车，预约将</text>
+        <text class="font_4">自动取消</text>
+        <text class="font_3">，您可重新预约可用车辆。</text>
+
+        <text class="font_2 mt-13">2.按照小程序显示的位置，在景区内找不到预约的车辆，该怎么办？</text>
+        <text class="font_3">请点击小程序内的</text>
+        <text class="font_4">“车辆定位”</text>
+        <text class="font_3">查看车辆的实时位置（需确保定位开启）；若仍无法找到，请</text>
+        <text class="font_4">联系客服</text>
+        <text class="font_3">，我们会帮您确认车辆是否仍在预约地点；若车辆被撤取，将为您协调附近的可用车辆。</text>
+      </view>
+    </view>
+    <view class="oMo-flex-col section_3">
+      <text class="oMo-self-start font">五.车辆故障</text>
+      <view class="oMo-self-stretch group_3 mt-13">
+        <text class="font_2">1.行驶过程中，车辆突然出现故障（如刹车异常、电量快速下降等），该怎么处理？</text>
+        <text class="font_3">请立即寻找安全区域</text>
+        <text class="font_4">靠边停车</text>
+        <text class="font_3">，确认自身安全后，打开小程序</text>
+        <text class="font_4">“帮助”-“车辆故障”</text>
+        <text class="font_3">按提示上报故障信息，我们会尽快安排工作人员就近处理；同时，您可</text>
+        <text class="font_4">联系客服</text>
+        <text class="font_3">协助处理。</text>
+
+        <text class="font_2 mt-13">2.取车时发现车辆有明显故障（如轮胎漏气、车锁损坏等），还能使用吗？</text>
+        <text class="font_3">请勿使用存在故障的车辆；您可点击小程序</text>
+        <text class="font_4">“我要反馈”</text>
+        <text class="font_3">，选择</text>
+        <text class="font_4">“车辆故障”</text>
+        <text class="font_3">类型并上传照片，我们将尽快处理，同时为您推荐附近的可用车辆。</text>
+      </view>
+    </view>
+  </view>
+  <view class="oMo-flex-col oMo-justify-start oMo-items-end text-wrapper mt-17" bind:tap="onFeedbackTap">
+    <text class="font text_3">我要反馈</text>
+  </view>
+  <view wx:if="{{showFeedback}}" class="feedback-mask" catchtap="closeFeedback"></view>
+  <view wx:if="{{showFeedback}}" class="feedback-sheet">
+    <text class="feedback-title">客服电话</text>
+    <text class="feedback-phone">13962243668</text>
+    <view class="feedback-actions">
+      <view class="feedback-action-btn" bind:tap="closeFeedback">知道了</view>
+    </view>
+  </view>
+</view>

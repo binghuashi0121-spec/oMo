@@ -1,0 +1,87 @@
+﻿<view class="oMo-flex-col page">
+  <view class="oMo-flex-col group_1">
+    <view class="oMo-flex-col section">
+      <view class="oMo-flex-row">
+        <view class="oMo-flex-col oMo-justify-start oMo-items-center oMo-self-start image-wrapper" bind:tap="onClick" hover-class="tap-press">
+          <image class="image image_1" src="../../pictures/yiwancheng/back.png" />
+        </view>
+        <view class="oMo-flex-col oMo-justify-start oMo-items-start oMo-flex-1 oMo-relative group">
+          <image class="image_2" src="../../pictures/yiwancheng/oMo_logo.png" />
+          <view class="oMo-flex-col oMo-justify-start oMo-items-center image-wrapper_2 pos" bind:tap="onClick_1" hover-class="tap-press">
+            <image class="image" src="../../pictures/yiwancheng/help_center.png" />
+          </view>
+        </view>
+      </view>
+      <view class="oMo-flex-col oMo-items-center oMo-mt-6">
+        <text class="text">订单管理</text>
+        <view class="section_2 mt-7"></view>
+      </view>
+    </view>
+
+    <view class="list-wrap">
+      <view wx:if="{{loading}}" class="empty-card">
+        <text class="empty-title">订单加载中...</text>
+      </view>
+
+      <view wx:elif="{{!trips.length}}" class="empty-card">
+        <view class="empty-copy">
+          <text class="empty-title">{{emptyText}}</text>
+          <text class="empty-sub">（完成一次行程后 这里会显示你的订单记录）</text>
+        </view>
+      </view>
+
+      <view wx:for="{{trips}}" wx:key="tripId" class="section_3">
+        <view class="oMo-flex-row oMo-items-center group_2">
+          <image class="image_4" src="../../pictures/yiwancheng/bin.png" />
+          <image class="image_3" src="../../pictures/yiwancheng/small_oMo_logo.png" />
+        </view>
+
+        <view class="oMo-flex-row group_9 mt-19">
+          <image class="image_5" src="../../pictures/yiwancheng/time_clock.png" />
+          <text class="font oMo-ml-8">{{item.timeText}}</text>
+        </view>
+
+        <view class="oMo-flex-row oMo-items-center group_10 mt-19">
+          <view class="section_4"></view>
+          <view class="group_4 oMo-ml-10">
+            <text class="font">骑行时长</text>
+            <text class="font_2 text_4">{{item.durationText}}</text>
+          </view>
+        </view>
+
+        <view class="oMo-flex-row oMo-items-center group_10 mt-19">
+          <view class="section_5"></view>
+          <view class="group_5 ml-11">
+            <text class="font">车辆序号</text>
+            <text class="font_2 text_5">{{item.ugvID}}</text>
+          </view>
+        </view>
+
+        <view class="oMo-flex-row oMo-items-center group_10 mt-19">
+          <view class="section_4"></view>
+          <view class="group_4 oMo-ml-10">
+            <text class="font">行驶里程</text>
+            <text class="font_2 text_4">{{item.distanceText}}</text>
+          </view>
+        </view>
+
+        <view class="oMo-flex-row oMo-items-center group_10 mt-19">
+          <view class="section_5"></view>
+          <view class="group_5 ml-11">
+            <text class="font">订单金额</text>
+            <text class="font_2 text_5">{{item.costText}}</text>
+          </view>
+        </view>
+
+        <view class="card-footer">
+          <text class="status-tag">{{item.statusText}}</text>
+          <view class="oMo-flex-row oMo-items-center group_6" data-trip-id="{{item.tripId}}" bind:tap="onTripDetailTap" hover-class="tap-press">
+            <text class="text_6">查看详情</text>
+            <image class="oMo-shrink-0 image_6" src="../../pictures/yiwancheng/click.png" />
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
+
