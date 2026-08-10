@@ -3,7 +3,7 @@
 ## 当前交付范围
 
 - `omo-admin-web`：Vue 3、TypeScript、Vite、Element Plus、Pinia、Vue Router、ECharts。
-- `admin-api`：NestJS、TypeScript、Argon2id、HttpOnly Cookie、CSRF、CloudBase/内存双数据适配器。
+- `omo-admin-api`：NestJS、TypeScript、Argon2id、HttpOnly Cookie、CSRF、CloudBase/内存双数据适配器。
 - 页面：`/login`、`/map`、`/orders`、`/finance`、`/system`。
 - 两个预配置景区；地图、订单、财务和状态栏共享景区上下文。
 - 管理后台车辆指令仅生成模拟记录，不连接 MQTT Broker。
@@ -17,10 +17,10 @@
 
 ```powershell
 # API：默认内存演示数据
-Copy-Item admin-api/.env.example admin-api/.env
-npm --prefix admin-api install
-npm --prefix admin-api run bootstrap:admin
-npm --prefix admin-api run start:dev
+Copy-Item omo-admin-api/.env.example omo-admin-api/.env
+npm --prefix omo-admin-api install
+npm --prefix omo-admin-api run bootstrap:admin
+npm --prefix omo-admin-api run start:dev
 
 # Web：默认 Mock；需要联调 API 时把 VITE_USE_MOCK 改为 false
 Copy-Item omo-admin-web/.env.example omo-admin-web/.env
@@ -36,9 +36,9 @@ npm --prefix omo-admin-web run dev
 npm --prefix omo-admin-web run test
 npm --prefix omo-admin-web run build
 npm --prefix omo-admin-web run test:e2e
-npm --prefix admin-api run test
-npm --prefix admin-api run build
-npm --prefix mqtt-bridge test
+npm --prefix omo-admin-api run test
+npm --prefix omo-admin-api run build
+npm --prefix omo-mqtt-bridge test
 ```
 
 ## 管理 API
@@ -74,7 +74,7 @@ Copy-Item deploy/admin/cloudbaserc.example.json cloudbaserc.admin.json
 
 ### 2. 建集合、索引和景区
 
-在 `admin-api/.env` 中临时配置：
+在 `omo-admin-api/.env` 中临时配置：
 
 ```dotenv
 DATA_DRIVER=cloudbase
@@ -84,10 +84,10 @@ CLOUDBASE_ENV_ID=<dev-environment-id>
 然后执行：
 
 ```powershell
-npm --prefix admin-api run cloudbase:setup
+npm --prefix omo-admin-api run cloudbase:setup
 ```
 
-脚本只允许 dev/test/staging 环境，幂等创建管理集合并写入两个预配置景区。集合清单见 `admin-api/cloudbase/schema/collections.json`；索引按 `admin-api/cloudbase/schema/indexes.json` 在控制台创建，尤其要启用管理员账号、会话令牌、调账幂等键和模拟指令幂等键的唯一索引。
+脚本只允许 dev/test/staging 环境，幂等创建管理集合并写入两个预配置景区。集合清单见 `omo-admin-api/cloudbase/schema/collections.json`；索引按 `omo-admin-api/cloudbase/schema/indexes.json` 在控制台创建，尤其要启用管理员账号、会话令牌、调账幂等键和模拟指令幂等键的唯一索引。
 
 ### 3. 天马山迁移演练
 
@@ -98,22 +98,22 @@ $env:DATA_DRIVER='cloudbase'
 $env:CLOUDBASE_ENV_ID='<dev-environment-id>'
 
 $env:MIGRATION_MODE='backup'
-npm --prefix admin-api run migrate:tianmashan
+npm --prefix omo-admin-api run migrate:tianmashan
 
 $env:MIGRATION_MODE='dry-run'
-npm --prefix admin-api run migrate:tianmashan
+npm --prefix omo-admin-api run migrate:tianmashan
 
 $env:MIGRATION_MODE='apply'
 $env:MIGRATION_CONFIRM='APPLY_TIANMASHAN'
-npm --prefix admin-api run migrate:tianmashan
+npm --prefix omo-admin-api run migrate:tianmashan
 ```
 
 备份和核对状态写入忽略目录 `.cloudbase-admin/`，不会提交 Git。apply 后脚本会核对每个集合的记录数、金额合计和缺失景区数，并输出 `deleted: 0`。
 
-### 4. 部署 admin-api
+### 4. 部署 admin-api 服务
 
 ```powershell
-tcb cloudrun deploy -e <dev-environment-id> -s admin-api --port 3001 --source ./admin-api
+tcb cloudrun deploy -e <dev-environment-id> -s admin-api --port 3001 --source ./omo-admin-api
 ```
 
 非敏感服务配置参考 `deploy/admin/service-settings.example.json`。CloudBase Run 应使用 Node.js 22、同环境数据库身份和 HTTPS 网关。第一期先保持单实例，并在 HTTP 网关再配置 IP 级登录限频；如果扩容为多实例，需将应用内限频状态迁移到共享存储。上线前先访问 `/api/admin/v1/live`，再登录检查受保护的 `/system/health`。

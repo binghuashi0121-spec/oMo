@@ -1,7 +1,7 @@
 {
   "$comment": "Non-secret CloudBase dev settings checklist; actual values are configured in the console or CLI.",
   "serviceName": "admin-api",
-  "source": "admin-api",
+  "source": "omo-admin-api",
   "port": 3001,
   "runtime": "nodejs22",
   "access": "HTTP gateway",

@@ -69,7 +69,7 @@
 ## 本地检查
 
 ```powershell
-cd mqtt-bridge
+cd omo-mqtt-bridge
 npm install
 npm test
 node --check app.js
@@ -80,7 +80,7 @@ npm start
 
 ## CloudBase 部署要求
 
-1. 使用 Node.js 20 或 22 构建 `mqtt-bridge/Dockerfile`。
+1. 使用 Node.js 20 或 22 构建 `omo-mqtt-bridge/Dockerfile`。
 2. 最小实例数和最大实例数均设为 1，避免 MQTT 长连接缩容及重复订阅。
 3. 通过服务环境变量注入凭据，并对历史 MQTT 凭据执行外部轮换。
 4. 关闭普通公网入口；只允许同环境私有链路和小程序 `callContainer`。
