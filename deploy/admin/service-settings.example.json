@@ -1,0 +1,25 @@
+{
+  "$comment": "Non-secret CloudBase dev settings checklist; actual values are configured in the console or CLI.",
+  "serviceName": "admin-api",
+  "source": "admin-api",
+  "port": 3001,
+  "runtime": "nodejs22",
+  "access": "HTTP gateway",
+  "minInstances": 0,
+  "maxInstances": 1,
+  "environment": {
+    "NODE_ENV": "production",
+    "DATA_DRIVER": "cloudbase",
+    "COOKIE_SECURE": "true",
+    "CLOUDBASE_ENV_ID": "<dev-environment-id>",
+    "ADMIN_WEB_ORIGIN": "https://admin-dev.example.com",
+    "MQTT_BRIDGE_HEALTH_URL": "<same-environment-private-health-url>"
+  },
+  "secretsExcluded": [
+    "BOOTSTRAP_ADMIN_PASSWORD",
+    "TENCENTCLOUD_SECRETID",
+    "TENCENTCLOUD_SECRETKEY",
+    "MQTT_PASSWORD",
+    "VITE_TENCENT_MAP_KEY"
+  ]
+}

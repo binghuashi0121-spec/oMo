@@ -59,32 +59,14 @@ App({
     return `${normalizedPrefix.replace(/\/+$/, '')}${normalizedPath}`;
   },
 
-  getRequestOpenId() {
-    const storedOpenId = wx.getStorageSync('openid') || wx.getStorageSync('openId') || '';
-    return String(storedOpenId || '').trim();
-  },
-
   buildContainerHeaders(header = {}) {
     const serviceName = (this.globalData && this.globalData.containerServiceName) || '';
-    const openid = this.getRequestOpenId();
-    const baseHeaders = serviceName
+    return serviceName
       ? {
           'X-WX-SERVICE': serviceName,
           ...header
         }
       : { ...header };
-
-    if (!openid) return baseHeaders;
-    const existingHeaderKeys = Object.keys(baseHeaders).map((k) => String(k || '').toLowerCase());
-    if (existingHeaderKeys.includes('x-wx-openid') || existingHeaderKeys.includes('x-openid') || existingHeaderKeys.includes('openid')) {
-      return baseHeaders;
-    }
-
-    return {
-      ...baseHeaders,
-      'x-wx-openid': openid,
-      'x-openid': openid
-    };
   },
 
   checkLoginStatus() {
@@ -135,6 +117,7 @@ App({
     wx.removeStorageSync('userInfo');
     wx.removeStorageSync('guest_token');
     wx.removeStorageSync('openid');
+    wx.removeStorageSync('openId');
     if (shouldNotifyExpired) {
       wx.setStorageSync(SESSION_EXPIRED_NOTICE_KEY, true);
     } else {

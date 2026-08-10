@@ -6,9 +6,11 @@ const express = require('express');
 const mqtt = require('mqtt');
 const cloudbase = require('@cloudbase/node-sdk');
 const { registerTripGatewayRoutes } = require('./tripGateway');
+const { getTrustedCloudBaseIdentity } = require('./cloudbaseIdentity');
+const { validateProtocolCommand, getTripVehicleIdentity } = require('./commandPolicy');
 
 const app = express();
-app.use(express.json({ limit: '1mb' }));
+app.use(express.json({ limit: '64kb' }));
 
 const PORT = Number(process.env.PORT || 3000);
 const TCB_ENV = process.env.TCB_ENV;
@@ -19,6 +21,9 @@ const DB_QUERY_TIMEOUT_MS = Number(process.env.DB_QUERY_TIMEOUT_MS || 8000);
 const VEHICLE_STATUS_STALE_MS = Number(process.env.VEHICLE_STATUS_STALE_MS || 60 * 1000);
 const VEHICLE_STATUS_FUTURE_TOLERANCE_MS = Number(process.env.VEHICLE_STATUS_FUTURE_TOLERANCE_MS || 5 * 1000);
 const TCB_DISABLE_METADATA_PROBE = process.env.TCB_DISABLE_METADATA_PROBE !== 'false';
+const DEFAULT_SCENIC_AREA_ID = /^[A-Za-z0-9_-]{2,64}$/.test(String(process.env.DEFAULT_SCENIC_AREA_ID || ''))
+  ? String(process.env.DEFAULT_SCENIC_AREA_ID)
+  : 'tianmashan';
 
 // MQTT config from env
 const MQTT_URL = process.env.MQTT_URL || 'mqtt://127.0.0.1:1883';
@@ -129,6 +134,7 @@ console.log(
 const vehiclesCol = db.collection('vehicles');
 const mqttLogsCol = db.collection('mqtt_logs');
 const commandHistoryCol = db.collection('command_history');
+const tripsCol = db.collection('trips');
 
 // ---- MQTT state ----
 let mqttConnected = false;
@@ -370,9 +376,38 @@ mqttClient.on('message', async (topic, payloadBuffer) => {
     parseError = e.message;
   }
 
+  const topicParts = topic.split('/');
+  const topicTail = topicParts[topicParts.length - 1] || '';
+  const isResponseTopic = topicTail === 'response';
+  let ugvID = null;
+  if (topicParts.length >= 2 && topicParts[0] === 'ugv') ugvID = topicParts[1];
+  if (!ugvID) ugvID = parsedPayload?.ugvID || parsedPayload?.payload?.ugvID;
+  if (ugvID) lastMessageUgvID = ugvID;
+
+  let existingVehicle = null;
+  let vehicleLookupError = null;
+  if (ugvID) {
+    try {
+      const queryRes = await vehiclesCol.where({ ugvID }).limit(1).get();
+      existingVehicle = getFirstDoc(queryRes);
+      if (!existingVehicle) {
+        try {
+          existingVehicle = getFirstDoc(await vehiclesCol.doc(ugvID).get());
+        } catch (error) {
+          existingVehicle = null;
+        }
+      }
+    } catch (error) {
+      vehicleLookupError = error;
+    }
+  }
+  const scenicAreaId = String(existingVehicle?.scenicAreaId || DEFAULT_SCENIC_AREA_ID);
+
   // 1) write mqtt_logs
   try {
     await mqttLogsCol.add({
+      scenicAreaId,
+      ugvID: ugvID || '',
       topic,
       payloadRaw: payloadText,
       payloadJson: parsedPayload,
@@ -385,24 +420,8 @@ mqttClient.on('message', async (topic, payloadBuffer) => {
 
   // 2) update vehicles if ugvID exists
   try {
-    // Strategy: Extract ugvID from Topic first (Standard: ugv/{devID}/device)
-    // Topic parts: [ 'ugv', 'device_id', 'device' ]
-    const topicParts = topic.split('/');
-    const topicTail = topicParts[topicParts.length - 1] || '';
-    const isResponseTopic = topicTail === 'response';
-    let ugvID = null;
-
-    if (topicParts.length >= 2 && topicParts[0] === 'ugv') {
-      ugvID = topicParts[1];
-    }
-
-    // Fallback: check payload
-    if (!ugvID) {
-      ugvID = parsedPayload?.ugvID || parsedPayload?.payload?.ugvID;
-    }
-
     if (!ugvID) return;
-    lastMessageUgvID = ugvID;
+    if (vehicleLookupError) throw vehicleLookupError;
 
     const packetPayload =
       parsedPayload && parsedPayload.payload && typeof parsedPayload.payload === 'object'
@@ -418,6 +437,7 @@ mqttClient.on('message', async (topic, payloadBuffer) => {
 
     const updateData = {
       ugvID,
+      scenicAreaId,
       updatedAt: now
     };
 
@@ -511,41 +531,16 @@ mqttClient.on('message', async (topic, payloadBuffer) => {
       }
     }
 
-    const queryRes = await vehiclesCol.where({ ugvID }).get();
-    const existingVehicle = getFirstDoc(queryRes);
-
     if (existingVehicle) {
       if (!isResponseTopic || !existingVehicle.status) {
         updateData.status = getVehicleBusinessStatus(existingVehicle, packetPayload);
       }
-      await vehiclesCol.doc(existingVehicle._id).set(
+      await vehiclesCol.doc(existingVehicle._id || ugvID).set(
         buildVehicleDocument(existingVehicle, updateData)
       );
     } else {
-      let updatedById = false;
-      try {
-        const byId = await vehiclesCol.doc(ugvID).get();
-        const existingById = getFirstDoc(byId);
-        if (existingById) {
-          if (!isResponseTopic || !existingById.status) {
-            updateData.status = getVehicleBusinessStatus(existingById, packetPayload);
-          }
-          await vehiclesCol.doc(ugvID).set(
-            buildVehicleDocument(existingById, updateData)
-          );
-          updatedById = true;
-        }
-      } catch (e) {
-        updatedById = false;
-      }
-
-      if (!updatedById) {
-        updateData.status = getVehicleBusinessStatus(
-          null,
-          isResponseTopic ? null : packetPayload
-        );
-        await vehiclesCol.add(updateData);
-      }
+      updateData.status = getVehicleBusinessStatus(null, isResponseTopic ? null : packetPayload);
+      await vehiclesCol.add(updateData);
     }
   } catch (dbErr) {
     console.error('[DB] upsert vehicles failed:', dbErr.message);
@@ -554,8 +549,9 @@ mqttClient.on('message', async (topic, payloadBuffer) => {
 
 // ---- Routes ----
 app.use((req, res, next) => {
-  const requestId = req.headers['x-request-id'] || createRequestId();
-  req.requestId = String(requestId);
+  const rawRequestId = Array.isArray(req.headers['x-request-id']) ? req.headers['x-request-id'][0] : req.headers['x-request-id'];
+  const candidate = String(rawRequestId || '').trim();
+  req.requestId = /^[A-Za-z0-9._:-]{8,100}$/.test(candidate) ? candidate : createRequestId();
   res.setHeader('x-request-id', req.requestId);
   next();
 });
@@ -579,35 +575,58 @@ function handleHealth(req, res) {
   });
 }
 
-// send command to MQTT
+async function findOwnedActiveTrip(openid, ugvID) {
+  const query = tripsCol.where({
+    openid,
+    status: db.command.in(['waiting_pickup', 'active', 'ongoing'])
+  }).limit(20).get();
+  const result = await withTimeout(query, DB_QUERY_TIMEOUT_MS, 'sendCommand.tripOwnership');
+  return (Array.isArray(result && result.data) ? result.data : []).find(
+    (trip) => getTripVehicleIdentity(trip) === ugvID
+  ) || null;
+}
+
+// Authenticated, ownership-bound protocol command. Raw MQTT topic/payload is intentionally unsupported.
 async function handleSendCommand(req, res) {
   const requestId = req.requestId;
   try {
-    // Supports two modes:
-    // 1. Raw mode: provide "topic" and "payload"
-    // 2. Protocol mode: provide "ugvID", "command" (payload data), and optional "messageType"
-    let { topic, payload, ugvID, command, messageType } = req.body || {};
+    const body = req.body || {};
+    const { ugvID: rawUgvID, command, messageType } = body;
+    const ugvID = String(rawUgvID || '').trim();
     console.log(
       `[HTTP] /sendCommand requestId=${requestId} ugvID=${ugvID || ''} messageType=${messageType || ''}`
     );
 
-    // --- Protocol Mode Handling ---
-    if (ugvID && !topic) {
-      // Auto-construct topic: ugv/{deviceId}/platform
-      topic = `ugv/${ugvID}/platform`;
-      
-      // Auto-construct Standard Packet
-      const timestamp = Date.now();
-      payload = {
-        header: {
-          messageNo: `cmd-${timestamp}-${Math.floor(Math.random()*1000)}`,
-          messageType: messageType || 'command',
-          timestamp: timestamp
-        },
-        payload: command || {} // The actual business command goes here
-      };
+    if (Object.prototype.hasOwnProperty.call(body, 'topic') || Object.prototype.hasOwnProperty.call(body, 'payload')) {
+      return res.status(400).json({ code: 'BRIDGE_RAW_COMMAND_FORBIDDEN', msg: 'Raw MQTT topic/payload mode is disabled', data: null, ok: false, message: 'Raw MQTT topic/payload mode is disabled', requestId });
     }
-    // ------------------------------
+
+    const identity = getTrustedCloudBaseIdentity(req);
+    if (!identity) {
+      return res.status(401).json({ code: 'BRIDGE_AUTH_UNTRUSTED_IDENTITY', msg: 'Missing or invalid CloudBase private identity', data: null, ok: false, message: 'Missing or invalid CloudBase private identity', requestId });
+    }
+    if (!/^[A-Za-z0-9_-]{1,64}$/.test(ugvID)) {
+      return res.status(400).json({ code: 'BRIDGE_INVALID_VEHICLE', msg: 'Invalid ugvID', data: null, ok: false, message: 'Invalid ugvID', requestId });
+    }
+    const validationError = validateProtocolCommand(ugvID, String(messageType || ''), command);
+    if (validationError) {
+      return res.status(400).json({ code: 'BRIDGE_COMMAND_NOT_ALLOWED', msg: validationError, data: null, ok: false, message: validationError, requestId });
+    }
+    const ownedTrip = await findOwnedActiveTrip(identity.openid, ugvID);
+    if (!ownedTrip) {
+      return res.status(403).json({ code: 'BRIDGE_VEHICLE_FORBIDDEN', msg: 'Vehicle is not bound to the current active trip', data: null, ok: false, message: 'Vehicle is not bound to the current active trip', requestId });
+    }
+
+    const topic = `ugv/${ugvID}/platform`;
+    const timestamp = Date.now();
+    const payload = {
+      header: {
+        messageNo: `cmd-${timestamp}-${Math.floor(Math.random() * 1000)}`,
+        messageType,
+        timestamp
+      },
+      payload: command
+    };
 
     if (!topic || typeof topic !== 'string') {
       return res.status(400).json({
@@ -652,6 +671,7 @@ async function handleSendCommand(req, res) {
         try {
           await withTimeout(
             commandHistoryCol.add({
+              scenicAreaId: ownedTrip.scenicAreaId || DEFAULT_SCENIC_AREA_ID,
               topic,
               payload,
               payloadRaw: payloadString,
@@ -673,7 +693,6 @@ async function handleSendCommand(req, res) {
           data: null,
           ok: false,
           message: 'MQTT publish failed',
-          error: err.message,
           requestId
         });
       }
@@ -682,6 +701,7 @@ async function handleSendCommand(req, res) {
       try {
         await withTimeout(
           commandHistoryCol.add({
+            scenicAreaId: ownedTrip.scenicAreaId || DEFAULT_SCENIC_AREA_ID,
             topic,
             payload,
             payloadRaw: payloadString,
@@ -716,7 +736,6 @@ async function handleSendCommand(req, res) {
       data: null,
       ok: false,
       message: 'Internal server error',
-      error: err.message,
       requestId
     });
   }
@@ -726,6 +745,10 @@ async function handleSendCommand(req, res) {
 async function handleVehicleStatus(req, res) {
   const requestId = req.requestId;
   try {
+    const identity = getTrustedCloudBaseIdentity(req);
+    if (!identity) {
+      return res.status(401).json({ code: 'BRIDGE_AUTH_UNTRUSTED_IDENTITY', msg: 'Missing or invalid CloudBase private identity', data: null, ok: false, message: 'Missing or invalid CloudBase private identity', requestId });
+    }
     if (!cloudbaseConfigStatus.ready) {
       return res.status(503).json({
         msg: 'CloudBase CAM configuration is incomplete',
@@ -738,18 +761,22 @@ async function handleVehicleStatus(req, res) {
       });
     }
 
-    const ugvID = req.query.ugvID;
+    const ugvID = typeof req.query.ugvID === 'string' ? req.query.ugvID.trim() : '';
     console.log(`[HTTP] /vehicleStatus requestId=${requestId} ugvID=${ugvID || ''}`);
 
-    if (!ugvID) {
+    if (!/^[A-Za-z0-9_-]{1,64}$/.test(ugvID)) {
       return res.status(400).json({
         code: 400,
-        msg: 'Missing query param "ugvID"',
+        msg: 'Missing or invalid query param "ugvID"',
         data: null,
         ok: false,
-        message: 'Missing query param "ugvID"',
+        message: 'Missing or invalid query param "ugvID"',
         requestId
       });
+    }
+
+    if (!(await findOwnedActiveTrip(identity.openid, ugvID))) {
+      return res.status(403).json({ code: 'BRIDGE_VEHICLE_FORBIDDEN', msg: 'Vehicle is not bound to the current active trip', data: null, ok: false, message: 'Vehicle is not bound to the current active trip', requestId });
     }
 
     let result = await withTimeout(
@@ -830,7 +857,6 @@ async function handleVehicleStatus(req, res) {
       data: null,
       ok: false,
       message: 'Database query failed',
-      error: err.message,
       requestId
     });
   }
@@ -846,6 +872,7 @@ registerTripGatewayRoutes(app, {
   db,
   withTimeout,
   dbQueryTimeoutMs: DB_QUERY_TIMEOUT_MS,
+  defaultScenicAreaId: DEFAULT_SCENIC_AREA_ID,
   isMqttConnected: () => mqttConnected
 });
 

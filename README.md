@@ -19,13 +19,17 @@
 - `components/`：小程序组件
 - `cloudfunctions/`：云函数
 - `mqtt-bridge/`：MQTT 到 CloudBase 的桥接服务
+- `omo-admin-web/`：Vue 3 桌面端运营管理台
+- `admin-api/`：NestJS 管理 API
+- `docs/admin-system.md`：后台本地运行、迁移、部署与验收说明
 - `scripts/`：本地检查、启动、辅助脚本
 - `database_import/`：云数据库初始化/导入数据
 
 ## 开发备注
 
-- `mqtt-bridge` 的本地联调、部署和检查说明见 [mqtt-bridge/README.md](/d:/oMo/oMo_code/mqtt-bridge/README.md)
-- 小程序调用云托管时，容器路径前缀在 [app.js](/d:/oMo/oMo_code/app.js) 中配置为 `/mqtt`
+- `mqtt-bridge` 的安全联调与部署说明见 [mqtt-bridge/README.md](mqtt-bridge/README.md)
+- 管理后台实施与 CloudBase dev 部署说明见 [docs/admin-system.md](docs/admin-system.md)
+- 小程序调用云托管时，容器路径前缀在 [app.js](app.js) 中配置为 `/mqtt`
 - 车辆搜索主键当前按 `ugvID` 使用，不按文档 `_id` 直接给用户暴露
 
 ## 上线前逐项打勾的测试清单

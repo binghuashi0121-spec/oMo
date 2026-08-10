@@ -193,9 +193,9 @@ Page({
         }
 
         wx.setStorageSync('token', shibinghuaResultData.token);
-        if (shibinghuaResultData.openid) {
-          wx.setStorageSync('openid', shibinghuaResultData.openid);
-        }
+        // OpenID is a server/platform identity and must never be supplied from local storage.
+        wx.removeStorageSync('openid');
+        wx.removeStorageSync('openId');
         wx.setStorageSync('userInfo', shibinghuaResultData.userInfo || {});
         wx.setStorageSync('user_phone', shibinghuaPhone);
         wx.removeStorageSync('guest_token');
@@ -237,9 +237,8 @@ Page({
           });
 
           wx.setStorageSync('guest_token', shibinghuaResultData.token);
-          if (shibinghuaResultData.openid) {
-            wx.setStorageSync('openid', shibinghuaResultData.openid);
-          }
+          wx.removeStorageSync('openid');
+          wx.removeStorageSync('openId');
           // Keep guest credentials; only clear formal-login state.
           if (shibinghuaApp && shibinghuaApp.globalData) {
             shibinghuaApp.globalData.isLoggedIn = false;

@@ -132,7 +132,6 @@ Page({
       console.warn('[waiting-trip] validate ownership failed, continue with current page state', {
         tripId,
         trackedUgvID,
-        openid: this.getCurrentOpenId(),
         err
       });
       this.bootstrapWaitingPage();
@@ -165,16 +164,6 @@ Page({
     return {};
   },
 
-  getCurrentOpenId() {
-    try {
-      const openid = wx.getStorageSync('openid') || wx.getStorageSync('openId') || '';
-      return String(openid || '').trim();
-    } catch (error) {
-      console.warn('[waiting-trip] read openid failed', error);
-      return '';
-    }
-  },
-
   logTripContext(stage, extra = {}) {
     let currentTripInfo = null;
     try {
@@ -187,7 +176,6 @@ Page({
       stage,
       tripId: this.data.tripId,
       trackedUgvID: this.data.trackedUgvID,
-      openid: this.getCurrentOpenId(),
       currentTripInfo,
       ...extra
     });
@@ -1050,7 +1038,6 @@ Page({
 
   logStartTripPrecheck() {
     const tripId = String(this.data.tripId || '').trim();
-    const openid = this.getCurrentOpenId();
     this.logTripContext('startTripAndEnter.beforeStart');
 
     return callBridge({
@@ -1060,7 +1047,6 @@ Page({
       const serverTrip = result && result.data ? result.data : null;
       console.warn('[waiting-trip] startTrip precheck active trip', {
         tripId,
-        openid,
         code: result && result.code,
         msg: result && result.msg,
         serverTripId: serverTrip && serverTrip.tripId ? serverTrip.tripId : '',
@@ -1070,7 +1056,6 @@ Page({
     }).catch((err) => {
       console.warn('[waiting-trip] startTrip precheck active trip failed', {
         tripId,
-        openid,
         err
       });
     });

@@ -12,31 +12,13 @@ function buildContainerPath(path) {
   return normalizedPath;
 }
 
-function getRequestOpenId() {
-  const storedOpenId = wx.getStorageSync('openid') || wx.getStorageSync('openId') || '';
-  return String(storedOpenId || '').trim();
-}
-
 function buildContainerHeaders(header = {}) {
   const app = getApp();
   if (app && typeof app.buildContainerHeaders === 'function') {
     return app.buildContainerHeaders(header);
   }
 
-  const openid = getRequestOpenId();
-  const baseHeaders = { ...header };
-  if (!openid) return baseHeaders;
-
-  const existingHeaderKeys = Object.keys(baseHeaders).map((k) => String(k || '').toLowerCase());
-  if (existingHeaderKeys.includes('x-wx-openid') || existingHeaderKeys.includes('x-openid') || existingHeaderKeys.includes('openid')) {
-    return baseHeaders;
-  }
-
-  return {
-    ...baseHeaders,
-    'x-wx-openid': openid,
-    'x-openid': openid
-  };
+  return { ...header };
 }
 
 function normalizeBridgeBody(raw) {

@@ -1,0 +1,20 @@
+{
+  "$comment": "Deployment intent only. Confirm current route syntax with tcb routes add --help or apply it in the CloudBase HTTP access console.",
+  "domain": "admin-dev.example.com",
+  "routes": [
+    {
+      "path": "/api/*",
+      "targetType": "cloudrun",
+      "target": "admin-api",
+      "rewrite": "preserve-full-path"
+    },
+    {
+      "path": "/*",
+      "targetType": "static-hosting",
+      "target": "admin-web"
+    }
+  ],
+  "spaFallback": {
+    "errorDocument": "index.html"
+  }
+}

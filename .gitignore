@@ -1,4 +1,20 @@
 mqtt-bridge/.env
 node_modules/
 *.log
+omo-admin-web/.env
+omo-admin-web/.env.*
+!omo-admin-web/.env.example
+omo-admin-web/dist/
+omo-admin-web/test-results/
+omo-admin-web/playwright-report/
+admin-api/.env
+admin-api/.env.*
+!admin-api/.env.example
+admin-api/dist/
+coverage/
+*.tsbuildinfo
+.cloudbase-admin/
+cloudbaserc.admin.json
+deploy/admin/*.local.json
+scripts/.env.simulator
 

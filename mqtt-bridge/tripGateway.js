@@ -1,4 +1,6 @@
 
+const { requireCloudBaseIdentity } = require('./cloudbaseIdentity');
+
 const LOW_BATTERY_THRESHOLD = 20;
 const POSITION_STALE_MS = 60 * 1000;
 const POSITION_FUTURE_TOLERANCE_MS = 5 * 1000;
@@ -33,18 +35,9 @@ function fail(res, requestId, code, msg, httpStatus = 400, data = null) {
   });
 }
 
-function getOpenId(req) {
-  const value = req.headers['x-wx-openid'] || req.headers['x-openid'] || req.headers.openid || '';
-  return String(value || '').trim();
-}
-
 function requireOpenId(req, res) {
-  const openid = getOpenId(req);
-  if (!openid) {
-    fail(res, req.requestId, 'BRIDGE_AUTH_MISSING_OPENID', 'missing openid in request header', 401);
-    return null;
-  }
-  return openid;
+  const identity = requireCloudBaseIdentity(req, res, fail);
+  return identity ? identity.openid : null;
 }
 
 function isDocumentNotExistError(err) {
@@ -259,6 +252,7 @@ function formatCompletedTrip(trip) {
 
 function registerTripGatewayRoutes(app, deps) {
   const { db, withTimeout, dbQueryTimeoutMs, isMqttConnected } = deps;
+  const defaultScenicAreaId = String(deps.defaultScenicAreaId || 'tianmashan');
   const _ = db.command;
 
   async function listAvailableVehicles(req, res) {
@@ -404,6 +398,7 @@ function registerTripGatewayRoutes(app, deps) {
         if (!isVehicleTelemetryFresh(latestVehicle)) throw new Error('vehicle_stale');
         const latestStatusInfo = getStatusInfo(latestVehicle);
         const latestStatus = getLatestStatus(latestVehicle);
+        const scenicAreaId = String(latestVehicle.scenicAreaId || defaultScenicAreaId);
         const vehicleModel =
           latestVehicle.model ||
           latestStatusInfo.model ||
@@ -417,6 +412,7 @@ function registerTripGatewayRoutes(app, deps) {
         });
 
         const tripRes = await transaction.collection('trips').add({
+          scenicAreaId,
           openid,
           vehicleId: vehicleDocId,
           vehicleModel,
@@ -440,6 +436,7 @@ function registerTripGatewayRoutes(app, deps) {
         const tripId = getInsertedDocId(tripRes);
         if (!tripId) throw new Error('trip_insert_failed');
         const runtimeRes = await transaction.collection('trip_runtime').add({
+          scenicAreaId,
           tripId,
           vehicleId: vehicleDocId,
           ugvID,
@@ -459,7 +456,7 @@ function registerTripGatewayRoutes(app, deps) {
           updateTime: db.serverDate()
         });
 
-        return { tripId, runtimeId, vehicleId: vehicleDocId, ugvID };
+        return { tripId, runtimeId, vehicleId: vehicleDocId, ugvID, scenicAreaId };
       });
 
       ok(res, requestId, 'unlock success', result);
@@ -489,7 +486,7 @@ function registerTripGatewayRoutes(app, deps) {
 
       const reason = String((err && (err.errMsg || err.message)) || 'unknown error');
       console.error('[TRIP] unlock error:', { requestId, openid, vehicleIdentity, reason, err });
-      fail(res, requestId, 500, 'unlock failed', 500, { reason });
+      fail(res, requestId, 500, 'unlock failed', 500);
     }
   }
   async function startTrip(req, res) {
@@ -774,6 +771,7 @@ function registerTripGatewayRoutes(app, deps) {
 
       const result = await db.runTransaction(async (transaction) => {
         const settleRes = await transaction.collection('trip_settlements').add({
+          scenicAreaId: trip.scenicAreaId || defaultScenicAreaId,
           tripId,
           openid,
           vehicleId: trip.vehicleId,

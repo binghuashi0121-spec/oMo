@@ -1,0 +1,15 @@
+import { describe, expect, it } from 'vitest';
+import { aggregateHealth, assertAdjustment, computeEffectiveAmount, isSessionExpired, normalizeOrderStatus, normalizeVehicleStatus, resolveVehicleCoordinates, toIso, wgs84ToGcj02 } from '../src/domain/rules';
+import type { Adjustment } from '../src/domain/models';
+
+const adjustment = (amountCents: number): Adjustment => ({ id: String(amountCents), settlementId: 's1', scenicAreaId: 'tianmashan', amountCents, type: amountCents < 0 ? 'credit' : 'charge', reason: 'test', idempotencyKey: String(amountCents), createdAt: new Date().toISOString(), createdBy: 'test' });
+
+describe('domain rules', () => {
+  it('normalizes legacy states without mutating stored values', () => { expect(normalizeOrderStatus('ongoing')).toBe('active'); expect(normalizeVehicleStatus('idle')).toBe('available'); expect(normalizeVehicleStatus('online')).toBe('available'); expect(normalizeVehicleStatus('in_use')).toBe('active'); expect(normalizeVehicleStatus('maintenance')).toBe('fault'); });
+  it('converts WGS84 once into a distinct GCJ-02 display coordinate', () => { const converted = wgs84ToGcj02(28.1738406625,112.9411494675); expect(converted.latitude).not.toBeCloseTo(28.1738406625,6); expect(converted.longitude).not.toBeCloseTo(112.9411494675,6); const outside=wgs84ToGcj02(40,-74); expect(outside).toEqual({latitude:40,longitude:-74}); });
+  it('preserves bridge raw WGS84 and does not convert stored GCJ-02 twice', () => { const bridge={rawLatitude:28.17361,rawLongitude:112.94123,latitude:28.17047,longitude:112.94684,latestPayload:{payload:{coordSystem:'gcj02'}}}; expect(resolveVehicleCoordinates(bridge)).toEqual({positionWgs84:{latitude:28.17361,longitude:112.94123},positionGcj02:{latitude:28.17047,longitude:112.94684}}); const legacy=resolveVehicleCoordinates({latitude:28.17361,longitude:112.94123}); expect(legacy.positionGcj02).toEqual(wgs84ToGcj02(28.17361,112.94123)); });
+  it('normalizes second and millisecond timestamps to UTC ISO strings',()=>{expect(toIso(1_700_000_000)).toBe(toIso(1_700_000_000_000));});
+  it('keeps original amount immutable and sums ledger rows', () => { const rows=[adjustment(-200),adjustment(50)]; expect(computeEffectiveAmount(3275,rows)).toBe(3125); expect(assertAdjustment(3275,rows,-100)).toBe(3025); expect(()=>assertAdjustment(100,[],-101)).toThrow(/不得小于 0/); });
+  it('expires sessions on either absolute or idle boundary', () => { const now=Date.now(); expect(isSessionExpired({absoluteExpiresAt:new Date(now+10000).toISOString(),lastSeenAt:new Date(now-31*60_000).toISOString()},now)).toBe(true); expect(isSessionExpired({absoluteExpiresAt:new Date(now-1).toISOString(),lastSeenAt:new Date(now).toISOString()},now)).toBe(true); expect(isSessionExpired({absoluteExpiresAt:new Date(now+10000).toISOString(),lastSeenAt:new Date(now).toISOString()},now)).toBe(false); });
+  it('never reports healthy when a dependency is degraded', () => { expect(aggregateHealth(['healthy','degraded'])).toBe('degraded'); expect(aggregateHealth(['healthy','critical'])).toBe('critical'); });
+});

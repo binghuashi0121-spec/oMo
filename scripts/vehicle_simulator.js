@@ -4,12 +4,17 @@
 const mqtt = require('mqtt');
 
 const MQTT_CONFIG = {
-  host: 'rk88.foundstech.com',
-  port: 1883,
-  username: 'aisave',
-  password: 'tianma',
-  deviceId: 'OMO_0008'
+  host: process.env.MQTT_SIMULATOR_HOST || '',
+  port: Number(process.env.MQTT_SIMULATOR_PORT || 1883),
+  username: process.env.MQTT_SIMULATOR_USERNAME || '',
+  password: process.env.MQTT_SIMULATOR_PASSWORD || '',
+  deviceId: process.env.MQTT_SIMULATOR_DEVICE_ID || 'OMO_SIM_0001'
 };
+
+if (!MQTT_CONFIG.host || !MQTT_CONFIG.username || !MQTT_CONFIG.password) {
+  console.error('Missing MQTT simulator environment variables. See scripts/.env.simulator.example.');
+  process.exit(1);
+}
 
 const SPEED_MODE_LIMITS = {
   1: 1,

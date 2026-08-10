@@ -1,0 +1,41 @@
+{
+  "name": "omo-admin-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "^20.19.0 || ^22.12.0 || >=24.0.0"
+  },
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "check": "npm run test && npm run build"
+  },
+  "dependencies": {
+    "dayjs": "1.11.19",
+    "echarts": "6.1.0",
+    "element-plus": "2.14.4",
+    "pinia": "3.0.4",
+    "vue": "3.5.41",
+    "vue-router": "4.6.4"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.62.1",
+    "@types/node": "24.13.3",
+    "@types/geojson": "7946.0.16",
+    "@vitejs/plugin-vue": "6.0.8",
+    "@vue/test-utils": "2.4.6",
+    "jsdom": "28.1.0",
+    "typescript": "5.9.3",
+    "vite": "7.3.6",
+    "vitest": "3.2.7",
+    "vue-tsc": "3.2.5"
+  },
+  "overrides": {
+    "glob": "10.5.0"
+  }
+}
