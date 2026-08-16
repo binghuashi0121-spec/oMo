@@ -30,3 +30,22 @@ export const vehicleStatusLabel: Record<string, string> = {
   offline: '离线',
   fault: '故障',
 };
+
+export const commandStatusLabel: Record<string, string> = {
+  pending: '等待发送',
+  sent: '已发送',
+  acked: '已确认',
+  failed: '失败',
+  timed_out: '回执超时',
+};
+
+export const commandKeyLabel: Record<string, string> = {
+  query_status: '查询车辆状态',
+  sound_horn: '鸣笛提示',
+  safe_stop: '安全停车',
+  resume_trip: '继续行程',
+};
+
+export function hasDefinedLatency(value?: number): boolean {
+  return value !== undefined;
+}

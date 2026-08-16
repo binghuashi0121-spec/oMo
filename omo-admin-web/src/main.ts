@@ -1,12 +1,12 @@
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
-import ElementPlus from 'element-plus';
-import zhCn from 'element-plus/es/locale/lang/zh-cn';
-import 'element-plus/dist/index.css';
+import 'element-plus/es/components/message/style/css';
+import 'element-plus/es/components/message-box/style/css';
 import App from './App.vue';
 import router from './router';
 import { useAuthStore } from './stores/auth';
 import './styles/main.css';
+import './styles/optimizations.css';
 
 const pinia = createPinia();
 window.addEventListener('omo-admin-session-expired', () => {
@@ -16,4 +16,4 @@ window.addEventListener('omo-admin-session-expired', () => {
   if (router.currentRoute.value.name !== 'login') router.replace({ name: 'login', query: { redirect: currentPath, expired: '1' } });
 });
 
-createApp(App).use(pinia).use(router).use(ElementPlus, { locale: zhCn }).mount('#app');
+createApp(App).use(pinia).use(router).mount('#app');

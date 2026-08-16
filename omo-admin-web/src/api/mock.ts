@@ -120,7 +120,15 @@ export const mockApi: AdminApi = {
   },
   async changePassword() { await pause(); },
   async scenicAreas() { await pause(); return structuredClone(scenicAreas); },
-  async mapVehicles(scenicAreaId) { await pause(); return structuredClone(scoped(vehicles, scenicAreaId)); },
+  async mapVehicles(scenicAreaId) {
+    const configuredDelay = import.meta.env.MODE === 'test' ? Number(sessionStorage.getItem(`omo-admin-test-map-delay-${scenicAreaId}`) || 0) : 0;
+    await pause(configuredDelay || 140);
+    if (import.meta.env.MODE === 'test' && sessionStorage.getItem('omo-admin-test-fail-map-once') === '1') {
+      sessionStorage.removeItem('omo-admin-test-fail-map-once');
+      throw new Error('模拟车辆数据网络异常');
+    }
+    return structuredClone(scoped(vehicles, scenicAreaId));
+  },
   async orders(query) {
     await pause();
     const page = query.page || 1; const pageSize = query.pageSize || 20;

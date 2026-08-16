@@ -11,6 +11,8 @@ export const useAppStore = defineStore('app', () => {
   const selectedScenicAreaId = ref(localStorage.getItem(STORAGE_KEY) || 'tianmashan');
   setScenicContext(selectedScenicAreaId.value);
   const health = ref<SystemHealth | null>(null);
+  const healthRefreshing = ref(false);
+  let healthRequestId = 0;
   const selectedScenic = computed(() => scenicAreas.value.find((item) => item.id === selectedScenicAreaId.value));
 
   async function loadScenicAreas() {
@@ -18,7 +20,18 @@ export const useAppStore = defineStore('app', () => {
     if (selectedScenicAreaId.value !== 'all' && !selectedScenic.value) selectScenicArea(scenicAreas.value[0]?.id || 'all');
   }
   function selectScenicArea(id: string) { selectedScenicAreaId.value = id; localStorage.setItem(STORAGE_KEY, id); setScenicContext(id); }
-  async function refreshHealth() { health.value = await api.systemHealth(selectedScenicAreaId.value); }
+  async function refreshHealth() {
+    const requestId = ++healthRequestId;
+    const scenicAreaId = selectedScenicAreaId.value;
+    healthRefreshing.value = true;
+    try {
+      const result = await api.systemHealth(scenicAreaId);
+      if (requestId === healthRequestId && scenicAreaId === selectedScenicAreaId.value) health.value = result;
+      return result;
+    } finally {
+      if (requestId === healthRequestId) healthRefreshing.value = false;
+    }
+  }
 
-  return { scenicAreas, selectedScenicAreaId, selectedScenic, health, loadScenicAreas, selectScenicArea, refreshHealth };
+  return { scenicAreas, selectedScenicAreaId, selectedScenic, health, healthRefreshing, loadScenicAreas, selectScenicArea, refreshHealth };
 });

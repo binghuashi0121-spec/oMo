@@ -20,6 +20,9 @@ const scenicOptions = computed(() => isMap.value ? appStore.scenicAreas : [{ id:
 watch(isMap, (value) => {
   if (value && appStore.selectedScenicAreaId === 'all') appStore.selectScenicArea(appStore.scenicAreas[0]?.id || 'tianmashan');
 });
+watch(() => appStore.selectedScenicAreaId, () => {
+  if (appStore.scenicAreas.length) void appStore.refreshHealth().catch(() => undefined);
+});
 
 async function logout() {
   await ElMessageBox.confirm('确认退出管理后台？', '退出登录', { confirmButtonText: '退出', cancelButtonText: '取消' });
@@ -31,7 +34,9 @@ onMounted(async () => {
   await appStore.loadScenicAreas();
   if (isMap.value && appStore.selectedScenicAreaId === 'all') appStore.selectScenicArea(appStore.scenicAreas[0]?.id || 'tianmashan');
   await appStore.refreshHealth();
-  timer = window.setInterval(() => appStore.refreshHealth().catch(() => undefined), 30_000);
+  timer = window.setInterval(() => {
+    if (document.visibilityState === 'visible' && !appStore.healthRefreshing) void appStore.refreshHealth().catch(() => undefined);
+  }, 30_000);
 });
 onBeforeUnmount(() => { if (timer) window.clearInterval(timer); });
 </script>
@@ -67,7 +72,7 @@ onBeforeUnmount(() => { if (timer) window.clearInterval(timer); });
           <div class="date-box"><span>{{ new Intl.DateTimeFormat('zh-CN', { month: 'long', day: 'numeric', weekday: 'short' }).format(new Date()) }}</span><small>Asia/Shanghai</small></div>
         </div>
       </header>
-      <SystemStatusBar :health="appStore.health" @refresh="appStore.refreshHealth" />
+      <SystemStatusBar :health="appStore.health" :refreshing="appStore.healthRefreshing" @refresh="appStore.refreshHealth" />
       <main class="page-content"><router-view /></main>
     </section>
   </div>
