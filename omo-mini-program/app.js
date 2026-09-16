@@ -1,17 +1,35 @@
 const SESSION_DURATION = 12 * 60 * 60 * 1000; // 12 hours
-const CLOUD_ENV_ID = 'omo-mqtt-prod-2g4zisao87d6ec54';
-const CONTAINER_PATH_PREFIX = '/mqtt';
-const CONTAINER_SERVICE_NAME = 'mqtt-bridge-v3';
 const SESSION_EXPIRED_NOTICE_KEY = 'session_expired_notice';
+const { detectEnvVersion, resolveRuntimeEnvironment } = require('./config/environments');
 
 App({
   onLaunch() {
+    try {
+      const runtimeEnvironment = resolveRuntimeEnvironment(detectEnvVersion());
+      Object.assign(this.globalData, {
+        environmentReady: true,
+        environmentName: runtimeEnvironment.name,
+        envVersion: runtimeEnvironment.envVersion,
+        cloudEnvId: runtimeEnvironment.cloudEnvId,
+        containerPathPrefix: runtimeEnvironment.containerPathPrefix,
+        containerServiceName: runtimeEnvironment.containerServiceName,
+        environmentError: ''
+      });
+      console.info(`[app] environment=${runtimeEnvironment.name} envVersion=${runtimeEnvironment.envVersion}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '小程序运行环境配置错误';
+      Object.assign(this.globalData, { environmentReady: false, environmentError: message });
+      console.error('[app] environment validation failed', error);
+      if (typeof wx.showModal === 'function') wx.showModal({ title: '环境配置错误', content: message, showCancel: false });
+      return;
+    }
+
     try {
       if (!wx.cloud) {
         console.error('Please use base library >= 2.2.3 to enable cloud capability.');
       } else {
         wx.cloud.init({
-          env: CLOUD_ENV_ID,
+          env: this.globalData.cloudEnvId,
           traceUser: true
         });
       }
@@ -33,9 +51,13 @@ App({
 
   globalData: {
     isLoggedIn: false,
-    cloudEnvId: CLOUD_ENV_ID,
-    containerPathPrefix: CONTAINER_PATH_PREFIX,
-    containerServiceName: CONTAINER_SERVICE_NAME,
+    environmentReady: false,
+    environmentName: '',
+    envVersion: '',
+    environmentError: '',
+    cloudEnvId: '',
+    containerPathPrefix: '',
+    containerServiceName: '',
     lastLogoutReason: '',
     sessionExpiredNotice: false,
     systemInfo: {}

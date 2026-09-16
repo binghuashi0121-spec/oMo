@@ -108,7 +108,10 @@ exports.main = async (event) => {
     const result = await db.runTransaction(async (transaction) => {
       const settleRes = await transaction.collection('trip_settlements').add({
         data: {
+          scenicAreaId: trip.scenicAreaId || 'tianmashan',
           tripId,
+          orderId: tripId,
+          orderNo: trip.orderNo || tripId,
           openid,
           vehicleId: trip.vehicleId,
           pricingVersion: 'v1_202602',
@@ -138,11 +141,15 @@ exports.main = async (event) => {
             total: parseFloat(totalFee.toFixed(2))
           },
           total: parseFloat(totalFee.toFixed(2)),
+          originalAmountCents: Math.round(totalFee * 100),
+          effectiveAmountCents: Math.round(totalFee * 100),
+          paymentStatus: extraPayAmount > 0 ? 'demo_pending' : 'demo_paid',
           settlementStatus,
           refundAmount,
           extraPayAmount,
           refundTime: refundAmount > 0 ? db.serverDate() : null,
           createTime: db.serverDate(),
+          settledAt: db.serverDate(),
           updateTime: db.serverDate()
         }
       });
@@ -153,9 +160,14 @@ exports.main = async (event) => {
         data: {
           status: 'completed',
           endTime: db.serverDate(),
+          endAt: db.serverDate(),
           endLocation: endLocation || null,
           distance: parseFloat(distanceKm.toFixed(2)),
+          distanceKm: parseFloat(distanceKm.toFixed(2)),
+          durationMinutes: totalMinutes,
           cost: parseFloat(totalFee.toFixed(2)),
+          originalAmountCents: Math.round(totalFee * 100),
+          effectiveAmountCents: Math.round(totalFee * 100),
           settleId,
           payStatus: paymentStatus
         }
@@ -164,6 +176,7 @@ exports.main = async (event) => {
       await transaction.collection('vehicles').doc(trip.vehicleId).update({
         data: {
           status: 'available',
+          activeOrderId: null,
           lat: endLocation && (endLocation.latitude || endLocation.lat),
           lng: endLocation && (endLocation.longitude || endLocation.lng),
           lastUsedTime: db.serverDate()

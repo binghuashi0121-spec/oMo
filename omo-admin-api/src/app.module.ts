@@ -13,10 +13,13 @@ import { CommandsController } from './business/commands.controller';
 import { CommandsService } from './business/commands.service';
 import { SystemController } from './business/system.controller';
 import { SystemService } from './business/system.service';
+import { OverviewController } from './business/overview.controller';
+import { OverviewService } from './business/overview.service';
+import { DevelopmentAdminBootstrapService } from './auth/development-admin-bootstrap.service';
 
 @Module({
   imports: [ConfigModule.forRoot({ isGlobal:true })],
-  controllers: [AuthController,ScenicController,OrdersController,FinanceController,CommandsController,SystemController],
-  providers: [RepositoryService,AuthService,FinanceService,CommandsService,SystemService,{provide:APP_GUARD,useClass:SessionGuard}],
+  controllers: [AuthController,ScenicController,OrdersController,FinanceController,CommandsController,SystemController,OverviewController],
+  providers: [RepositoryService,AuthService,FinanceService,CommandsService,SystemService,OverviewService,DevelopmentAdminBootstrapService,{provide:APP_GUARD,useClass:SessionGuard}],
 })
 export class AppModule {}

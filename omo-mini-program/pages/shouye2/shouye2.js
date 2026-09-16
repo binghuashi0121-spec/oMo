@@ -416,18 +416,6 @@ Page({
     });
   },
 
-  getContainerEnv() {
-    const app = getApp();
-    return app && app.globalData ? app.globalData.cloudEnvId : undefined;
-  },
-
-  buildContainerPath(path) {
-    const app = getApp();
-    return app && typeof app.buildContainerPath === 'function'
-      ? app.buildContainerPath(path)
-      : path;
-  },
-
   parseVehicleStatus(raw) {
     return parseVehicleRealtimeStatus(raw, {
       model: DEFAULT_VEHICLE_MODEL,

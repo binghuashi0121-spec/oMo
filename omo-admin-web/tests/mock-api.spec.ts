@@ -2,6 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { mockApi } from '../src/api/mock';
 
 describe('admin web mock contract', () => {
+  it('aggregates overview data in one read-only request', async () => {
+    const result = await mockApi.overview('tianmashan');
+    expect(result).toMatchObject({ scenicAreaId: 'tianmashan', vehicles: { total: 4, available: 1, active: 1, charging: 1, offline: 1, fault: 0 }, orders: { waitingPickup: 0, active: 1 } });
+    expect(result.recentOrders.length).toBeLessThanOrEqual(5);
+    expect(result.activeVehicles[0].activeOrderId).toBe('trip-24081201');
+  });
   it('requires the demo administrator account and creates a session', async () => {
     await expect(mockApi.login({ username:'guest', password:'123456' })).rejects.toThrow();
     const session=await mockApi.login({username:'admin',password:'123456'}); expect(session.user.role).toBe('super_admin'); expect((await mockApi.me()).user.id).toBe(session.user.id);

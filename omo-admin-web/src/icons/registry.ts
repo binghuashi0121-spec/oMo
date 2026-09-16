@@ -1,4 +1,5 @@
 export const iconPaths = {
+  overview: ['M4 4h6v6H4Z', 'M14 4h6v4h-6Z', 'M14 12h6v8h-6Z', 'M4 14h6v6H4Z'],
   'map-pin': ['M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z', 'M12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z'],
   'file-text': ['M6 2h8l4 4v16H6Z', 'M14 2v5h5', 'M9 12h6', 'M9 16h6'],
   chart: ['M4 20V10', 'M10 20V4', 'M16 20v-7', 'M22 20H2'],
@@ -24,6 +25,9 @@ export const iconPaths = {
   'x-circle': ['M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z', 'm9 9 6 6', 'm15 9-6 6'],
   warning: ['M12 3 2.7 20h18.6Z', 'M12 9v4', 'M12 17h.01'],
   info: ['M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z', 'M12 11v6', 'M12 7h.01'],
+  pulse: ['M3 12h4l2-5 4 10 3-7h5'],
+  clock: ['M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z', 'M12 7v5l3 2'],
+  arrow: ['M5 12h14', 'm14 12-5-5', 'm14 12-5 5'],
 } as const;
 
 export type AppIconName = keyof typeof iconPaths;

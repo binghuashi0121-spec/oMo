@@ -7,6 +7,8 @@
     "admin:api:build": "npm --prefix omo-admin-api run build",
     "admin:api:test": "npm --prefix omo-admin-api run test",
     "admin:check": "npm --prefix omo-admin-web run check && npm --prefix omo-admin-api run check",
+    "mini:config:test": "node --test omo-mini-program/tests/environment-config.test.js",
+    "mini:test": "node --test omo-mini-program/tests/*.test.js",
     "cloudbase:check-env": "node scripts/cloudbase/check-env.js",
     "cloudbase:backup:inspect": "node scripts/cloudbase/inspect-backup.js",
     "cloudbase:backup:validate": "node scripts/cloudbase/validate-import.js",

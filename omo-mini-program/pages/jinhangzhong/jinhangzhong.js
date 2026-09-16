@@ -457,50 +457,25 @@ Page({
       totalFee: total.toFixed(2) // Display realtime total
     });
   },
-  getContainerEnv() {
-    const app = getApp();
-    return app && app.globalData ? app.globalData.cloudEnvId : undefined;
-  },
-
-  buildContainerPath(path) {
-    const app = getApp();
-    return app && typeof app.buildContainerPath === 'function'
-      ? app.buildContainerPath(path)
-      : path;
-  },
-
-  buildContainerHeaders(header = {}) {
-    const app = getApp();
-    return app && typeof app.buildContainerHeaders === 'function'
-      ? app.buildContainerHeaders(header)
-      : { ...header };
-  },
-
   sendVehicleCommand(messageType, command, onDone) {
-    if (!this.data.trackedUgvID || !wx.cloud || !wx.cloud.callContainer) {
+    if (!this.data.trackedUgvID) {
       if (typeof onDone === 'function') onDone(false);
       return;
     }
 
-    wx.cloud.callContainer({
-      config: { env: this.getContainerEnv() },
-      path: this.buildContainerPath('/sendCommand'),
+    callBridge({
+      path: '/sendCommand',
       method: 'POST',
-      header: this.buildContainerHeaders({
-        'content-type': 'application/json'
-      }),
       data: {
         ugvID: this.data.trackedUgvID,
         messageType,
         command
-      },
-      success: () => {
-        if (typeof onDone === 'function') onDone(true);
-      },
-      fail: (err) => {
-        console.warn('[MQTT] send command failed', { messageType, command, err });
-        if (typeof onDone === 'function') onDone(false);
       }
+    }).then((result) => {
+      if (typeof onDone === 'function') onDone(isBridgeSuccess(result));
+    }).catch((err) => {
+      console.warn('[MQTT] send command failed', { messageType, command, err });
+      if (typeof onDone === 'function') onDone(false);
     });
   },
 
@@ -624,25 +599,20 @@ Page({
       return;
     }
 
-    if (!wx.cloud || !wx.cloud.callContainer) {
-      return;
-    }
     if (this._vehicleStatusRequesting) {
       return;
     }
 
     this._vehicleStatusRequesting = true;
 
-    wx.cloud.callContainer({
-      config: { env: this.getContainerEnv() },
-      path: this.buildContainerPath('/vehicleStatus'),
+    callBridge({
+      path: '/vehicleStatus',
       method: 'GET',
-      header: this.buildContainerHeaders(),
       data: {
         ugvID: this.data.trackedUgvID
-      },
-      success: (res) => {
-        const vehicle = this.parseVehicleStatus(res.data);
+      }
+    }).then((result) => {
+        const vehicle = this.parseVehicleStatus(result);
         if (!vehicle) {
           return;
         }
@@ -707,16 +677,13 @@ Page({
         }
 
         this.setData(updateData);
-      },
-      fail: (err) => {
+      }).catch((err) => {
         console.warn('[Realtime] fetch vehicle status failed', err);
         const count = this.data.locationErrorCount + 1;
         this.setData({ locationErrorCount: count });
-      },
-      complete: () => {
+      }).finally(() => {
         this._vehicleStatusRequesting = false;
-      }
-    });
+      });
   },
 
   computeDistance(lat1, lng1, lat2, lng2) {

@@ -8,6 +8,10 @@ const db = cloud.database();
 const _ = db.command;
 const LOW_BATTERY_THRESHOLD = 20;
 
+function buildOrderNo(now = Date.now()) {
+  return `OM${now}${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
+}
+
 async function resolveVehicleReference(identity) {
   const normalizedIdentity = String(identity || '').trim();
   if (!normalizedIdentity) {
@@ -217,6 +221,8 @@ exports.main = async (event, context) => {
       return { code: 1004, msg: '车辆暂不可用', status: availabilityStatus };
     }
 
+    const orderNo = buildOrderNo();
+    const scenicAreaId = vehicle.scenicAreaId || 'tianmashan';
     const result = await db.runTransaction(async (transaction) => {
       const v = await transaction.collection('vehicles').doc(vehicleDocId).get();
       const latestAvailabilityStatus = getVehicleAvailabilityStatus(v.data);
@@ -231,17 +237,22 @@ exports.main = async (event, context) => {
 
       await transaction.collection('vehicles').doc(vehicleDocId).update({
         data: {
-          status: 'in_use',
-          lastUsedTime: db.serverDate()
+          status: 'active',
+          lastUsedTime: db.serverDate(),
+          updateTime: db.serverDate()
         }
       });
 
       const tripRes = await transaction.collection('trips').add({
         data: {
+          scenicAreaId,
+          orderNo,
           openid,
           vehicleId: vehicleDocId,
+          vehicleNo: ugvID,
           vehicleModel: vehicle.model,
           startTime: null,
+          startAt: null,
           waitStartTime: db.serverDate(),
           status: 'waiting_pickup',
           startLocation: {
@@ -249,11 +260,18 @@ exports.main = async (event, context) => {
             lng: vehicle.lng
           },
           cost: 0,
+          originalAmountCents: 0,
+          effectiveAmountCents: 0,
           distance: 0,
+          distanceKm: 0,
+          durationMinutes: 0,
           payStatus: 'unpaid',
           runtimeId: null,
           settleId: null,
-          ugvID
+          ugvID,
+          createdAt: db.serverDate(),
+          createTime: db.serverDate(),
+          updateTime: db.serverDate()
         }
       });
 
@@ -261,6 +279,7 @@ exports.main = async (event, context) => {
 
       const runtimeRes = await transaction.collection('trip_runtime').add({
         data: {
+          scenicAreaId,
           tripId,
           vehicleId: vehicleDocId,
           ugvID,
@@ -278,15 +297,21 @@ exports.main = async (event, context) => {
 
       await transaction.collection('trips').doc(tripId).update({
         data: {
-          runtimeId
+          runtimeId,
+          updateTime: db.serverDate()
         }
+      });
+      await transaction.collection('vehicles').doc(vehicleDocId).update({
+        data: { activeOrderId: tripId, updateTime: db.serverDate() }
       });
 
       return {
         tripId,
         runtimeId,
         vehicleId: vehicleDocId,
-        ugvID
+        ugvID,
+        orderNo,
+        scenicAreaId
       };
     });
 

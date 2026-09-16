@@ -13,6 +13,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "test:e2e:real": "playwright test --config playwright.real-api.config.ts",
     "check": "npm run test && npm run build"
   },
   "dependencies": {

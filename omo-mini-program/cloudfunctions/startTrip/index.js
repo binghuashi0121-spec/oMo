@@ -46,6 +46,7 @@ exports.main = async (event) => {
       data: {
         status: 'active',
         startTime: now,
+        startAt: now,
         updateTime: db.serverDate()
       }
     });

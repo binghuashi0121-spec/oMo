@@ -45,35 +45,36 @@ onBeforeUnmount(() => { if (timer) window.clearInterval(timer); });
   <div class="admin-shell">
     <aside class="sidebar">
       <div class="brand">
-        <img class="brand-logo" :src="brandLogo" alt="oMo共享车" width="145" height="51" />
-        <span class="brand-console-label">运营管理台</span>
+        <div class="brand-mark"><img class="brand-logo" :src="brandLogo" alt="oMo共享车" width="132" height="46" /><span class="live-dot" /></div>
       </div>
+      <div class="sidebar-section-label">指挥中心</div>
       <el-menu :default-active="route.path" router class="nav-menu">
+        <el-menu-item index="/overview"><AppIcon name="overview" /><span>运营总览</span></el-menu-item>
         <el-menu-item index="/map"><AppIcon name="map-pin" /><span>车辆地图</span></el-menu-item>
+        <div class="sidebar-section-label in-menu">运营管理</div>
         <el-menu-item index="/orders"><AppIcon name="file-text" /><span>订单管理</span></el-menu-item>
         <el-menu-item index="/finance"><AppIcon name="chart" /><span>财务中心</span></el-menu-item>
         <el-menu-item index="/system"><AppIcon name="monitor" /><span>系统诊断</span></el-menu-item>
       </el-menu>
       <div class="sidebar-foot">
-        <span class="demo-chip" v-if="isMockMode">MOCK 原型</span>
+        <div class="environment-card"><span class="environment-label">运行环境</span><strong><i />{{ isMockMode ? '模拟环境' : '预发布环境' }}</strong></div>
         <button class="user-button" aria-label="退出登录" @click="logout"><span>{{ authStore.user?.displayName }}</span><AppIcon name="logout" /></button>
       </div>
     </aside>
     <section class="main-column">
       <header class="topbar">
-        <div><p class="eyebrow">oMo OPERATIONS</p><h1>{{ route.meta.title }}</h1></div>
+        <div class="page-heading"><h1>{{ route.meta.title }}</h1></div>
         <div class="topbar-actions">
-          <span class="selector-label">运营范围</span>
-          <el-select :model-value="appStore.selectedScenicAreaId" style="width: 210px" @change="appStore.selectScenicArea">
+          <div class="scope-control"><span class="selector-label">运营范围</span><el-select :model-value="appStore.selectedScenicAreaId" style="width: 205px" @change="appStore.selectScenicArea">
             <el-option v-for="item in scenicOptions" :key="item.id" :label="item.name" :value="item.id">
               <span>{{ item.name }}</span><el-tag v-if="item.isDemo" size="small" type="warning" class="option-tag">演示</el-tag>
             </el-option>
-          </el-select>
-          <div class="date-box"><span>{{ new Intl.DateTimeFormat('zh-CN', { month: 'long', day: 'numeric', weekday: 'short' }).format(new Date()) }}</span><small>Asia/Shanghai</small></div>
+          </el-select></div>
+          <div class="date-box"><span>{{ new Intl.DateTimeFormat('zh-CN', { month: 'long', day: 'numeric', weekday: 'short' }).format(new Date()) }}</span><small><i />北京时间</small></div>
         </div>
       </header>
       <SystemStatusBar :health="appStore.health" :refreshing="appStore.healthRefreshing" @refresh="appStore.refreshHealth" />
-      <main class="page-content"><router-view /></main>
+      <main class="page-content" :class="`page-${String(route.name || '')}`"><router-view /></main>
     </section>
   </div>
 </template>

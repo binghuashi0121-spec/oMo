@@ -119,6 +119,41 @@ export const mockApi: AdminApi = {
     return { user: { id: 'admin-demo', username: 'admin', displayName: '超级管理员', role: 'super_admin', mustChangePassword: false }, csrfToken: 'mock-csrf-token', expiresAt: nowIso(480) };
   },
   async changePassword() { await pause(); },
+  async overview(scenicAreaId) {
+    await pause();
+    const scopedVehicles = scoped(vehicles, scenicAreaId);
+    const scopedOrders = scoped(orders, scenicAreaId);
+    const scopedSettlements = scoped(settlements, scenicAreaId);
+    const systemHealth = health(healthScenario);
+    const shanghaiDate = (value: string | number | Date) => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(value));
+    const today = shanghaiDate(Date.now());
+    const todaySettlements = scopedSettlements.filter((item) => shanghaiDate(item.settledAt) === today);
+    return {
+      updatedAt: nowIso(),
+      scenicAreaId: scenicAreaId || 'all',
+      vehicles: {
+        total: scopedVehicles.length,
+        available: scopedVehicles.filter((item) => item.status === 'available').length,
+        active: scopedVehicles.filter((item) => item.status === 'active').length,
+        charging: scopedVehicles.filter((item) => item.status === 'charging').length,
+        offline: scopedVehicles.filter((item) => item.status === 'offline').length,
+        fault: scopedVehicles.filter((item) => item.status === 'fault').length,
+      },
+      orders: {
+        waitingPickup: scopedOrders.filter((item) => item.status === 'waiting_pickup').length,
+        active: scopedOrders.filter((item) => item.status === 'active').length,
+        completedToday: scopedOrders.filter((item) => item.status === 'completed' && shanghaiDate(item.endAt || item.createdAt) === today).length,
+        cancelledToday: scopedOrders.filter((item) => item.status === 'cancelled' && shanghaiDate(item.endAt || item.createdAt) === today).length,
+      },
+      finance: {
+        settlementCountToday: todaySettlements.length,
+        effectiveAmountCentsToday: todaySettlements.reduce((sum, item) => sum + item.effectiveAmountCents, 0),
+      },
+      health: { level: systemHealth.level, incidentCount: systemHealth.incidents.length },
+      recentOrders: structuredClone(scopedOrders.slice(0, 5)),
+      activeVehicles: structuredClone(scopedVehicles.filter((item) => item.status === 'active').slice(0, 4)),
+    };
+  },
   async scenicAreas() { await pause(); return structuredClone(scenicAreas); },
   async mapVehicles(scenicAreaId) {
     const configuredDelay = import.meta.env.MODE === 'test' ? Number(sessionStorage.getItem(`omo-admin-test-map-delay-${scenicAreaId}`) || 0) : 0;

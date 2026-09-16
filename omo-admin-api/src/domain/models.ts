@@ -14,3 +14,13 @@ export interface AdminSessionRecord { id: string; userId: string; tokenHash: str
 export interface AuditRecord { id: string; actorId: string; action: string; targetType: string; targetId: string; scenicAreaId?: string; requestId: string; detail: Record<string, unknown>; createdAt: string }
 export interface VehicleCommand { id: string; scenicAreaId: string; vehicleId: string; commandKey: string; params: Record<string, unknown>; reason: string; idempotencyKey: string; status: CommandStatus; createdAt: string; updatedAt: string; createdBy: string; simulated: true }
 export interface PageResult<T> { items: T[]; total: number; page: number; pageSize: number }
+export interface OverviewSummary {
+  updatedAt: string;
+  scenicAreaId: string;
+  vehicles: { total: number; available: number; active: number; charging: number; offline: number; fault: number };
+  orders: { waitingPickup: number; active: number; completedToday: number; cancelledToday: number };
+  finance: { settlementCountToday: number; effectiveAmountCentsToday: number };
+  health: { level: HealthLevel; incidentCount: number };
+  recentOrders: Order[];
+  activeVehicles: Vehicle[];
+}

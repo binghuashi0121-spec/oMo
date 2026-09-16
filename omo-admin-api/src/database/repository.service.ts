@@ -110,7 +110,16 @@ export class RepositoryService implements OnModuleInit {
 
   private normalizeAdjustment(item: DocumentRecord): Adjustment { return { ...item, id: item.id || item._id, createdAt: toIso(item.createdAt), amountCents: Number(item.amountCents) } as Adjustment; }
   private async allAdjustments() { const rows = this.isCloudbase() ? await this.all('financial_adjustments') : this.adjustments; return rows.map((item: any) => this.normalizeAdjustment(item)); }
-  private normalizeSettlement(doc: DocumentRecord): Settlement { const original = this.cents(doc); return { id: String(doc._id || doc.id || doc.settlementId), scenicAreaId: doc.scenicAreaId || 'tianmashan', orderId: String(doc.orderId || doc.tripId || ''), orderNo: String(doc.orderNo || doc.tripNo || doc.orderId || doc.tripId || ''), originalAmountCents: original, adjustmentAmountCents: 0, effectiveAmountCents: original, paymentStatus: 'demo_paid', settledAt: toIso(doc.settledAt || doc.endTime || doc.createdAt || doc.createTime), isDemo: Boolean(doc.isDemo) }; }
+  private normalizeSettlement(doc: DocumentRecord): Settlement {
+    const original = this.cents(doc);
+    const rawPaymentStatus = String(doc.paymentStatus || doc.payStatus || '').toLowerCase();
+    const paymentStatus: Settlement['paymentStatus'] = rawPaymentStatus === 'demo_pending' || rawPaymentStatus === 'pending' || rawPaymentStatus === 'unpaid'
+      ? 'demo_pending'
+      : rawPaymentStatus === 'demo_refunded' || rawPaymentStatus === 'refunded'
+        ? 'demo_refunded'
+        : 'demo_paid';
+    return { id: String(doc._id || doc.id || doc.settlementId), scenicAreaId: doc.scenicAreaId || 'tianmashan', orderId: String(doc.orderId || doc.tripId || ''), orderNo: String(doc.orderNo || doc.tripNo || doc.orderId || doc.tripId || ''), originalAmountCents: original, adjustmentAmountCents: 0, effectiveAmountCents: original, paymentStatus, settledAt: toIso(doc.settledAt || doc.endTime || doc.createdAt || doc.createTime), isDemo: Boolean(doc.isDemo) };
+  }
   private async allSettlements(): Promise<Settlement[]> { const raw = this.isCloudbase() ? (await this.all('trip_settlements')).map((doc) => this.normalizeSettlement(doc)) : structuredClone(this.settlements); const adjustments = await this.allAdjustments(); return raw.map((item) => { const own = adjustments.filter((adjustment) => adjustment.settlementId === item.id); const effective = computeEffectiveAmount(item.originalAmountCents, own); return { ...item, adjustments: own, adjustmentAmountCents: effective - item.originalAmountCents, effectiveAmountCents: effective }; }); }
   async listSettlements(input: { scenicAreaId?: string; keyword?: string; page: number; pageSize: number }): Promise<PageResult<Settlement>> { if (input.scenicAreaId && input.scenicAreaId !== 'all') await this.requireScenic(input.scenicAreaId); let rows = await this.allSettlements(); if (input.scenicAreaId && input.scenicAreaId !== 'all') rows = rows.filter((item) => item.scenicAreaId === input.scenicAreaId); if (input.keyword) rows = rows.filter((item) => item.orderNo.toLowerCase().includes(input.keyword!.toLowerCase())); rows.sort((a,b) => b.settledAt.localeCompare(a.settledAt)); const start = (input.page - 1) * input.pageSize; return { items: rows.slice(start, start + input.pageSize), total: rows.length, page: input.page, pageSize: input.pageSize }; }
   async findSettlement(id: string) { return (await this.allSettlements()).find((item) => item.id === id) || null; }

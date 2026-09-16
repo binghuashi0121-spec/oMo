@@ -2,6 +2,7 @@ import type {
   FinanceSummary,
   Order,
   OrderQuery,
+  OverviewSummary,
   PageResult,
   ScenicArea,
   SessionInfo,
@@ -17,6 +18,7 @@ export interface AdminApi {
   logout(): Promise<void>;
   me(): Promise<SessionInfo>;
   changePassword(input: { currentPassword: string; newPassword: string }): Promise<void>;
+  overview(scenicAreaId?: string): Promise<OverviewSummary>;
   scenicAreas(): Promise<ScenicArea[]>;
   mapVehicles(scenicAreaId: string): Promise<Vehicle[]>;
   orders(query: OrderQuery): Promise<PageResult<Order>>;

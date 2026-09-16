@@ -13,6 +13,10 @@ const BASE_KM = 1.5;
 const EXTRA_PRICE_PER_KM = 5;
 const DEPOSIT_AMOUNT = 200;
 
+function buildOrderNo(now = Date.now()) {
+  return `OM${now}${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
+}
+
 function sendApi(res, httpStatus, payload) {
   res.status(httpStatus).json(payload);
 }
@@ -157,7 +161,7 @@ function getVehicleAvailabilityStatus(vehicle) {
   const businessStatus = typeof vehicle?.status === 'string' ? vehicle.status : '';
   const runtimeStatus = getVehicleRuntimeStatus(vehicle);
   if (runtimeStatus === 'available' || runtimeStatus === 'online') return 'available';
-  if (runtimeStatus === 'faulty' || runtimeStatus === 'maintenance' || runtimeStatus === 'in_use') {
+  if (runtimeStatus === 'faulty' || runtimeStatus === 'maintenance' || runtimeStatus === 'in_use' || runtimeStatus === 'active') {
     return runtimeStatus;
   }
   if (runtimeStatus === 'offline') return 'offline';
@@ -384,6 +388,7 @@ function registerTripGatewayRoutes(app, deps) {
         return;
       }
 
+      const orderNo = buildOrderNo();
       const result = await db.runTransaction(async (transaction) => {
         const latestVehicleRes = await transaction.collection('vehicles').doc(vehicleDocId).get();
         const latestVehicle = latestVehicleRes && latestVehicleRes.data ? latestVehicleRes.data : null;
@@ -406,30 +411,38 @@ function registerTripGatewayRoutes(app, deps) {
           'oMo_Standard';
 
         await transaction.collection('vehicles').doc(vehicleDocId).update({
-          status: 'in_use',
+          status: 'active',
           lastUsedTime: db.serverDate(),
           updateTime: db.serverDate()
         });
 
         const tripRes = await transaction.collection('trips').add({
           scenicAreaId,
+          orderNo,
           openid,
           vehicleId: vehicleDocId,
+          vehicleNo: ugvID,
           vehicleModel,
           startTime: null,
           waitStartTime: db.serverDate(),
           status: 'waiting_pickup',
+          startAt: null,
           startLocation: {
             lat: latestVehicle.lat,
             lng: latestVehicle.lng
           },
           cost: 0,
+          originalAmountCents: 0,
+          effectiveAmountCents: 0,
           distance: 0,
+          distanceKm: 0,
+          durationMinutes: 0,
           payStatus: 'unpaid',
           runtimeId: null,
           settleId: null,
           ugvID,
           createTime: db.serverDate(),
+          createdAt: db.serverDate(),
           updateTime: db.serverDate()
         });
 
@@ -455,8 +468,12 @@ function registerTripGatewayRoutes(app, deps) {
           runtimeId,
           updateTime: db.serverDate()
         });
+        await transaction.collection('vehicles').doc(vehicleDocId).update({
+          activeOrderId: tripId,
+          updateTime: db.serverDate()
+        });
 
-        return { tripId, runtimeId, vehicleId: vehicleDocId, ugvID, scenicAreaId };
+        return { tripId, orderNo, runtimeId, vehicleId: vehicleDocId, ugvID, scenicAreaId };
       });
 
       ok(res, requestId, 'unlock success', result);
@@ -530,6 +547,7 @@ function registerTripGatewayRoutes(app, deps) {
       await db.collection('trips').doc(tripId).update({
         status: 'active',
         startTime: new Date(now),
+        startAt: new Date(now),
         updateTime: db.serverDate()
       });
 
@@ -773,6 +791,8 @@ function registerTripGatewayRoutes(app, deps) {
         const settleRes = await transaction.collection('trip_settlements').add({
           scenicAreaId: trip.scenicAreaId || defaultScenicAreaId,
           tripId,
+          orderId: tripId,
+          orderNo: trip.orderNo || tripId,
           openid,
           vehicleId: trip.vehicleId,
           pricingVersion: 'v1_202602',
@@ -802,11 +822,15 @@ function registerTripGatewayRoutes(app, deps) {
             total: parseFloat(totalFee.toFixed(2))
           },
           total: parseFloat(totalFee.toFixed(2)),
+          originalAmountCents: Math.round(totalFee * 100),
+          effectiveAmountCents: Math.round(totalFee * 100),
+          paymentStatus: extraPayAmount > 0 ? 'demo_pending' : 'demo_paid',
           settlementStatus,
           refundAmount,
           extraPayAmount,
           refundTime: refundAmount > 0 ? db.serverDate() : null,
           createTime: db.serverDate(),
+          settledAt: db.serverDate(),
           updateTime: db.serverDate()
         });
         const settleId = getInsertedDocId(settleRes);
@@ -821,11 +845,16 @@ function registerTripGatewayRoutes(app, deps) {
         await transaction.collection('trips').doc(tripId).update({
           status: 'completed',
           endTime: db.serverDate(),
+          endAt: db.serverDate(),
           endLocation,
           endLocationSource: 'mqtt-bridge',
           endLocationReportAt: reportAt,
           distance: parseFloat(distanceKm.toFixed(2)),
+          distanceKm: parseFloat(distanceKm.toFixed(2)),
+          durationMinutes: totalMinutes,
           cost: parseFloat(totalFee.toFixed(2)),
+          originalAmountCents: Math.round(totalFee * 100),
+          effectiveAmountCents: Math.round(totalFee * 100),
           settleId,
           payStatus: paymentStatus,
           updateTime: db.serverDate()
@@ -834,6 +863,7 @@ function registerTripGatewayRoutes(app, deps) {
         if (trip.vehicleId) {
           await transaction.collection('vehicles').doc(trip.vehicleId).update({
             status: 'available',
+            activeOrderId: null,
             lat: coordinates.lat,
             lng: coordinates.lng,
             lastUsedTime: db.serverDate(),
@@ -886,12 +916,14 @@ function registerTripGatewayRoutes(app, deps) {
         await transaction.collection('trips').doc(tripId).update({
           status: 'cancelled',
           cancelTime: db.serverDate(),
+          endAt: db.serverDate(),
           updateTime: db.serverDate()
         });
 
         if (trip.vehicleId) {
           await transaction.collection('vehicles').doc(trip.vehicleId).update({
             status: 'available',
+            activeOrderId: null,
             updateTime: db.serverDate()
           });
         }

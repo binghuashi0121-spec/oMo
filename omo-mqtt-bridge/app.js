@@ -174,9 +174,8 @@ function getVehicleBusinessStatus(existingDoc, statusPayload) {
     return 'available';
   }
 
-  if (runtimeStatus === 'faulty' || runtimeStatus === 'maintenance' || runtimeStatus === 'in_use') {
-    return runtimeStatus;
-  }
+  if (runtimeStatus === 'faulty' || runtimeStatus === 'maintenance' || runtimeStatus === 'fault') return 'fault';
+  if (runtimeStatus === 'in_use' || runtimeStatus === 'active') return 'active';
 
   if (runtimeStatus === 'offline') {
     return 'offline';
@@ -509,6 +508,7 @@ mqttClient.on('message', async (topic, payloadBuffer) => {
         const battery = Number(normalizedPayload.electiricQuantity ?? normalizedPayload.battery);
         if (Number.isFinite(battery)) {
           updateData.battery = battery;
+          updateData.batteryPercent = battery;
         }
       }
 
@@ -517,17 +517,21 @@ mqttClient.on('message', async (topic, payloadBuffer) => {
         updateData.lng = convertedCoords.longitude;
         updateData.latitude = convertedCoords.latitude;
         updateData.longitude = convertedCoords.longitude;
+        updateData.positionGcj02 = { latitude: convertedCoords.latitude, longitude: convertedCoords.longitude };
       }
       if (Number.isFinite(rawLatitude) && Number.isFinite(rawLongitude)) {
         updateData.rawLatitude = rawLatitude;
         updateData.rawLongitude = rawLongitude;
         updateData.sourceCoordSystem = 'wgs84';
+        updateData.positionWgs84 = { latitude: rawLatitude, longitude: rawLongitude };
       }
       if (Number.isFinite(speed)) {
         updateData.speed = speed;
+        updateData.speedKph = speed;
       }
       if (Number.isFinite(reportTimestamp)) {
         updateData.lastReportAt = reportTimestamp;
+        updateData.heartbeatAt = new Date(reportTimestamp).toISOString();
       }
     }
 

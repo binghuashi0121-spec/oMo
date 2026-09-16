@@ -1,12 +1,13 @@
 import type { AdminApi } from './contract';
 import { queryString, request, setCsrfToken } from './client';
-import type { FinanceSummary, Order, PageResult, ScenicArea, SessionInfo, Settlement, SystemHealth, Vehicle, VehicleCommand } from '@/types/domain';
+import type { FinanceSummary, Order, OverviewSummary, PageResult, ScenicArea, SessionInfo, Settlement, SystemHealth, Vehicle, VehicleCommand } from '@/types/domain';
 
 export const realApi: AdminApi = {
   async login(input) { const data = await request<SessionInfo>('/auth/login', { method: 'POST', body: JSON.stringify(input) }); setCsrfToken(data.csrfToken); return data; },
   async logout() { await request<void>('/auth/logout', { method: 'POST' }); setCsrfToken(''); },
   async me() { const data = await request<SessionInfo>('/auth/me'); setCsrfToken(data.csrfToken); return data; },
   async changePassword(input) { await request<void>('/auth/password', { method: 'POST', body: JSON.stringify(input) }); },
+  overview: (scenicAreaId) => request<OverviewSummary>(`/overview${queryString({ scenicAreaId })}`),
   scenicAreas: () => request<ScenicArea[]>('/scenic-areas'),
   mapVehicles: (scenicAreaId) => request<Vehicle[]>(`/map/vehicles${queryString({ scenicAreaId })}`),
   orders: (query) => request<PageResult<Order>>(`/orders${queryString(query)}`),

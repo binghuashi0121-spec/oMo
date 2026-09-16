@@ -16,7 +16,8 @@ defineEmits<{ retry: [] }>();
 <template>
   <div class="page-data-state" :aria-busy="initialLoading">
     <div v-if="initialLoading && !hasData" class="page-loading" v-loading="true" aria-label="正在加载数据" />
-    <el-result v-else-if="error && !hasData" icon="error" title="数据加载失败" :sub-title="error">
+    <el-result v-else-if="error && !hasData" title="数据加载失败" :sub-title="error">
+      <template #icon><AppIcon name="x-circle" size="64" /></template>
       <template #extra><el-button type="primary" @click="$emit('retry')"><AppIcon name="refresh" />重新加载</el-button></template>
     </el-result>
     <template v-else>

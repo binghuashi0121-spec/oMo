@@ -5,6 +5,7 @@ export default defineConfig({
   fullyParallel: false,
   use: {
     baseURL: 'http://127.0.0.1:4173',
+    ...(process.env.PLAYWRIGHT_CHANNEL ? { channel: process.env.PLAYWRIGHT_CHANNEL } : {}),
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },

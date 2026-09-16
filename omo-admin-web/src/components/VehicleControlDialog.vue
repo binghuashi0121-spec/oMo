@@ -3,6 +3,7 @@ import { computed, reactive, ref, watch } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { api } from '@/api';
 import type { Vehicle, VehicleCommand } from '@/types/domain';
+import AppIcon from '@/components/AppIcon.vue';
 
 const props = defineProps<{ modelValue: boolean; vehicle: Vehicle | null }>();
 const emit = defineEmits<{ 'update:modelValue': [value: boolean]; sent: [command: VehicleCommand] }>();
@@ -30,7 +31,7 @@ async function submit() {
 
 <template>
   <el-dialog :model-value="modelValue" title="车辆控制中心（模拟）" width="560px" @update:model-value="emit('update:modelValue', $event)">
-    <el-alert title="安全隔离已启用" description="第一期后台指令全部写入模拟记录，不连接 MQTT Broker，也不会改变真实车辆状态。" type="warning" :closable="false" show-icon />
+    <el-alert title="安全隔离已启用" description="第一期后台指令全部写入模拟记录，不连接 MQTT Broker，也不会改变真实车辆状态。" type="warning" :closable="false" show-icon><template #icon><AppIcon name="warning" /></template></el-alert>
     <div v-if="vehicle" class="command-target"><span>目标车辆</span><strong>{{ vehicle.vehicleNo }}</strong><small>{{ vehicle.scenicAreaId }}</small></div>
     <el-form label-position="top" class="dialog-form">
       <el-form-item label="白名单指令"><el-select v-model="form.commandKey" style="width: 100%"><el-option v-for="item in options" :key="item.value" :label="`${item.label} · 风险${item.risk}`" :value="item.value" /></el-select></el-form-item>

@@ -64,7 +64,7 @@ useVisiblePolling(load, 30_000);
   >
     <div class="page-stack">
       <section class="system-hero" :class="`is-${health?.level || 'degraded'}`" aria-live="polite">
-        <div><p class="eyebrow">SYSTEM READINESS</p><h2>{{ health?.summary || '正在聚合系统状态' }}</h2><p>HTTP 可访问只代表存活；MQTT 断开、数据库不可用或车辆心跳异常都会降低就绪状态。</p></div>
+        <div><h2>{{ health?.summary || '正在聚合系统状态' }}</h2><p>HTTP 可访问只代表存活；MQTT 断开、数据库不可用或车辆心跳异常都会降低就绪状态。</p></div>
         <div class="health-score"><strong>{{ healthyCount }}/{{ health?.components.length || 0 }}</strong><span>组件健康</span><small>{{ shanghaiTime(health?.checkedAt) }}</small></div>
       </section>
       <section class="panel" v-if="isMockMode"><div class="demo-scenario"><div><strong>状态演示控制器</strong><span>仅改变 Mock 数据，用于评审状态栏与诊断交互</span></div><el-button-group><el-button type="success" plain @click="scenario('healthy')">健康</el-button><el-button type="warning" plain @click="scenario('degraded')">降级</el-button><el-button type="danger" plain @click="scenario('critical')">故障</el-button></el-button-group></div></section>

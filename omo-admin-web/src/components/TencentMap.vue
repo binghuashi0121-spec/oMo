@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import AppIcon from '@/components/AppIcon.vue';
-import { vehicleMarkerSvgDataUri, type VehicleMarkerStatus } from '@/icons/registry';
 import type { ScenicArea, Vehicle } from '@/types/domain';
+import omoVehicleImage from '../../../omo-mini-program/pictures/dengdaiquche/car.png';
 
 const props = defineProps<{ scenic: ScenicArea; vehicles: Vehicle[]; selectedVehicleId?: string }>();
 const emit = defineEmits<{ select: [vehicle: Vehicle] }>();
@@ -52,14 +52,14 @@ function renderLayers() {
   markerLayer = new TMap.MultiMarker({
     map,
     styles: {
-      available: new TMap.MarkerStyle({ width: 40, height: 40, anchor: { x: 20, y: 20 }, src: vehicleMarkerSvgDataUri('available') }),
-      active: new TMap.MarkerStyle({ width: 40, height: 40, anchor: { x: 20, y: 20 }, src: vehicleMarkerSvgDataUri('active') }),
-      charging: new TMap.MarkerStyle({ width: 40, height: 40, anchor: { x: 20, y: 20 }, src: vehicleMarkerSvgDataUri('charging') }),
-      offline: new TMap.MarkerStyle({ width: 40, height: 40, anchor: { x: 20, y: 20 }, src: vehicleMarkerSvgDataUri('offline') }),
-      fault: new TMap.MarkerStyle({ width: 40, height: 40, anchor: { x: 20, y: 20 }, src: vehicleMarkerSvgDataUri('fault') }),
-      selected: new TMap.MarkerStyle({ width: 48, height: 48, anchor: { x: 24, y: 24 }, src: vehicleMarkerSvgDataUri('available', true) }),
+      available: new TMap.MarkerStyle({ width: 64, height: 65, anchor: { x: 32, y: 58 }, src: omoVehicleImage }),
+      active: new TMap.MarkerStyle({ width: 64, height: 65, anchor: { x: 32, y: 58 }, src: omoVehicleImage }),
+      charging: new TMap.MarkerStyle({ width: 64, height: 65, anchor: { x: 32, y: 58 }, src: omoVehicleImage }),
+      offline: new TMap.MarkerStyle({ width: 64, height: 65, anchor: { x: 32, y: 58 }, src: omoVehicleImage }),
+      fault: new TMap.MarkerStyle({ width: 64, height: 65, anchor: { x: 32, y: 58 }, src: omoVehicleImage }),
+      selected: new TMap.MarkerStyle({ width: 76, height: 77, anchor: { x: 38, y: 69 }, src: omoVehicleImage }),
     },
-    geometries: props.vehicles.map((vehicle) => ({ id: vehicle.id, styleId: vehicle.id === props.selectedVehicleId ? 'selected' : vehicle.status as VehicleMarkerStatus, position: new TMap.LatLng(vehicle.positionGcj02.latitude, vehicle.positionGcj02.longitude), properties: { vehicleId: vehicle.id } })),
+    geometries: props.vehicles.map((vehicle) => ({ id: vehicle.id, styleId: vehicle.id === props.selectedVehicleId ? 'selected' : vehicle.status, position: new TMap.LatLng(vehicle.positionGcj02.latitude, vehicle.positionGcj02.longitude), properties: { vehicleId: vehicle.id } })),
   });
   markerLayer.on('click', (event: any) => { const found = props.vehicles.find((item) => item.id === event.geometry?.id); if (found) emit('select', found); });
 }
@@ -86,7 +86,7 @@ onBeforeUnmount(() => { markerLayer?.setMap(null); lineLayer?.setMap(null); map?
     <div v-else class="map-fallback">
       <div class="fallback-grid" />
       <svg class="fallback-route" viewBox="0 0 100 100" preserveAspectRatio="none"><polyline :points="fallbackPath" fill="none" stroke="#ef5b24" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" /></svg>
-      <button v-for="vehicle in vehicles" :key="vehicle.id" class="fallback-marker" :class="[`is-${vehicle.status}`, { selected: vehicle.id === selectedVehicleId }]" :style="{ left: `${fallbackPoint(vehicle.positionGcj02.longitude, vehicle.positionGcj02.latitude).x}%`, top: `${fallbackPoint(vehicle.positionGcj02.longitude, vehicle.positionGcj02.latitude).y}%` }" :aria-label="`查看车辆 ${vehicle.vehicleNo}`" @click="emit('select', vehicle)"><AppIcon name="vehicle" /><span class="fallback-marker-label">{{ vehicle.vehicleNo.replace('OMO-', '') }}</span></button>
+      <button v-for="vehicle in vehicles" :key="vehicle.id" class="fallback-marker" :class="[`is-${vehicle.status}`, { selected: vehicle.id === selectedVehicleId }]" :style="{ left: `${fallbackPoint(vehicle.positionGcj02.longitude, vehicle.positionGcj02.latitude).x}%`, top: `${fallbackPoint(vehicle.positionGcj02.longitude, vehicle.positionGcj02.latitude).y}%` }" :aria-label="`查看车辆 ${vehicle.vehicleNo}`" @click="emit('select', vehicle)"><img class="vehicle-marker-image" :src="omoVehicleImage" alt="" /><span class="fallback-marker-label">{{ vehicle.vehicleNo.replace('OMO-', '') }}</span></button>
       <div class="map-key-notice"><AppIcon name="info" /><div><strong>{{ loadError || '地图安全降级模式' }}</strong><span>{{ loadError ? '请检查网络或腾讯地图 Key 配置。' : '配置 VITE_TENCENT_MAP_KEY 后启用腾讯地图；车辆与路线仍可操作。' }}</span></div></div>
     </div>
     <div class="map-watermark">GCJ-02 展示坐标 · {{ scenic.shortName }}</div>

@@ -76,6 +76,11 @@ function callBridge(options = {}) {
   } = options;
 
   return new Promise((resolve, reject) => {
+    const app = getApp();
+    if (!app || !app.globalData || !app.globalData.environmentReady) {
+      reject(new Error((app && app.globalData && app.globalData.environmentError) || 'environment unavailable'));
+      return;
+    }
     if (!wx.cloud || !wx.cloud.callContainer) {
       reject(new Error('bridge unavailable'));
       return;

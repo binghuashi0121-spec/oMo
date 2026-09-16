@@ -9,7 +9,15 @@ async function login(page: Page, testInfo?: TestInfo) {
   await page.getByPlaceholder('请输入管理员账号').fill('admin');
   await page.getByPlaceholder('请输入密码').fill('123456');
   await page.getByRole('button', { name: '安全登录' }).click();
-  await expect(page).toHaveURL(/\/map$/);
+  await expect(page).toHaveURL(/\/overview$/);
+  await expect(page.getByRole('heading', { name: '全域运营态势' })).toBeVisible();
+  await expect(page.locator('.command-metrics article').first().locator('strong')).toHaveText('4');
+  await expect(page.getByText('OM202608100001', { exact: true })).toBeVisible();
+  if (testInfo) await page.screenshot({ path: testInfo.outputPath('overview.png'), fullPage: true });
+  await Promise.all([
+    page.waitForURL(/\/map$/),
+    page.getByRole('menuitem', { name: '车辆地图' }).click(),
+  ]);
 }
 
 async function navigateByMenu(page: Page, name: string, path: RegExp) {
@@ -26,7 +34,7 @@ test('login, scenic switching, map filter and logout', async ({ page }, testInfo
   await expect(page.getByText('地图安全降级模式')).toBeVisible();
   await expect(page.getByLabel('车辆状态图例')).toContainText('可用');
   await expect(page.getByText(/每 15 秒自动刷新/)).toBeVisible();
-  await expect(page.locator('.fallback-marker .app-icon').first()).toBeVisible();
+  await expect(page.locator('.fallback-marker .vehicle-marker-image').first()).toBeVisible();
   await page.locator('.topbar .el-select').click();
   await page.getByRole('option', { name: /湖畔示范景区/ }).click();
   await expect(page.getByText(/GCJ-02 展示坐标 · 湖畔示范/)).toBeVisible();

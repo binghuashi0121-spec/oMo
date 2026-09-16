@@ -37,6 +37,7 @@ exports.main = async (event) => {
         data: {
           status: 'cancelled',
           cancelTime: db.serverDate(),
+          endAt: db.serverDate(),
           updateTime: db.serverDate()
         }
       });
@@ -45,6 +46,7 @@ exports.main = async (event) => {
         await transaction.collection('vehicles').doc(trip.vehicleId).update({
           data: {
             status: 'available',
+            activeOrderId: null,
             updateTime: db.serverDate()
           }
         });
