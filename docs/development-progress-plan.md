@@ -217,6 +217,7 @@ omo-platform/
 - 新环境 `omo-platform-staging-d5a30d0fd8f` 为文档型数据库类型，个人版、`Status=NORMAL`、未自动续费，到期时间 2026-10-17 23:59:59。`Databases[0].Status=RUNNING`，地域 `ap-shanghai`，静态托管 `online`。
 - 对新环境执行只读 NoSQL `listCollections` 返回空集合清单，确认数据层可访问。后续只向新 ID 初始化集合、索引和测试数据；生产环境与旧环境均不作兜底。
 - 使用已授权 CloudBase CLI 在新 ID 执行 `staging:nosql -- --apply`；完成并回读 16 个集合、22 条索引和 3 条种子（两个景区、一台 `OMO_STAGING_0001` 测试车）。一次性管理员、隔离 MQTT Broker、云函数、云托管、Web 和 trial 仍未部署。
+- 后续只读 `staging:nosql -- --verify` 再次通过。已实现本机隐藏输入密码的一次性 staging 管理员初始化脚本及独立 TLS Broker 冒烟脚本；两者尚未对云端执行。staging 配置测试现为 10/10。下一步需要用户在本机终端输入管理员初始密码，并登录 EMQX Cloud 创建月消费上限 0 的 Serverless 测试部署。
 
 ## 7. 当前工作区特别说明
 

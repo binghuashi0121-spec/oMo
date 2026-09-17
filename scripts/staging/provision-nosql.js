@@ -1,6 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
+const assert = require('node:assert/strict');
 const manifest = require('../../deploy/staging/manifest.json');
 const adminSchema = require('../../omo-admin-api/cloudbase/schema/collections.json');
 const adminIndexes = require('../../omo-admin-api/cloudbase/schema/indexes.json');
@@ -46,12 +47,12 @@ function normalizeResult(result) {
 }
 
 function createCliRunner(cliEntry, env = process.env) {
-  if (!cliEntry || !fs.existsSync(cliEntry)) throw new Error('需设置 OMO_TCB_CLI_ENTRY 指向已安装的 CloudBase CLI bin/tcb');
+  if (!cliEntry || !fs.existsSync(cliEntry) || !fs.statSync(cliEntry).isFile()) throw new Error('需设置 OMO_TCB_CLI_ENTRY 指向已安装的 CloudBase CLI bin/tcb');
   return (table, command, commandType = 'COMMAND') => {
     const request = JSON.stringify([{ TableName: table, CommandType: commandType, Command: JSON.stringify(command) }]);
     const result = spawnSync(process.execPath, [cliEntry, '-e', environmentId, 'db', 'nosql', 'execute', '--command', request, '--json'],
       { env, encoding: 'utf8', maxBuffer: 2_000_000, timeout: 30_000 });
-    if (result.status !== 0) throw new Error(`CloudBase ${table} ${commandType} 失败：${String(result.stderr || result.stdout || result.error).trim()}`);
+    if (result.status !== 0) throw new Error(`CloudBase ${table} ${commandType} 失败（退出码 ${result.status ?? 'unknown'}）；请检查 CLI 授权和环境状态`);
     return normalizeResult(JSON.parse(result.stdout));
   };
 }
@@ -66,6 +67,29 @@ function indexDefinition(spec) {
     name: indexName(spec),
     ...(spec.unique ? { unique: true } : {}),
   };
+}
+
+function verify(run) {
+  const present = run('scenic_areas', { listCollections: 1 }).map((item) => item.name);
+  assert.deepEqual([...present].sort(), [...collections].sort(), '集合清单与 staging 规格不一致');
+  for (const spec of indexSpecs) {
+    const expected = indexDefinition(spec);
+    const actual = run(spec.collection, { listIndexes: spec.collection }).find((item) => item.name === expected.name);
+    if (!actual) throw new Error(`索引缺失：${spec.collection}.${expected.name}`);
+    const actualKey = Object.fromEntries(Object.entries(actual.key || {}).map(([field, order]) =>
+      [field, Number(order && typeof order === 'object' ? order.$numberInt ?? order.$numberLong : order)]));
+    assert.deepEqual(actualKey, expected.key, `索引字段不匹配：${spec.collection}.${expected.name}`);
+    if (expected.unique && actual.unique !== true) throw new Error(`唯一索引失效：${spec.collection}.${expected.name}`);
+  }
+  for (const seed of seeds) {
+    const found = run(seed.collection, { find: seed.collection, filter: { _id: seed.id }, limit: 1 }, 'QUERY');
+    if (found.length !== 1) throw new Error(`测试数据缺失：${seed.collection}/${seed.id}`);
+    if (seed.collection === 'vehicles' &&
+        (found[0].ugvID !== seed.id || found[0].scenicAreaId !== 'tianmashan')) {
+      throw new Error(`测试车辆标识不匹配：${seed.id}`);
+    }
+  }
+  console.log(`PASS (read only): ${collections.length} collections, ${indexSpecs.length} indexes, ${seeds.length} seeds`);
 }
 
 function provision(run) {
@@ -111,7 +135,9 @@ if (require.main === module) {
   try {
     assertTarget();
     console.log(`target=${environmentId}; collections=${collections.length}; indexes=${indexSpecs.length}; seeds=${seeds.length}`);
-    if (process.argv[2] !== '--apply') {
+    if (process.argv[2] === '--verify') {
+      verify(createCliRunner(path.resolve(process.env.OMO_TCB_CLI_ENTRY || '')));
+    } else if (process.argv[2] !== '--apply') {
       console.log('DRY RUN ONLY. Pass --apply with STAGING_SETUP_APPLY=CREATE_FRESH_STAGING_ONLY to write.');
     } else {
       if (process.env.STAGING_SETUP_APPLY !== 'CREATE_FRESH_STAGING_ONLY') throw new Error('缺少写入确认变量');
@@ -123,4 +149,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { assertTarget, collections, indexSpecs, seeds, indexDefinition, provision };
+module.exports = { assertTarget, collections, indexSpecs, seeds, indexDefinition, createCliRunner, provision, verify };

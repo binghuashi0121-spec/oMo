@@ -12,6 +12,8 @@
     "staging:check": "node scripts/staging/check-config.js",
     "staging:test": "node --test scripts/staging/*.test.js",
     "staging:nosql": "node scripts/staging/provision-nosql.js",
+    "staging:admin": "node scripts/staging/bootstrap-admin-cli.js",
+    "staging:broker": "node scripts/staging/broker-smoke.js",
     "cloudbase:check-env": "node scripts/cloudbase/check-env.js",
     "cloudbase:backup:inspect": "node scripts/cloudbase/inspect-backup.js",
     "cloudbase:backup:validate": "node scripts/cloudbase/validate-import.js",

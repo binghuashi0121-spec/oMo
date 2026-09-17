@@ -18,4 +18,5 @@ coverage/
 cloudbaserc.admin.json
 deploy/admin/*.local.json
 scripts/.env.simulator
+scripts/.env.broker
 

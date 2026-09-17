@@ -28,7 +28,7 @@ node scripts/staging/check-config.js deploy
 
 ## 3. 按顺序发布与停机门禁
 
-1. 设置并核对 staging 环境变量后，先运行 `npm run staging:nosql` 查看无写入预览。CloudBase CLI 授权后，设置 `OMO_TCB_CLI_ENTRY` 为本机 CLI 的 `node_modules/@cloudbase/cli/bin/tcb` 绝对路径，临时设置 `STAGING_SETUP_APPLY=CREATE_FRESH_STAGING_ONLY`，再运行 `npm run staging:nosql -- --apply`。脚本只对新 ID 创建并回读 16 个集合、22 条索引、两个测试景区和一台 `OMO_STAGING_0001` 测试车；不覆盖已有种子数据。一次性 staging 管理员单独初始化，首次改密后撤去初始化凭据。
+1. 设置并核对 staging 环境变量、`OMO_TCB_CLI_ENTRY`（本机 CLI 的 `node_modules/@cloudbase/cli/bin/tcb` 绝对路径）后，运行 `npm run staging:nosql -- --verify` 进行无写入回读。已创建的 16 个集合、22 条索引和 3 条测试数据不可重新初始化或覆盖。随后在本机交互终端临时设置 `STAGING_ADMIN_APPLY=CREATE_ONE_TIME_ADMIN_ONLY`，运行 `npm run staging:admin -- --apply`，按提示隐藏输入并确认初始密码；脚本只创建 `staging_admin`，以 Argon2id 哈希存储，标记首次登录强制改密，并在账号已存在时拒绝再写入。运行后清除该临时确认变量；初始密码只由用户本人保存，不发送到聊天或提交到仓库。
 2. 部署独立 EMQX Cloud TLS Broker 后，用单独测试客户端确认 TLS、Topic ACL 和唯一 Client ID；禁止连接生产 Broker。
 3. 部署 `mqtt-bridge-staging`（端口 3000），设置 `OMO_STAGING_MODE=true`，启动时强制检查环境 ID、TLS、独立账号和固定 Client ID。`/mqtt/health` 的 `cloudbase.ready` 与 `mqtt.connected` 都为 true 才继续。CloudBase CLI 实际版本帮助中的参数是 `--service-name`、`--source`、`--min-num 1`、`--max-num 1`、`--wait`；先运行本地配置检查并核对 CLI 帮助，不以旧文档中 `--dry-run` 一定可用为前提。
 4. 将清单中的 10 个小程序云函数逐个部署到指定环境，部署后查询所属环境和调用结果，不使用生产函数作兜底。
@@ -40,3 +40,37 @@ node scripts/staging/check-config.js deploy
 每一步失败立即停止。Web 发布前保留上一版本和校验值；云托管保留上一修订；第一次部署失败不切换生产。静态托管 `--safe` 远端备份默认不会自动清理。当前测试只可标记“手机真机 + MQTT 模拟车辆”，iPhone、Android 缺一时列为未验证；最小实例数降回 0 应在验收报告完成后另行确认。
 
 2026-09-17 数据层执行记录：上述 CLI 初始化在 `omo-platform-staging-d5a30d0fd8f` 成功，输出 `PASS: 16 collections, 22 indexes, 3 seeds`。一次性管理员与 Broker 尚未创建；不因集合和索引通过就启动后续部署。
+
+只读 `--verify` 已再次回读通过；一次性管理员脚本已就绪，但需用户在本机交互终端输入密码，当前尚未执行创建。不要通过 `BOOTSTRAP_ADMIN_PASSWORD` 环境变量或命令参数传密码。数据库核验及管理员创建完成后，方可进入 Broker 门禁。
+
+## 4. 本机管理员与独立 Broker 操作
+
+管理员只在本机终端操作。上述五个非密钥环境变量及 `OMO_TCB_CLI_ENTRY` 均设置为本环境后运行：
+
+```powershell
+npm run staging:nosql -- --verify
+$env:STAGING_ADMIN_APPLY='CREATE_ONE_TIME_ADMIN_ONLY'
+npm run staging:admin -- --apply
+Remove-Item Env:STAGING_ADMIN_APPLY
+```
+
+脚本在交互终端隐藏读取两次密码，不接受重定向输入或 `BOOTSTRAP_ADMIN_PASSWORD`。若已存在管理员，停止而不是重置；执行者自己保管初始密码。确认输出 `PASS` 后再进入 Broker 阶段。
+
+用户在 [EMQX Cloud 控制台](https://cloud-intl.emqx.com/)登录，新建独立项目 `omo-platform-staging` 和 Serverless 部署 `omo-mqtt-staging`，选择控制台可用的亚太地区，确认月度消费上限 **0**、状态 Running。不得选择付费 Dedicated；免费额度耗尽后停用而非自动付费。[官方创建说明](https://docs.emqx.com/en/cloud/latest/create/serverless.html) · [消费上限说明](https://docs.emqx.com/en/cloud/latest/deployments/spend_limit.html)
+
+在“访问控制 → 客户端认证”创建两个**不同账号**，密码只保存在用户控制台/本机忽略文件；在“客户端授权”按用户名配置：
+
+| 账号用途 | 允许订阅 | 允许发布 |
+| --- | --- | --- |
+| Bridge | `ugv/+/device`、`ugv/+/response` | `ugv/OMO_STAGING_0001/platform` |
+| 模拟车 | `ugv/OMO_STAGING_0001/platform` | `ugv/OMO_STAGING_0001/device`、`ugv/OMO_STAGING_0001/response` |
+
+另在 All Users 添加 Topic `#` 的 Publish & Subscribe Deny 规则作兜底。Serverless 默认黑名单模式，仅配置允许规则并不会拒绝其他 Topic；用户名规则优先于 All Users 兜底。[官方授权说明](https://docs.emqx.com/en/cloud/latest/deployments/default_authz.html)
+
+将 `scripts/.env.broker.example` 复制为已被 Git 忽略的 `scripts/.env.broker`，填入新部署的 `mqtts://<主机>:8883`、Bridge 账号和模拟车账号。凭据不得写在 URL 中，不发送到聊天。**仅在 Bridge 尚未启动时**运行：
+
+```powershell
+node --env-file=scripts/.env.broker scripts/staging/broker-smoke.js
+```
+
+脚本使用两个不同 Client ID，检查 TLS 和三条授权消息方向，并验证越权、错误密码与明文 1883 端口；通过后再将 Bridge 凭据配置到 CloudBase 安全配置。若连接不稳、ACL 不可确认或消费上限不是 0，停止后续服务部署。
