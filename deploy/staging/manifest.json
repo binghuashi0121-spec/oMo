@@ -1,6 +1,6 @@
 {
   "environmentName": "omo-platform-staging",
-  "environmentId": "omo-platform-staging-d3acae2142c",
+  "environmentId": "omo-platform-staging-d5a30d0fd8f",
   "forbiddenEnvironmentId": "omo-mqtt-prod-2g4zisao87d6ec54",
   "services": {
     "bridge": { "name": "mqtt-bridge-staging", "source": "omo-mqtt-bridge", "port": 3000, "minInstances": 1, "maxInstances": 1, "healthPath": "/mqtt/health" },

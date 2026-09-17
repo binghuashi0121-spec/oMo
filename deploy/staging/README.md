@@ -1,19 +1,21 @@
 # oMo staging 发布门禁
 
-本目录只有不含密钥的发布意图。唯一可用的环境显示名为 `omo-platform-staging`，已购买的环境 ID 为 `omo-platform-staging-d3acae2142c`；其他环境 ID 和现有生产 ID 均被本地检查拒绝。不要运行天马山历史迁移脚本、导入生产备份或修改 `omo-mini-program/project.config.json`。
+本目录只有不含密钥的发布意图。唯一可用的环境显示名为 `omo-platform-staging`，当前文档型数据库环境 ID 为 `omo-platform-staging-d5a30d0fd8f`；其他环境 ID 和现有生产 ID 均被本地检查拒绝。不要运行天马山历史迁移脚本、导入生产备份或修改 `omo-mini-program/project.config.json`。
 
 ## 1. 检查点与准备
 
 在 Git 检查点之后，使用 Node 22 和已授权的 CloudBase CLI。先运行 `npm run staging:test` 与 `npm run staging:check`；后者确认服务规格、全部 10 个云函数目录、集合/索引文件和 MQTT 隔离配置。任何云端写入前还应核对当前 `tcb env list` 返回的环境 ID、显示名、套餐及地域，明确排除生产环境。
 
-用户已购买 staging 环境，不再运行 `tcb env create`。2026-09-17 的截图显示环境 `UNAVAILABLE`；必须先在控制台确认环境变为可用，并在 CLI 登录后用 `tcb env list` 复核 ID、显示名、套餐、地域和服务能力。若仍不可用，停止云端写入并调查初始化状态，不删除重建，也不改用生产环境。
+用户已创建新的 staging 文档型数据库环境，不再运行 `tcb env create`。在 CLI 登录后用 `tcb env list` 复核 ID、显示名、套餐、地域和服务能力。若不可用，停止云端写入并调查初始化状态，不删除重建，也不改用生产环境。
+
+2026-09-17 只读核验：旧 ID `omo-platform-staging-d3acae2142c` 已 `ISOLATE`，其数据库为 PostgreSQL，不作本轮目标。新 ID `omo-platform-staging-d5a30d0fd8f` 为 `NORMAL`，`Databases[0].Status=RUNNING`，静态托管 `online`，只读 NoSQL `listCollections` 返回空集合清单。所有写入、部署和验收只允许新 ID。
 
 ## 2. 部署前参数检查
 
 仅在本地临时进程环境中设置非密钥参数：
 
 ```powershell
-$env:OMO_STAGING_ENV_ID='omo-platform-staging-d3acae2142c'
+$env:OMO_STAGING_ENV_ID='omo-platform-staging-d5a30d0fd8f'
 $env:OMO_STAGING_ENV_NAME='omo-platform-staging'
 $env:OMO_STAGING_MQTT_URL='mqtts://<独立测试 Broker 主机>:8883'
 $env:OMO_STAGING_WEB_ORIGIN='https://<最终默认域名>'
@@ -26,7 +28,7 @@ node scripts/staging/check-config.js deploy
 
 ## 3. 按顺序发布与停机门禁
 
-1. 设置并核对 staging 环境变量后，先运行 `npm --prefix omo-admin-api run cloudbase:staging:setup` 查看无写入预览。仅在确认是全新环境后，临时设置 `DATA_DRIVER=cloudbase` 与 `STAGING_SETUP_APPLY=CREATE_FRESH_STAGING_ONLY` 再运行同一命令。脚本只创建集合、两个测试景区和一台 `OMO_STAGING_0001` 测试车，已有测试数据会导致停止而非覆盖。按 `manifest.json` 指向的两份索引规格在控制台创建并核对索引，特别核对四个管理唯一索引。一次性 staging 管理员单独初始化，首次改密后撤去初始化凭据。
+1. 设置并核对 staging 环境变量后，先运行 `npm run staging:nosql` 查看无写入预览。CloudBase CLI 授权后，设置 `OMO_TCB_CLI_ENTRY` 为本机 CLI 的 `node_modules/@cloudbase/cli/bin/tcb` 绝对路径，临时设置 `STAGING_SETUP_APPLY=CREATE_FRESH_STAGING_ONLY`，再运行 `npm run staging:nosql -- --apply`。脚本只对新 ID 创建并回读 16 个集合、22 条索引、两个测试景区和一台 `OMO_STAGING_0001` 测试车；不覆盖已有种子数据。一次性 staging 管理员单独初始化，首次改密后撤去初始化凭据。
 2. 部署独立 EMQX Cloud TLS Broker 后，用单独测试客户端确认 TLS、Topic ACL 和唯一 Client ID；禁止连接生产 Broker。
 3. 部署 `mqtt-bridge-staging`（端口 3000），设置 `OMO_STAGING_MODE=true`，启动时强制检查环境 ID、TLS、独立账号和固定 Client ID。`/mqtt/health` 的 `cloudbase.ready` 与 `mqtt.connected` 都为 true 才继续。CloudBase CLI 实际版本帮助中的参数是 `--service-name`、`--source`、`--min-num 1`、`--max-num 1`、`--wait`；先运行本地配置检查并核对 CLI 帮助，不以旧文档中 `--dry-run` 一定可用为前提。
 4. 将清单中的 10 个小程序云函数逐个部署到指定环境，部署后查询所属环境和调用结果，不使用生产函数作兜底。
@@ -36,3 +38,5 @@ node scripts/staging/check-config.js deploy
 8. 将小程序 trial 环境 ID 更新为同一个 ID，运行 `node scripts/staging/check-config.js trial`；再用微信开发者工具 CLI 上传 `staging-YYYYMMDD-HHmm`，仅设置体验成员，不提交正式审核。
 
 每一步失败立即停止。Web 发布前保留上一版本和校验值；云托管保留上一修订；第一次部署失败不切换生产。静态托管 `--safe` 远端备份默认不会自动清理。当前测试只可标记“手机真机 + MQTT 模拟车辆”，iPhone、Android 缺一时列为未验证；最小实例数降回 0 应在验收报告完成后另行确认。
+
+2026-09-17 数据层执行记录：上述 CLI 初始化在 `omo-platform-staging-d5a30d0fd8f` 成功，输出 `PASS: 16 collections, 22 indexes, 3 seeds`。一次性管理员与 Broker 尚未创建；不因集合和索引通过就启动后续部署。

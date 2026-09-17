@@ -49,7 +49,7 @@ test('trip ownership identity is deterministic', () => {
 
 test('staging Bridge rejects production, plaintext Broker and wrong Client ID', () => {
   const config = {
-    OMO_STAGING_MODE: 'true', TCB_ENV: 'omo-platform-staging-d3acae2142c',
+    OMO_STAGING_MODE: 'true', TCB_ENV: 'omo-platform-staging-d5a30d0fd8f',
     MQTT_URL: 'mqtts://staging.example.test:8883', MQTT_USERNAME: 'test-user',
     MQTT_PASSWORD: 'test-password', MQTT_CLIENT_ID: 'omo-mqtt-bridge-staging',
   };

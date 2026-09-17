@@ -99,8 +99,8 @@ omo-platform/
 | A：交互前端原型 | 用户验收通过 | 当前 Web 视觉和页面结构已冻结，只允许联调、安全和部署修复 |
 | A+：前端质量优化 | 用户验收通过 | 自动刷新、请求竞态、旧数据状态、可访问性和包体优化已完成 |
 | B：真实 Admin API | 本地验证通过 | 总览接口、同进程开发管理员和真实 API 浏览器主流程已通过，尚未接入 staging |
-| B：CloudBase 开发环境 | 未开始 | 受环境注册条件限制 |
-| B：小程序与后台联合联调 | 未开始 | 缺少独立 CloudBase dev 环境 |
+| B：CloudBase staging 环境 | 数据层部分完成 | 新环境 `omo-platform-staging-d5a30d0fd8f` 文档型数据库 RUNNING；16 个集合、22 条索引和 3 条测试种子已回读通过，管理员待创建 |
+| B：小程序与后台联合联调 | 未开始 | 等待隔离 MQTT Broker、管理员及服务部署 |
 | C：安全整改 | 代码基本完成 | 云端重新部署、凭据轮换和真机验证尚未完成 |
 | 正式设计与使用文档 | 待开始 | 当前只有技术部署文档 |
 | D：开发环境部署 | 未开始 | 静态托管、CloudBase Run 和 HTTP 网关尚未执行 |
@@ -200,7 +200,7 @@ omo-platform/
 | Web TypeScript 与生产构建 | 通过 |
 | Admin API 单元/集成测试 | 27/27 通过 |
 | Admin API 构建和脚本类型检查 | 通过 |
-| MQTT Bridge 安全测试 | 5/5 通过 |
+| MQTT Bridge 安全测试 | 6/6 通过 |
 | 小程序环境与云函数字段契约测试 | 7/7 通过 |
 | Playwright 桌面端测试 | 24/24 通过 |
 | Playwright 分辨率 | 1280×900、1440×900、1920×1080 |
@@ -209,7 +209,14 @@ omo-platform/
 
 财务路由包含 ECharts，单独异步文件较大，但不进入地图、订单或系统页面的首屏主入口，目前不作为阻塞项。
 
-以上是本地验证结果，不代表 CloudBase、微信真机、MQTT Broker 或真实车辆验收。新对话开始后仍应重新运行验证。
+以上测试于 2026-09-17 在 Node 22.23.2 下复跑；浏览器使用 Edge 通道。它们不代表 CloudBase、微信真机、MQTT Broker 或真实车辆验收。staging 部署检查点提交为 `712c018`，未包含 `omo-mini-program/project.config.json`。
+
+### 6.1 staging 环境只读核验（2026-09-17）
+
+- 旧环境 `omo-platform-staging-d3acae2142c` 为 PostgreSQL 类型，现为 `ISOLATE`，不作本轮目标；不删除、不写入。
+- 新环境 `omo-platform-staging-d5a30d0fd8f` 为文档型数据库类型，个人版、`Status=NORMAL`、未自动续费，到期时间 2026-10-17 23:59:59。`Databases[0].Status=RUNNING`，地域 `ap-shanghai`，静态托管 `online`。
+- 对新环境执行只读 NoSQL `listCollections` 返回空集合清单，确认数据层可访问。后续只向新 ID 初始化集合、索引和测试数据；生产环境与旧环境均不作兜底。
+- 使用已授权 CloudBase CLI 在新 ID 执行 `staging:nosql -- --apply`；完成并回读 16 个集合、22 条索引和 3 条种子（两个景区、一台 `OMO_STAGING_0001` 测试车）。一次性管理员、隔离 MQTT Broker、云函数、云托管、Web 和 trial 仍未部署。
 
 ## 7. 当前工作区特别说明
 
@@ -282,9 +289,9 @@ omo-platform/
 
 前置：用户可以创建或授权独立 CloudBase dev/test/staging 环境。
 
-- [ ] 创建明确含 `dev/test/staging` 的环境。
-- [ ] 创建管理集合和索引。
-- [ ] 写入 `tianmashan` 和第二个演示景区。
+- [x] 创建明确含 `staging` 的独立环境；文档型数据库已就绪。
+- [x] 创建业务与管理集合和索引，回读 16 个集合与 22 条索引。
+- [x] 写入 `tianmashan`、第二个演示景区和一台模拟车辆。
 - [ ] 创建专用微信测试账号、测试车辆和开发 Broker。
 - [ ] 部署小程序云函数。
 - [ ] 部署 `mqtt-bridge-dev`。

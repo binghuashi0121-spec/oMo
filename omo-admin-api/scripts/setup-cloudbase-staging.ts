@@ -6,7 +6,7 @@ const adminSchema = require('../cloudbase/schema/collections.json') as { collect
 const adminIndexes = require('../cloudbase/schema/indexes.json') as { indexes: unknown[] };
 const businessIndexes = require('../../scripts/cloudbase/index-specs.json') as { indexes: unknown[] };
 
-const purchasedEnvId = 'omo-platform-staging-d3acae2142c';
+const purchasedEnvId = 'omo-platform-staging-d5a30d0fd8f';
 const vehicleId = 'OMO_STAGING_0001';
 const collections = [...new Set([
   ...adminSchema.collections,

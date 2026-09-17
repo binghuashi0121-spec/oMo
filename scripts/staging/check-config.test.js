@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const { validateStagingConfig } = require('./check-config');
 const manifest = require('../../deploy/staging/manifest.json');
 const { resolveSimulatorConfig } = require('./simulator-config');
+const { assertTarget, collections, indexSpecs, seeds, indexDefinition } = require('./provision-nosql');
 
 const valid = {
   phase: 'deploy', environmentId: manifest.environmentId,
@@ -43,4 +44,20 @@ test('simulator only connects to the isolated TLS Broker and staging vehicle', (
   assert.match(resolveSimulatorConfig(config).clientId, /^omo-simulator-staging-/);
   assert.throws(() => resolveSimulatorConfig({ ...config, MQTT_SIMULATOR_URL: 'mqtt://staging.example.test:1883' }), /TLS/);
   assert.throws(() => resolveSimulatorConfig({ ...config, MQTT_SIMULATOR_DEVICE_ID: 'OMO_0008' }), /staging 测试车辆/);
+});
+
+test('NoSQL provisioning is pinned to the new document database environment', () => {
+  const config = {
+    OMO_STAGING_ENV_ID: manifest.environmentId,
+    OMO_STAGING_ENV_NAME: manifest.environmentName,
+    TCB_ENV: manifest.environmentId,
+    CLOUDBASE_ENV_ID: manifest.environmentId,
+  };
+  assert.doesNotThrow(() => assertTarget(config));
+  assert.throws(() => assertTarget({ ...config, TCB_ENV: 'omo-platform-staging-d3acae2142c' }), /环境配置/);
+  assert.equal(collections.length, 16);
+  assert.equal(indexSpecs.length, 22);
+  assert.equal(seeds.length, 3);
+  assert.deepEqual(indexDefinition({ collection: 'vehicles', fields: [{ field: 'ugvID', order: 'asc' }] }),
+    { key: { ugvID: 1 }, name: 'ugvID_1' });
 });

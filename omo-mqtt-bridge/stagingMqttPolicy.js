@@ -1,7 +1,7 @@
 function assertStagingMqttConfig(environment = process.env) {
   if (environment.OMO_STAGING_MODE !== 'true') return;
   const envId = String(environment.TCB_ENV || '').trim();
-  if (envId !== 'omo-platform-staging-d3acae2142c' || /prod/i.test(envId)) {
+  if (envId !== 'omo-platform-staging-d5a30d0fd8f' || /prod/i.test(envId)) {
     throw new Error('staging Bridge 不允许缺失、生产或非本次购买的 CloudBase 环境 ID');
   }
   let broker;

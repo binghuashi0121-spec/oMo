@@ -16,7 +16,7 @@ function validateStagingConfig(config = manifest, options = {}) {
   if (environmentName !== 'omo-platform-staging') errors.push('环境显示名称必须是 omo-platform-staging');
   if (phase !== 'prepared' && !options.environmentName) errors.push('缺少从 CloudBase 环境列表核对的显示名称');
   if (config.forbiddenEnvironmentId !== productionEnvId) errors.push('生产环境禁止清单不匹配');
-  if (config.environmentId !== 'omo-platform-staging-d3acae2142c') errors.push('staging 环境 ID 清单不匹配');
+  if (config.environmentId !== 'omo-platform-staging-d5a30d0fd8f') errors.push('staging 环境 ID 清单不匹配');
   if (environmentId === productionEnvId || /prod/i.test(environmentId)) errors.push('禁止使用生产环境 ID');
   if (phase !== 'prepared' && !environmentId) errors.push('缺少 staging 环境 ID');
   if (phase !== 'prepared' && environmentId && environmentId !== config.environmentId) errors.push('目标环境不是已购买的 staging 环境 ID');
