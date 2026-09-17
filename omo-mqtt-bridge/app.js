@@ -8,6 +8,7 @@ const cloudbase = require('@cloudbase/node-sdk');
 const { registerTripGatewayRoutes } = require('./tripGateway');
 const { getTrustedCloudBaseIdentity } = require('./cloudbaseIdentity');
 const { validateProtocolCommand, getTripVehicleIdentity } = require('./commandPolicy');
+const { assertStagingMqttConfig } = require('./stagingMqttPolicy');
 
 const app = express();
 app.use(express.json({ limit: '64kb' }));
@@ -31,6 +32,7 @@ const MQTT_USERNAME = process.env.MQTT_USERNAME || '';
 const MQTT_PASSWORD = process.env.MQTT_PASSWORD || '';
 const MQTT_CLIENT_ID =
   process.env.MQTT_CLIENT_ID || `mqtt-bridge-${Date.now()}`;
+assertStagingMqttConfig(process.env);
 
 // Configurable subscribe topics
 // Default based on teacher's doc: ugv/+/device (status), ugv/+/response (cmd response)

@@ -1,18 +1,19 @@
 {
-  "$comment": "Non-secret CloudBase dev settings checklist; actual values are configured in the console or CLI.",
-  "serviceName": "admin-api",
+  "$comment": "Non-secret staging settings checklist; actual values are configured in CloudBase. Not an executable deployment file.",
+  "serviceName": "admin-api-staging",
   "source": "omo-admin-api",
   "port": 3001,
   "runtime": "nodejs22",
   "access": "HTTP gateway",
-  "minInstances": 0,
+  "minInstances": 1,
   "maxInstances": 1,
   "environment": {
     "NODE_ENV": "production",
     "DATA_DRIVER": "cloudbase",
     "COOKIE_SECURE": "true",
-    "CLOUDBASE_ENV_ID": "<dev-environment-id>",
-    "ADMIN_WEB_ORIGIN": "https://admin-dev.example.com",
+    "CLOUDBASE_ENV_ID": "omo-platform-staging-d3acae2142c",
+    "DEV_BOOTSTRAP_ADMIN_ENABLED": "false",
+    "ADMIN_WEB_ORIGIN": "https://<staging-default-domain>",
     "MQTT_BRIDGE_HEALTH_URL": "<same-environment-private-health-url>"
   },
   "secretsExcluded": [

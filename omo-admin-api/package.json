@@ -13,6 +13,7 @@
     "check": "npm run test && npm run build && npm run check:scripts",
     "bootstrap:admin": "tsx scripts/bootstrap-admin.ts",
     "cloudbase:setup": "tsx scripts/setup-cloudbase-dev.ts",
+    "cloudbase:staging:setup": "tsx scripts/setup-cloudbase-staging.ts",
     "migrate:tianmashan": "tsx scripts/migrate-tianmashan.ts"
   },
   "dependencies": {

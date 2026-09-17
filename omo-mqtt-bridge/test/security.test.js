@@ -2,6 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { getTrustedCloudBaseIdentity } = require('../cloudbaseIdentity');
 const { validateProtocolCommand, getTripVehicleIdentity } = require('../commandPolicy');
+const { assertStagingMqttConfig } = require('../stagingMqttPolicy');
 
 test('identity ignores client fallback headers', () => {
   const previous = process.env.TCB_ENV; process.env.TCB_ENV = 'omo-dev';
@@ -44,4 +45,17 @@ test('auto driving policy bounds coordinates and HTTPS uploads', () => {
 test('trip ownership identity is deterministic', () => {
   assert.equal(getTripVehicleIdentity({ ugvID: 'OMO_1' }), 'OMO_1');
   assert.equal(getTripVehicleIdentity({ vehicleId: 'veh-2' }), 'veh-2');
+});
+
+test('staging Bridge rejects production, plaintext Broker and wrong Client ID', () => {
+  const config = {
+    OMO_STAGING_MODE: 'true', TCB_ENV: 'omo-platform-staging-d3acae2142c',
+    MQTT_URL: 'mqtts://staging.example.test:8883', MQTT_USERNAME: 'test-user',
+    MQTT_PASSWORD: 'test-password', MQTT_CLIENT_ID: 'omo-mqtt-bridge-staging',
+  };
+  assert.doesNotThrow(() => assertStagingMqttConfig(config));
+  assert.throws(() => assertStagingMqttConfig({ ...config, TCB_ENV: 'omo-mqtt-prod-2g4zisao87d6ec54' }), /生产/);
+  assert.throws(() => assertStagingMqttConfig({ ...config, TCB_ENV: 'other-staging-env' }), /非本次购买/);
+  assert.throws(() => assertStagingMqttConfig({ ...config, MQTT_URL: 'mqtt://staging.example.test:1883' }), /TLS/);
+  assert.throws(() => assertStagingMqttConfig({ ...config, MQTT_CLIENT_ID: 'other-client' }), /Client ID/);
 });

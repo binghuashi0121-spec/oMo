@@ -1,0 +1,22 @@
+{
+  "environmentName": "omo-platform-staging",
+  "environmentId": "omo-platform-staging-d3acae2142c",
+  "forbiddenEnvironmentId": "omo-mqtt-prod-2g4zisao87d6ec54",
+  "services": {
+    "bridge": { "name": "mqtt-bridge-staging", "source": "omo-mqtt-bridge", "port": 3000, "minInstances": 1, "maxInstances": 1, "healthPath": "/mqtt/health" },
+    "adminApi": { "name": "admin-api-staging", "source": "omo-admin-api", "port": 3001, "minInstances": 1, "maxInstances": 1, "healthPath": "/api/admin/v1/live" }
+  },
+  "mqtt": {
+    "clientId": "omo-mqtt-bridge-staging",
+    "topics": ["ugv/+/device", "ugv/+/response"]
+  },
+  "cloudFunctions": [
+    "cancelWaitingTrip", "checkActiveTrip", "endTrip", "listCompletedTrips", "loginWithPhone",
+    "sendSms", "startTrip", "unlockVehicle", "updateTripData", "wechatLogin"
+  ],
+  "schema": {
+    "businessIndexes": "scripts/cloudbase/index-specs.json",
+    "adminCollections": "omo-admin-api/cloudbase/schema/collections.json",
+    "adminIndexes": "omo-admin-api/cloudbase/schema/indexes.json"
+  }
+}

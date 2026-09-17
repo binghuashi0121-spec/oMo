@@ -1,20 +1,12 @@
 // Vehicle simulator
-// Run: node scripts/vehicle_simulator.js
+// Run with Node 22: node --env-file=scripts/.env.simulator scripts/vehicle_simulator.js
 
-const mqtt = require('mqtt');
+const { createRequire } = require('node:module');
+const path = require('node:path');
+const { resolveSimulatorConfig } = require('./staging/simulator-config');
+const mqtt = createRequire(path.join(__dirname, '..', 'omo-mqtt-bridge', 'package.json'))('mqtt');
 
-const MQTT_CONFIG = {
-  host: process.env.MQTT_SIMULATOR_HOST || '',
-  port: Number(process.env.MQTT_SIMULATOR_PORT || 1883),
-  username: process.env.MQTT_SIMULATOR_USERNAME || '',
-  password: process.env.MQTT_SIMULATOR_PASSWORD || '',
-  deviceId: process.env.MQTT_SIMULATOR_DEVICE_ID || 'OMO_SIM_0001'
-};
-
-if (!MQTT_CONFIG.host || !MQTT_CONFIG.username || !MQTT_CONFIG.password) {
-  console.error('Missing MQTT simulator environment variables. See scripts/.env.simulator.example.');
-  process.exit(1);
-}
+const MQTT_CONFIG = resolveSimulatorConfig();
 
 const SPEED_MODE_LIMITS = {
   1: 1,
@@ -22,14 +14,13 @@ const SPEED_MODE_LIMITS = {
   5: 5
 };
 
-const connectUrl = `mqtt://${MQTT_CONFIG.host}:${MQTT_CONFIG.port}`;
-
-const client = mqtt.connect(connectUrl, {
-  clientId: `sim_${MQTT_CONFIG.deviceId}_${Date.now()}`,
+const client = mqtt.connect(MQTT_CONFIG.url, {
+  clientId: MQTT_CONFIG.clientId,
   clean: true,
   connectTimeout: 4000,
   username: MQTT_CONFIG.username,
   password: MQTT_CONFIG.password,
+  rejectUnauthorized: true,
   reconnectPeriod: 1000
 });
 
@@ -45,8 +36,8 @@ let vehicleState = {
   speedMode: 2,
   status: 'idle',
   electiricQuantity: 85,
-  longitude: 116.397451,
-  latitude: 39.909187,
+  longitude: 112.94170,
+  latitude: 28.17314,
   altitude: 300,
   speed: 0,
   isCharging: 0,
@@ -56,7 +47,7 @@ let vehicleState = {
 };
 
 client.on('connect', () => {
-  console.log(`[MQTT] Connected to ${MQTT_CONFIG.host}`);
+  console.log('[MQTT] Connected to staging TLS Broker');
 
   client.subscribe([TOPICS.platform_dn], () => {
     console.log(`[MQTT] Subscribed to topic: ${TOPICS.platform_dn}`);
