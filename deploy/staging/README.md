@@ -58,6 +58,8 @@ Remove-Item Env:STAGING_ADMIN_APPLY
 
 用户在 [EMQX Cloud 控制台](https://cloud-intl.emqx.com/)登录，新建独立项目 `omo-platform-staging` 和 Serverless 部署 `omo-mqtt-staging`，选择控制台可用的亚太地区，确认月度消费上限 **0**、状态 Running。不得选择付费 Dedicated；免费额度耗尽后停用而非自动付费。[官方创建说明](https://docs.emqx.com/en/cloud/latest/create/serverless.html) · [消费上限说明](https://docs.emqx.com/en/cloud/latest/deployments/spend_limit.html)
 
+实际已收到候选地址 `f12f196e.ala.eu-central-1.emqxsl.com:8883`。用户同意沿用欧洲 `eu-central-1` 部署先做 staging 测试，无需再创建亚太 Broker；但控制台 Running、Serverless 套餐、月消费上限 0 尚待截图核对。本机 DNS、8883 TCP、TLS 1.3 与证书校验已通过；CloudBase 上海侧出站连通性必须在 Bridge 部署后用 `/mqtt/health` 单独验证，本机结果不可代替。
+
 在“访问控制 → 客户端认证”创建两个**不同账号**，密码只保存在用户控制台/本机忽略文件；在“客户端授权”按用户名配置：
 
 | 账号用途 | 允许订阅 | 允许发布 |
@@ -67,7 +69,7 @@ Remove-Item Env:STAGING_ADMIN_APPLY
 
 另在 All Users 添加 Topic `#` 的 Publish & Subscribe Deny 规则作兜底。Serverless 默认黑名单模式，仅配置允许规则并不会拒绝其他 Topic；用户名规则优先于 All Users 兜底。[官方授权说明](https://docs.emqx.com/en/cloud/latest/deployments/default_authz.html)
 
-将 `scripts/.env.broker.example` 复制为已被 Git 忽略的 `scripts/.env.broker`，填入新部署的 `mqtts://<主机>:8883`、Bridge 账号和模拟车账号。凭据不得写在 URL 中，不发送到聊天。**仅在 Bridge 尚未启动时**运行：
+已在被 Git 忽略的 `scripts/.env.broker` 中预填上述 TLS 地址；用户只需在本机填入 Bridge 与模拟车的不同账号和密码。凭据不得写在 URL 中，不发送到聊天。**仅在 Bridge 尚未启动时**运行：
 
 ```powershell
 node --env-file=scripts/.env.broker scripts/staging/broker-smoke.js

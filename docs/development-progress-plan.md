@@ -218,6 +218,8 @@ omo-platform/
 - 对新环境执行只读 NoSQL `listCollections` 返回空集合清单，确认数据层可访问。后续只向新 ID 初始化集合、索引和测试数据；生产环境与旧环境均不作兜底。
 - 使用已授权 CloudBase CLI 在新 ID 执行 `staging:nosql -- --apply`；完成并回读 16 个集合、22 条索引和 3 条种子（两个景区、一台 `OMO_STAGING_0001` 测试车）。一次性管理员、隔离 MQTT Broker、云函数、云托管、Web 和 trial 仍未部署。
 - 后续只读 `staging:nosql -- --verify` 再次通过。已实现本机隐藏输入密码的一次性 staging 管理员初始化脚本及独立 TLS Broker 冒烟脚本；两者尚未对云端执行。staging 配置测试现为 10/10。下一步需要用户在本机终端输入管理员初始密码，并登录 EMQX Cloud 创建月消费上限 0 的 Serverless 测试部署。
+- 用户提供欧洲 `eu-central-1` EMQX Broker 候选地址并同意先沿用；本机 8883 TCP 和 TLS 1.3 证书验证通过。控制台 Running、消费上限 0、两账号 ACL 和 CloudBase 上海侧连通性仍未验证；管理员集合回读为 0。不得据本机 TLS 通过而部署后续服务。
+- 2026-09-18 复核：CloudBase staging `EnvStatus=NORMAL`、文档数据库 `RUNNING`、已部署云函数 0。`scripts/.env.broker` 已在本机忽略文件中预填非秘密的欧洲 TLS 地址，但两个账号和密码均未填写；管理员集合仍为 0。未进入 Bridge 部署。
 
 ## 7. 当前工作区特别说明
 
