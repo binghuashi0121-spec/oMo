@@ -27,8 +27,14 @@ function validateStagingConfig(config = manifest, options = {}) {
   const api = config.services && config.services.adminApi;
   if (!bridge || bridge.name !== 'mqtt-bridge-staging' || bridge.port !== 3000 || bridge.minInstances !== 1 || bridge.maxInstances !== 1) errors.push('Bridge 服务名、端口或实例数不符合 staging 规格');
   if (!api || api.name !== 'admin-api-staging' || api.port !== 3001 || api.minInstances !== 1 || api.maxInstances !== 1) errors.push('Admin API 服务名、端口或实例数不符合 staging 规格');
+  if (config.mqtt?.profile !== 'vendor_real') errors.push('staging MQTT profile 必须是 vendor_real');
   if (config.mqtt?.clientId !== 'omo-mqtt-bridge-staging') errors.push('MQTT Client ID 不符合 staging 规格');
-  if (JSON.stringify(config.mqtt?.topics) !== JSON.stringify(['ugv/+/device', 'ugv/+/response'])) errors.push('MQTT Topic 清单不符合隔离 Broker 规格');
+  if (config.mqtt?.connectionEnabled !== false || config.mqtt?.commandsEnabled !== false) errors.push('当前阶段必须关闭 MQTT 连接与车辆指令');
+  if (!Array.isArray(config.mqtt?.allowedUgvIds) || config.mqtt.allowedUgvIds.length !== 0) errors.push('无授权车辆编号时白名单必须为空');
+  if (config.mqtt?.telemetrySpeedUnit !== 'unknown') errors.push('供应方未确认前遥测速度单位必须是 unknown');
+  if (config.mqtt?.coordSystem !== 'unknown') errors.push('供应方未确认前坐标系必须是 unknown');
+  if (config.mqtt?.allowInsecureMqtt !== false) errors.push('当前阶段不得允许明文 MQTT');
+  if (!Array.isArray(config.mqtt?.topics) || config.mqtt.topics.length !== 0) errors.push('无授权车辆编号时不得配置订阅 Topic');
 
   const expectedFunctions = fs.readdirSync(path.join(root, 'omo-mini-program', 'cloudfunctions'), { withFileTypes: true })
     .filter((entry) => entry.isDirectory() && fs.existsSync(path.join(root, 'omo-mini-program', 'cloudfunctions', entry.name, 'index.js')))
@@ -41,7 +47,8 @@ function validateStagingConfig(config = manifest, options = {}) {
   if (Object.keys(config.schema || {}).length !== 3) errors.push('集合与索引规格清单不完整');
 
   if (phase !== 'prepared') {
-    if (!/^mqtts:\/\/[^\s]+$/i.test(brokerUrl) && !/^wss:\/\/[^\s]+$/i.test(brokerUrl)) errors.push('测试 Broker 必须使用 MQTT TLS 或 WSS');
+    if (config.mqtt?.connectionEnabled === false && brokerUrl) errors.push('blocked Bridge 不得配置 Broker URL');
+    if (config.mqtt?.connectionEnabled === true && !/^mqtts?:\/\/[^\s]+$/i.test(brokerUrl) && !/^wss:\/\/[^\s]+$/i.test(brokerUrl)) errors.push('启用连接时必须提供 MQTT Broker URL');
     if (!/^https:\/\/[^\s/]+$/i.test(webOrigin)) errors.push('Web Origin 必须是 HTTPS 域名，不含路径');
   }
   if (phase === 'trial' && options.trialEnvironmentId !== environmentId) errors.push('小程序 trial 环境与 staging ID 不一致');

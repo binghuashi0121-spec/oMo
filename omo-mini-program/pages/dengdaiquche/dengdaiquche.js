@@ -13,6 +13,7 @@ const {
   AUTO_DRIVING_DEFAULT_MAX_SPEED
 } = require('../../utils/vehicleControl');
 const { callBridge, isBridgeSuccess } = require('../../utils/bridgeApi');
+const { RESPONSE_TIMEOUT_MS, responseKey, matchesPendingResponse } = require('../../utils/autoDrivingResponse');
 
 
 function shouldShowDevArrivalShortcut() {
@@ -115,6 +116,9 @@ Page({
     this._autoDrivingPlanSentAt = 0;
     this._autoDrivingStartSentAt = 0;
     this._handledResponseKey = '';
+    this._handledResponseKeys = new Set();
+    this._autoDrivingPending = null;
+    this._autoDrivingResponseTimer = null;
     this._pageBootstrapped = false;
     this._tripValidationRedirecting = false;
     this.setData({
@@ -304,7 +308,10 @@ Page({
         command
       }
     }).then((result) => {
-      if (typeof onDone === 'function') onDone(isBridgeSuccess(result));
+      const messageNo = result && result.data && result.data.payload && result.data.payload.header
+        ? String(result.data.payload.header.messageNo || '')
+        : '';
+      if (typeof onDone === 'function') onDone(isBridgeSuccess(result), messageNo);
     }).catch((err) => {
       console.warn('[MQTT] send command failed', { messageType, command, err });
       if (typeof onDone === 'function') onDone(false);
@@ -313,6 +320,27 @@ Page({
 
   stopMoveHeartbeat() {
     this._moveHeartbeatSending = false;
+  },
+
+  waitForAutoDrivingResponse(stage, messageType, sentAt) {
+    if (this._autoDrivingResponseTimer) clearTimeout(this._autoDrivingResponseTimer);
+    this._autoDrivingStage = stage;
+    this._autoDrivingPending = { stage, messageType, sentAt, commandMessageNo: '' };
+    this._autoDrivingResponseTimer = setTimeout(() => {
+      if (!this._autoDrivingPending || this._autoDrivingPending.stage !== stage) return;
+      this.failAutoDrivingFlow('车辆响应超时，自动驾驶状态未确认，请返回后检查车辆');
+      if (stage === 'start_wait') this.stopAutoDriving();
+    }, RESPONSE_TIMEOUT_MS);
+  },
+
+  failAutoDrivingFlow(message) {
+    if (this._autoDrivingResponseTimer) clearTimeout(this._autoDrivingResponseTimer);
+    this._autoDrivingResponseTimer = null;
+    this._autoDrivingPending = null;
+    this._autoDrivingStarting = false;
+    this._autoDrivingStarted = false;
+    this._autoDrivingStage = 'failed';
+    this.setData({ statusText: message });
   },
 
   sendAutoDrivingPlan(onDone) {
@@ -325,9 +353,10 @@ Page({
       return;
     }
 
+    const hasStoredWgs84 = this.data.pickupWgs84Lat != null && this.data.pickupWgs84Lng != null;
     const storedWgs84Lat = Number(this.data.pickupWgs84Lat);
     const storedWgs84Lng = Number(this.data.pickupWgs84Lng);
-    const wgs84Point = Number.isFinite(storedWgs84Lat) && Number.isFinite(storedWgs84Lng)
+    const wgs84Point = hasStoredWgs84 && Number.isFinite(storedWgs84Lat) && Number.isFinite(storedWgs84Lng)
       ? {
         latitude: storedWgs84Lat,
         longitude: storedWgs84Lng
@@ -340,6 +369,7 @@ Page({
     }
 
     this._autoDrivingPlanSentAt = Date.now();
+    this.waitForAutoDrivingResponse('plan_wait', 'autoDriving', this._autoDrivingPlanSentAt);
     this.sendVehicleCommand(
       'autoDriving',
       buildAutoDrivingCommand(this.data.trackedUgvID, AUTO_DRIVING_OPT_PLAN, {
@@ -358,6 +388,7 @@ Page({
     }
 
     this._autoDrivingStartSentAt = Date.now();
+    this.waitForAutoDrivingResponse('start_wait', 'autoDriving', this._autoDrivingStartSentAt);
     this.sendVehicleCommand(
       'autoDriving',
       buildAutoDrivingCommand(this.data.trackedUgvID, AUTO_DRIVING_OPT_START, {
@@ -384,6 +415,7 @@ Page({
     if (
       this._autoDrivingStarted ||
       this._autoDrivingStarting ||
+      this._autoDrivingStage === 'failed' ||
       !this.data.trackedUgvID ||
       !Number.isFinite(this.data.pickupLat) ||
       !Number.isFinite(this.data.pickupLng)
@@ -398,58 +430,23 @@ Page({
     this._autoDrivingPlanSentAt = 0;
     this._autoDrivingStartSentAt = 0;
     this._handledResponseKey = '';
+    this._handledResponseKeys = new Set();
     this.setData({ statusText: '正在请求车辆进入自动驾驶模式...' });
+
+    this.waitForAutoDrivingResponse('mode_wait', 'ugvSetMode', this._autoDrivingFlowStartedAt);
 
     this.sendVehicleCommand(
       'ugvSetMode',
       buildModeCommand(this.data.trackedUgvID, 2),
-      (modeOk) => {
+      (modeOk, messageNo) => {
         if (!modeOk) {
-          this.setData({
-            statusText: '自动驾驶模式切换指令发送失败，请重试',
-          });
-          this._autoDrivingStarting = false;
-          this._autoDrivingStage = '';
+          this.failAutoDrivingFlow('自动驾驶模式切换指令发送失败，请返回后重试');
           return;
         }
-
+        if (this._autoDrivingPending?.stage === 'mode_wait') this._autoDrivingPending.commandMessageNo = messageNo;
         this.setData({
           statusText: '已发送自动驾驶模式切换，等待车辆响应...',
           latestResponseText: ''
-        });
-        this._autoDrivingStage = 'plan_wait';
-
-        this.sendAutoDrivingPlan((planOk) => {
-          if (!planOk) {
-            this.setData({
-              statusText: '路径规划请求发送失败，请重试',
-            });
-            this._autoDrivingStarting = false;
-            this._autoDrivingStage = '';
-            return;
-          }
-
-          this.setData({
-            statusText: '已发送路径规划请求，等待车辆响应...'
-          });
-
-          return;
-          setTimeout(() => {
-            this.sendAutoDrivingStart((startOk) => {
-              this._autoDrivingStarting = false;
-              this._autoDrivingStarted = !!startOk;
-              if (!startOk) {
-                this.setData({
-                  statusText: '自动驾驶启动指令发送失败，请重试',
-                });
-                return;
-              }
-
-              this.setData({
-                statusText: '已发送自动驾驶启动请求，等待车辆响应...'
-              });
-            });
-          }, 300);
         });
       }
     );
@@ -590,12 +587,15 @@ Page({
 
   clearAllTimers() {
     this.stopMoveHeartbeat();
+    if (this._autoDrivingResponseTimer) clearTimeout(this._autoDrivingResponseTimer);
     if (this._waitTimer) clearInterval(this._waitTimer);
     if (this._vehicleTimer) clearInterval(this._vehicleTimer);
     if (this._planTimer) clearInterval(this._planTimer);
     this._waitTimer = null;
     this._vehicleTimer = null;
     this._planTimer = null;
+    this._autoDrivingResponseTimer = null;
+    this._autoDrivingPending = null;
     this._vehicleStatusRequesting = false;
   },
 
@@ -655,11 +655,21 @@ Page({
       responsePayload.timestamp ??
       0
     );
-    const retCode = Number(responsePayload.ret_code);
+    const retCode = Object.prototype.hasOwnProperty.call(responsePayload, 'ret_code')
+      ? Number(responsePayload.ret_code)
+      : NaN;
     const totalDistance = Number(responsePayload.total_distance);
+    const correlationMessageNo = String(
+      responsePayload.requestMessageNo ??
+      responsePayload.request_message_no ??
+      responsePayload.commandMessageNo ??
+      responsePayload.command_message_no ??
+      ''
+    );
 
     return {
       messageNo: header.messageNo ? String(header.messageNo) : '',
+      correlationMessageNo,
       messageType: header.messageType ? String(header.messageType) : '',
       responseAt: Number.isFinite(responseAt) ? responseAt : 0,
       retCode: Number.isFinite(retCode) ? retCode : null,
@@ -674,18 +684,6 @@ Page({
           : '',
       payload: responsePayload
     };
-  },
-
-  getVehicleResponseKey(response) {
-    if (!response) return '';
-
-    return [
-      response.messageType || '',
-      response.messageNo || '',
-      response.responseAt || '',
-      response.retCode === null ? '' : response.retCode,
-      response.retMsg || ''
-    ].join('|');
   },
 
   buildResponseStatusText(response) {
@@ -728,118 +726,39 @@ Page({
   },
 
   applyVehicleResponse(response) {
-    const responseKey = this.getVehicleResponseKey(response);
-    if (!responseKey || responseKey === this._handledResponseKey) {
-      return;
-    }
-
-    const responseAt = Number(response && response.responseAt);
-    const flowStartedAt = Number(this._autoDrivingFlowStartedAt || 0);
-    const planSentAt = Number(this._autoDrivingPlanSentAt || 0);
-    const startSentAt = Number(this._autoDrivingStartSentAt || 0);
-
-    if (
-      this._autoDrivingStarting &&
-      Number.isFinite(responseAt) &&
-      responseAt > 0 &&
-      flowStartedAt > 0 &&
-      responseAt < flowStartedAt
-    ) {
-      return;
-    }
-
-    if (
-      response &&
-      response.messageType === 'autoDriving' &&
-      this._autoDrivingStage === 'plan_wait' &&
-      Number.isFinite(responseAt) &&
-      responseAt > 0 &&
-      planSentAt > 0 &&
-      responseAt < planSentAt
-    ) {
-      return;
-    }
-
-    if (
-      response &&
-      response.messageType === 'autoDriving' &&
-      this._autoDrivingStage === 'start_wait' &&
-      Number.isFinite(responseAt) &&
-      responseAt > 0 &&
-      startSentAt > 0 &&
-      responseAt < startSentAt
-    ) {
-      return;
-    }
-
-    this._handledResponseKey = responseKey;
+    const pending = this._autoDrivingPending;
+    if (!matchesPendingResponse(response, pending, this._handledResponseKeys || new Set())) return;
+    const stage = pending.stage;
+    this._handledResponseKeys.add(responseKey(response));
+    if (this._autoDrivingResponseTimer) clearTimeout(this._autoDrivingResponseTimer);
+    this._autoDrivingResponseTimer = null;
+    this._autoDrivingPending = null;
 
     const statusText = this.buildResponseStatusText(response);
-    const nextData = {
-      latestResponseText: statusText
-    };
-
-    if (statusText) {
-      nextData.statusText = statusText;
-    }
-
-    if (
-      Number.isFinite(response && response.totalDistance) &&
-      response.totalDistance > 0
-    ) {
+    const nextData = { latestResponseText: statusText, statusText };
+    if (stage === 'plan_wait' && response.totalDistance > 0) {
       nextData.distanceText = this.formatDistance(response.totalDistance);
-      nextData.liveDistanceText = this.formatDistance(response.totalDistance);
+      nextData.liveDistanceText = nextData.distanceText;
     }
-
     this.setData(nextData);
-
-    if (response.retCode !== null && response.retCode !== 0) {
-      if (this._autoDrivingStarting) {
-        this._autoDrivingStarting = false;
-        this._autoDrivingStage = '';
-      }
+    if (response.retCode !== 0) {
+      this.failAutoDrivingFlow(statusText || '车辆拒绝自动驾驶指令，请返回后检查车辆');
       return;
     }
 
-    if (response.messageType === 'ugvSetMode' && this._autoDrivingStage === '__ignore_ugv_set_mode_response__') {
-      this._autoDrivingStage = 'plan_wait';
-      this.sendAutoDrivingPlan((planOk) => {
-        if (!planOk) {
-          this._autoDrivingStarting = false;
-          this._autoDrivingStage = '';
-          this.setData({
-            statusText: '路径规划请求发送失败，请重试',
-          });
-          return;
-        }
-
-        this.setData({
-          statusText: '已发送路径规划请求，等待车辆响应...'
-        });
+    if (stage === 'mode_wait') {
+      this.sendAutoDrivingPlan((ok, messageNo) => {
+        if (!ok) return this.failAutoDrivingFlow('路径规划请求发送失败，请返回后重试');
+        if (this._autoDrivingPending?.stage === 'plan_wait') this._autoDrivingPending.commandMessageNo = messageNo;
+        this.setData({ statusText: '已发送路径规划请求，等待车辆响应...' });
       });
-      return;
-    }
-
-    if (response.messageType === 'autoDriving' && this._autoDrivingStage === 'plan_wait') {
-      this._autoDrivingStage = 'start_wait';
-      this.sendAutoDrivingStart((startOk) => {
-        if (!startOk) {
-          this._autoDrivingStarting = false;
-          this._autoDrivingStage = '';
-          this.setData({
-            statusText: '自动驾驶启动指令发送失败，请重试',
-          });
-          return;
-        }
-
-        this.setData({
-          statusText: '已发送自动驾驶启动请求，等待车辆响应...'
-        });
+    } else if (stage === 'plan_wait') {
+      this.sendAutoDrivingStart((ok, messageNo) => {
+        if (!ok) return this.failAutoDrivingFlow('自动驾驶启动指令发送失败，请返回后重试');
+        if (this._autoDrivingPending?.stage === 'start_wait') this._autoDrivingPending.commandMessageNo = messageNo;
+        this.setData({ statusText: '已发送自动驾驶启动请求，等待车辆响应...' });
       });
-      return;
-    }
-
-    if (response.messageType === 'autoDriving' && this._autoDrivingStage === 'start_wait') {
+    } else if (stage === 'start_wait') {
       this._autoDrivingStarting = false;
       this._autoDrivingStarted = true;
       this._autoDrivingStage = 'running';

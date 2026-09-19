@@ -15,8 +15,8 @@ function validateProtocolCommand(ugvID, messageType, command) {
   }
   if (messageType === 'ugvSetMove') {
     if (!hasOnlyKeys(command, ['ugvID', 'speed', 'angle'])) return 'ugvSetMove contains unknown fields';
-    if (!Number.isFinite(Number(command.speed)) || Math.abs(Number(command.speed)) > 5) return 'ugvSetMove.speed is invalid';
-    if (!Number.isFinite(Number(command.angle)) || Math.abs(Number(command.angle)) > 180) return 'ugvSetMove.angle is invalid';
+    if (typeof command.speed !== 'number' || !Number.isFinite(command.speed) || Math.abs(command.speed) > 1) return 'ugvSetMove.speed is invalid';
+    if (typeof command.angle !== 'number' || !Number.isFinite(command.angle) || Math.abs(command.angle) > 1) return 'ugvSetMove.angle is invalid';
   }
   if (messageType === 'autoDriving') {
     if (!hasOnlyKeys(command, ['ugvID', 'opt_mode', 'longitude', 'latitude', 'upload', 'file_url', 'max_speed'])) return 'autoDriving contains unknown fields';

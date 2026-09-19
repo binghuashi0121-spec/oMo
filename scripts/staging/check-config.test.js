@@ -5,11 +5,12 @@ const manifest = require('../../deploy/staging/manifest.json');
 const { resolveSimulatorConfig } = require('./simulator-config');
 const { assertTarget, collections, indexSpecs, seeds, indexDefinition, verify } = require('./provision-nosql');
 const { validatePassword, createStagingAdmin } = require('./bootstrap-admin-cli');
+const { validatePassword: validateResetPassword, resetStagingAdmin } = require('./reset-admin-password-cli');
 const { resolveBrokerSmokeConfig } = require('./broker-smoke');
 
 const valid = {
   phase: 'deploy', environmentId: manifest.environmentId,
-  environmentName: 'omo-platform-staging', brokerUrl: 'mqtts://staging.example.test:8883',
+  environmentName: 'omo-platform-staging', brokerUrl: '',
   webOrigin: 'https://staging.example.test',
   tcbEnv: manifest.environmentId, cloudbaseEnvId: manifest.environmentId,
 };
@@ -26,10 +27,18 @@ test('deployment rejects missing, production and mismatched environments', () =>
   assert.match(validateStagingConfig(manifest, { ...valid, tcbEnv: 'another-env' }).join(' '), /TCB_ENV/);
 });
 
-test('deployment requires TLS broker and HTTPS Web origin', () => {
-  assert.match(validateStagingConfig(manifest, { ...valid, brokerUrl: 'mqtt://example.test:1883' }).join(' '), /TLS/);
+test('blocked deployment rejects a Broker URL and requires HTTPS Web origin', () => {
+  assert.match(validateStagingConfig(manifest, { ...valid, brokerUrl: 'mqtt://example.test:1883' }).join(' '), /不得配置 Broker/);
   assert.match(validateStagingConfig(manifest, { ...valid, webOrigin: 'http://example.test' }).join(' '), /HTTPS/);
   assert.deepEqual(validateStagingConfig(manifest, valid), []);
+});
+
+test('staging manifest keeps unknown vendor units and disables MQTT', () => {
+  assert.equal(manifest.mqtt.telemetrySpeedUnit, 'unknown');
+  assert.equal(manifest.mqtt.coordSystem, 'unknown');
+  assert.equal(manifest.mqtt.connectionEnabled, false);
+  assert.equal(manifest.mqtt.commandsEnabled, false);
+  assert.match(validateStagingConfig({ ...manifest, mqtt: { ...manifest.mqtt, telemetrySpeedUnit: 'kph' } }).join(' '), /unknown/);
 });
 
 test('trial must resolve to the same staging environment', () => {
@@ -114,6 +123,32 @@ test('staging admin rejects weak or mismatched passwords before any write', asyn
   await assert.rejects(createStagingAdmin(run, async () => (++readCount === 1 ? 'Local-Only-Initial-A1' : 'Local-Only-Initial-B2'),
     async () => 'hash'), /不一致/);
   assert.deepEqual(calls, ['QUERY']);
+});
+
+test('staging admin reset forces password change and invalidates existing sessions', async () => {
+  validateResetPassword('Local-Only-Reset-A1');
+  assert.throws(() => validateResetPassword('weak'), /12–128/);
+  const user = { _id: 'admin-1', username: 'staging_admin', active: true, passwordHash: 'old', mustChangePassword: false };
+  const sessions = [{ _id: 'session-1', userId: 'admin-1' }];
+  const run = (_table, command, type) => {
+    if (type === 'QUERY' && command.find === 'admin_users') return [{ ...user }];
+    if (type === 'UPDATE') {
+      Object.assign(user, command.updates[0].u.$set);
+      return [];
+    }
+    if (type === 'QUERY' && command.find === 'admin_sessions') return sessions.map((item) => ({ ...item }));
+    if (type === 'DELETE') {
+      sessions.splice(0, sessions.length);
+      return [];
+    }
+    throw new Error('unexpected operation');
+  };
+  let reads = 0;
+  const result = await resetStagingAdmin(run, async () => (++reads === 1 ? 'Local-Only-Reset-A1' : 'Local-Only-Reset-A1'), async () => '$argon2id$new');
+  assert.equal(result.sessionsInvalidated, 1);
+  assert.equal(user.passwordHash, '$argon2id$new');
+  assert.equal(user.mustChangePassword, true);
+  assert.equal(sessions.length, 0);
 });
 
 test('Broker smoke configuration requires separate credentials and the same TLS endpoint', () => {

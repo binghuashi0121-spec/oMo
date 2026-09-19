@@ -8,7 +8,8 @@ const cloudbase = require('@cloudbase/node-sdk');
 const { registerTripGatewayRoutes } = require('./tripGateway');
 const { getTrustedCloudBaseIdentity } = require('./cloudbaseIdentity');
 const { validateProtocolCommand, getTripVehicleIdentity } = require('./commandPolicy');
-const { assertStagingMqttConfig } = require('./stagingMqttPolicy');
+const { speedToKph } = require('./telemetryPolicy');
+const { resolveMqttRuntimeConfig, isCommandRuntimeEnabled, getCommandRuntimeBlockedReasons } = require('./mqttRuntimePolicy');
 
 const app = express();
 app.use(express.json({ limit: '64kb' }));
@@ -26,21 +27,15 @@ const DEFAULT_SCENIC_AREA_ID = /^[A-Za-z0-9_-]{2,64}$/.test(String(process.env.D
   ? String(process.env.DEFAULT_SCENIC_AREA_ID)
   : 'tianmashan';
 
-// MQTT config from env
-const MQTT_URL = process.env.MQTT_URL || 'mqtt://127.0.0.1:1883';
-const MQTT_USERNAME = process.env.MQTT_USERNAME || '';
-const MQTT_PASSWORD = process.env.MQTT_PASSWORD || '';
-const MQTT_CLIENT_ID =
-  process.env.MQTT_CLIENT_ID || `mqtt-bridge-${Date.now()}`;
-assertStagingMqttConfig(process.env);
-
-// Configurable subscribe topics
-// Default based on teacher's doc: ugv/+/device (status), ugv/+/response (cmd response)
-const DEFAULT_SUB_TOPICS = ['ugv/+/device', 'ugv/+/response'];
-const SUB_TOPICS = (process.env.MQTT_SUB_TOPICS || DEFAULT_SUB_TOPICS.join(','))
-  .split(',')
-  .map((s) => s.trim())
-  .filter(Boolean);
+// Resolve before creating a client. vendor_real may intentionally boot in a blocked state.
+const mqttRuntime = resolveMqttRuntimeConfig(process.env);
+const MQTT_URL = mqttRuntime.url;
+const MQTT_USERNAME = mqttRuntime.username;
+const MQTT_PASSWORD = mqttRuntime.password;
+const MQTT_CLIENT_ID = mqttRuntime.clientId;
+const MQTT_TELEMETRY_SPEED_UNIT = mqttRuntime.telemetrySpeedUnit;
+const MQTT_COORD_SYSTEM = mqttRuntime.coordSystem;
+const SUB_TOPICS = mqttRuntime.subscribeTopics;
 
 function disableCloudbaseMetadataProbe() {
   if (!TCB_DISABLE_METADATA_PROBE) {
@@ -320,8 +315,28 @@ function convertWgs84ToGcj02(lat, lng) {
   };
 }
 
+function normalizeTelemetryCoordinates(rawLatitude, rawLongitude, coordSystem) {
+  if (!Number.isFinite(rawLatitude) || !Number.isFinite(rawLongitude)) return null;
+  if (coordSystem === 'unknown') {
+    return { sourceCoordSystem: 'unknown', display: null, wgs84: null, gcj02: null };
+  }
+  if (coordSystem === 'gcj02') {
+    const gcj02 = { latitude: rawLatitude, longitude: rawLongitude };
+    return { sourceCoordSystem: 'gcj02', display: gcj02, wgs84: null, gcj02 };
+  }
+  const converted = convertWgs84ToGcj02(rawLatitude, rawLongitude);
+  const wgs84 = { latitude: rawLatitude, longitude: rawLongitude };
+  const gcj02 = converted ? { latitude: converted.latitude, longitude: converted.longitude } : null;
+  return { sourceCoordSystem: 'wgs84', display: gcj02, wgs84, gcj02 };
+}
+
 // ---- MQTT client ----
-const mqttClient = mqtt.connect(MQTT_URL, {
+let mqttClient = null;
+let mqttState = mqttRuntime.connectionEnabled ? 'connecting' : 'blocked';
+
+if (mqttRuntime.connectionEnabled) {
+mqttClient = mqtt.connect(MQTT_URL, {
+  protocolVersion: 5,
   clientId: MQTT_CLIENT_ID,
   username: MQTT_USERNAME,
   password: MQTT_PASSWORD,
@@ -332,6 +347,7 @@ const mqttClient = mqtt.connect(MQTT_URL, {
 
 mqttClient.on('connect', () => {
   mqttConnected = true;
+  mqttState = 'connected';
   lastMqttError = null;
   console.log(`[MQTT] connected: ${MQTT_URL}`);
 
@@ -346,16 +362,19 @@ mqttClient.on('connect', () => {
 
 mqttClient.on('reconnect', () => {
   mqttConnected = false;
+  mqttState = 'connecting';
   console.log('[MQTT] reconnecting...');
 });
 
 mqttClient.on('close', () => {
   mqttConnected = false;
+  if (mqttState !== 'error') mqttState = 'connecting';
   console.log('[MQTT] connection closed');
 });
 
 mqttClient.on('error', (err) => {
   mqttConnected = false;
+  mqttState = 'error';
   lastMqttError = err.message;
   console.error('[MQTT] error:', err.message);
 });
@@ -471,25 +490,39 @@ mqttClient.on('message', async (topic, payloadBuffer) => {
     } else {
       const rawLatitude = packetPayload ? Number(packetPayload.latitude ?? packetPayload.lat) : NaN;
       const rawLongitude = packetPayload ? Number(packetPayload.longitude ?? packetPayload.lng) : NaN;
-      const speed = packetPayload ? Number(packetPayload.speed ?? 0) : NaN;
+      const rawSpeed = packetPayload ? packetPayload.speed : null;
+      const speedKph = speedToKph(rawSpeed, MQTT_TELEMETRY_SPEED_UNIT);
       const reportTimestamp = Number(
         packetHeader?.timestamp ??
         packetPayload?.timestamp ??
         now
       );
-      const convertedCoords = convertWgs84ToGcj02(rawLatitude, rawLongitude);
+      const coordinates = normalizeTelemetryCoordinates(rawLatitude, rawLongitude, MQTT_COORD_SYSTEM);
+      const displayCoords = coordinates?.display || null;
       const normalizedPayload = packetPayload && typeof packetPayload === 'object'
         ? {
             ...packetPayload,
-            latitude: convertedCoords ? convertedCoords.latitude : packetPayload.latitude,
-            longitude: convertedCoords ? convertedCoords.longitude : packetPayload.longitude,
-            lat: convertedCoords ? convertedCoords.latitude : packetPayload.lat,
-            lng: convertedCoords ? convertedCoords.longitude : packetPayload.lng,
+            latitude: displayCoords ? displayCoords.latitude : packetPayload.latitude,
+            longitude: displayCoords ? displayCoords.longitude : packetPayload.longitude,
+            lat: displayCoords ? displayCoords.latitude : packetPayload.lat,
+            lng: displayCoords ? displayCoords.longitude : packetPayload.lng,
             rawLatitude: Number.isFinite(rawLatitude) ? rawLatitude : packetPayload.rawLatitude,
             rawLongitude: Number.isFinite(rawLongitude) ? rawLongitude : packetPayload.rawLongitude,
-            coordSystem: convertedCoords && convertedCoords.converted ? 'gcj02' : 'wgs84'
+            rawSpeed,
+            telemetrySpeedUnit: MQTT_TELEMETRY_SPEED_UNIT,
+            sourceCoordSystem: MQTT_COORD_SYSTEM,
+            coordSystem: displayCoords ? 'gcj02' : 'unknown'
           }
         : packetPayload;
+      if (normalizedPayload && !displayCoords && MQTT_COORD_SYSTEM === 'unknown') {
+        delete normalizedPayload.latitude;
+        delete normalizedPayload.longitude;
+        delete normalizedPayload.lat;
+        delete normalizedPayload.lng;
+      }
+      if (normalizedPayload && speedKph === null && MQTT_TELEMETRY_SPEED_UNIT === 'unknown') {
+        delete normalizedPayload.speed;
+      }
 
       updateData.latestTopic = topic;
       updateData.latestPayload = parsedPayload && typeof parsedPayload === 'object'
@@ -514,22 +547,32 @@ mqttClient.on('message', async (topic, payloadBuffer) => {
         }
       }
 
-      if (convertedCoords && Number.isFinite(convertedCoords.latitude) && Number.isFinite(convertedCoords.longitude)) {
-        updateData.lat = convertedCoords.latitude;
-        updateData.lng = convertedCoords.longitude;
-        updateData.latitude = convertedCoords.latitude;
-        updateData.longitude = convertedCoords.longitude;
-        updateData.positionGcj02 = { latitude: convertedCoords.latitude, longitude: convertedCoords.longitude };
+      if (displayCoords) {
+        updateData.lat = displayCoords.latitude;
+        updateData.lng = displayCoords.longitude;
+        updateData.latitude = displayCoords.latitude;
+        updateData.longitude = displayCoords.longitude;
+        updateData.positionGcj02 = displayCoords;
       }
       if (Number.isFinite(rawLatitude) && Number.isFinite(rawLongitude)) {
         updateData.rawLatitude = rawLatitude;
         updateData.rawLongitude = rawLongitude;
-        updateData.sourceCoordSystem = 'wgs84';
-        updateData.positionWgs84 = { latitude: rawLatitude, longitude: rawLongitude };
+        updateData.sourceCoordSystem = MQTT_COORD_SYSTEM;
+        if (coordinates?.wgs84) updateData.positionWgs84 = coordinates.wgs84;
+        if (MQTT_COORD_SYSTEM === 'unknown') {
+          updateData.lat = null;
+          updateData.lng = null;
+          updateData.latitude = null;
+          updateData.longitude = null;
+          updateData.positionGcj02 = null;
+        }
       }
-      if (Number.isFinite(speed)) {
-        updateData.speed = speed;
-        updateData.speedKph = speed;
+      if (speedKph !== null) {
+        updateData.speed = rawSpeed;
+        updateData.speedKph = speedKph;
+      } else if (MQTT_TELEMETRY_SPEED_UNIT === 'unknown') {
+        updateData.speed = null;
+        updateData.speedKph = null;
       }
       if (Number.isFinite(reportTimestamp)) {
         updateData.lastReportAt = reportTimestamp;
@@ -552,6 +595,7 @@ mqttClient.on('message', async (topic, payloadBuffer) => {
     console.error('[DB] upsert vehicles failed:', dbErr.message);
   }
 });
+}
 
 // ---- Routes ----
 app.use((req, res, next) => {
@@ -564,18 +608,28 @@ app.use((req, res, next) => {
 
 // health check
 function handleHealth(req, res) {
+  const commandsEnabled = isCommandRuntimeEnabled(mqttRuntime);
   res.json({
     ok: true,
     service: 'mqtt-bridge-service',
     time: new Date().toISOString(),
     mqtt: {
       connected: mqttConnected,
+      state: mqttState,
+      profile: mqttRuntime.profile,
+      blockedReasons: mqttRuntime.blockedReasons,
+      allowedVehicleCount: mqttRuntime.allowedUgvIds.length,
       clientId: MQTT_CLIENT_ID,
       subTopics: SUB_TOPICS,
       lastError: lastMqttError,
       lastMessageAt,
       lastMessageTopic,
       lastMessageUgvID
+    },
+    commands: {
+      enabled: commandsEnabled,
+      blockedReasons: commandsEnabled ? [] : getCommandRuntimeBlockedReasons(mqttRuntime),
+      controlWindowExpiresAt: mqttRuntime.controlWindowExpiresAt
     },
     cloudbase: cloudbaseConfigStatus
   });
@@ -613,6 +667,22 @@ async function handleSendCommand(req, res) {
     }
     if (!/^[A-Za-z0-9_-]{1,64}$/.test(ugvID)) {
       return res.status(400).json({ code: 'BRIDGE_INVALID_VEHICLE', msg: 'Invalid ugvID', data: null, ok: false, message: 'Invalid ugvID', requestId });
+    }
+    if (!isCommandRuntimeEnabled(mqttRuntime)) {
+      return res.status(503).json({
+        code: 'BRIDGE_COMMANDS_DISABLED',
+        msg: 'Vehicle commands are disabled for this deployment',
+        data: { blockedReasons: getCommandRuntimeBlockedReasons(mqttRuntime) },
+        ok: false,
+        message: 'Vehicle commands are disabled for this deployment',
+        requestId
+      });
+    }
+    if (mqttRuntime.allowedUgvIds.length && !mqttRuntime.allowedUgvIds.includes(ugvID)) {
+      return res.status(403).json({ code: 'BRIDGE_VEHICLE_NOT_ALLOWLISTED', msg: 'Vehicle is not allowlisted', data: null, ok: false, message: 'Vehicle is not allowlisted', requestId });
+    }
+    if (!mqttRuntime.allowedCommandTypes.has(String(messageType || ''))) {
+      return res.status(400).json({ code: 'BRIDGE_COMMAND_NOT_ALLOWED', msg: 'messageType is disabled for this profile', data: null, ok: false, message: 'messageType is disabled for this profile', requestId });
     }
     const validationError = validateProtocolCommand(ugvID, String(messageType || ''), command);
     if (validationError) {
