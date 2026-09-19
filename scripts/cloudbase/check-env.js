@@ -20,8 +20,8 @@ function extractEnvValue(text, key) {
 }
 
 function main() {
-  const appJsPath = resolveProjectPath('app.js');
-  const mqttEnvPath = resolveProjectPath('mqtt-bridge', '.env');
+  const appJsPath = resolveProjectPath('omo-mini-program', 'app.js');
+  const mqttEnvPath = resolveProjectPath('omo-mqtt-bridge', '.env');
 
   if (!fs.existsSync(appJsPath)) {
     throw new Error(`app.js not found: ${appJsPath}`);
@@ -45,9 +45,9 @@ function main() {
   }
 
   console.log(`[INFO] app.js CLOUD_ENV_ID = ${cloudEnvId}`);
-  console.log(`[INFO] mqtt-bridge/.env TCB_ENV = ${tcbEnv || '(missing .env or TCB_ENV)'}`);
-  console.log(`[INFO] mqtt-bridge/.env TENCENTCLOUD_SECRETID configured = ${Boolean(secretId)}`);
-  console.log(`[INFO] mqtt-bridge/.env TENCENTCLOUD_SECRETKEY configured = ${Boolean(secretKey)}`);
+  console.log(`[INFO] omo-mqtt-bridge/.env TCB_ENV = ${tcbEnv || '(missing .env or TCB_ENV)'}`);
+  console.log(`[INFO] omo-mqtt-bridge/.env TENCENTCLOUD_SECRETID configured = ${Boolean(secretId)}`);
+  console.log(`[INFO] omo-mqtt-bridge/.env TENCENTCLOUD_SECRETKEY configured = ${Boolean(secretKey)}`);
 
   if (tcbEnv && tcbEnv !== cloudEnvId) {
     console.error('[FAIL] CLOUD_ENV_ID and TCB_ENV are not equal.');
@@ -55,7 +55,7 @@ function main() {
   }
 
   if (!secretId || !secretKey) {
-    console.error('[FAIL] TENCENTCLOUD_SECRETID/TENCENTCLOUD_SECRETKEY must both be configured in mqtt-bridge/.env.');
+    console.error('[FAIL] TENCENTCLOUD_SECRETID/TENCENTCLOUD_SECRETKEY must both be configured in omo-mqtt-bridge/.env.');
     process.exit(1);
   }
 

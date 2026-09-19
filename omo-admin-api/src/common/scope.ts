@@ -1,0 +1,3 @@
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
+export function resolveScenicScope(contextScope: string | undefined, requested: string | undefined, allowAll = true) { const context = contextScope || 'all'; const target = requested || context; if (context !== 'all' && target !== context) throw new ForbiddenException('禁止跨景区访问'); if (!allowAll && target === 'all') throw new NotFoundException('该接口必须指定具体景区'); return target; }
+export function assertEntityScope(contextScope: string | undefined, entityScenicAreaId: string) { if (contextScope && contextScope !== 'all' && contextScope !== entityScenicAreaId) throw new NotFoundException('记录不存在或不属于当前景区'); }

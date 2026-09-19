@@ -4,7 +4,7 @@ const path = require('path');
 const { spawn, spawnSync } = require('child_process');
 const { resolveProjectPath } = require('../cloudbase/utils');
 
-const MQTT_BRIDGE_DIR = resolveProjectPath('mqtt-bridge');
+const MQTT_BRIDGE_DIR = resolveProjectPath('omo-mqtt-bridge');
 const RUN_DIR = path.join(MQTT_BRIDGE_DIR, 'run');
 const PID_FILE = path.join(RUN_DIR, 'mqtt-bridge.pid');
 const STDOUT_LOG = path.join(RUN_DIR, 'mqtt-bridge.stdout.log');

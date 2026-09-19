@@ -1,0 +1,19 @@
+{
+  "collections": [
+    "scenic_areas",
+    "admin_users",
+    "admin_sessions",
+    "admin_audit_logs",
+    "admin_order_notes",
+    "financial_adjustments",
+    "vehicle_commands"
+  ],
+  "existingCollectionsExtended": [
+    "vehicles",
+    "trips",
+    "trip_runtime",
+    "trip_settlements",
+    "mqtt_logs",
+    "command_history"
+  ]
+}

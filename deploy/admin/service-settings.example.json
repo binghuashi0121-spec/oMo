@@ -1,0 +1,26 @@
+{
+  "$comment": "Non-secret staging settings checklist; actual values are configured in CloudBase. Not an executable deployment file.",
+  "serviceName": "admin-api-staging",
+  "source": "omo-admin-api",
+  "port": 3001,
+  "runtime": "nodejs22",
+  "access": "HTTP gateway",
+  "minInstances": 1,
+  "maxInstances": 1,
+  "environment": {
+    "NODE_ENV": "production",
+    "DATA_DRIVER": "cloudbase",
+    "COOKIE_SECURE": "true",
+    "CLOUDBASE_ENV_ID": "omo-platform-staging-d5a30d0fd8f",
+    "DEV_BOOTSTRAP_ADMIN_ENABLED": "false",
+    "ADMIN_WEB_ORIGIN": "https://<staging-default-domain>",
+    "MQTT_BRIDGE_HEALTH_URL": "<same-environment-private-health-url>"
+  },
+  "secretsExcluded": [
+    "BOOTSTRAP_ADMIN_PASSWORD",
+    "TENCENTCLOUD_SECRETID",
+    "TENCENTCLOUD_SECRETKEY",
+    "MQTT_PASSWORD",
+    "VITE_TENCENT_MAP_KEY"
+  ]
+}

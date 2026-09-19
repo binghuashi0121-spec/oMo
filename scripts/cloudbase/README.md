@@ -10,9 +10,9 @@ npm run cloudbase:check-env
 
 This checks:
 - `app.js` -> `CLOUD_ENV_ID`
-- `mqtt-bridge/.env` -> `TCB_ENV`
-- `mqtt-bridge/.env` -> `TENCENTCLOUD_SECRETID`
-- `mqtt-bridge/.env` -> `TENCENTCLOUD_SECRETKEY`
+- `omo-mqtt-bridge/.env` -> `TCB_ENV`
+- `omo-mqtt-bridge/.env` -> `TENCENTCLOUD_SECRETID`
+- `omo-mqtt-bridge/.env` -> `TENCENTCLOUD_SECRETKEY`
 
 `CLOUD_ENV_ID` and `TCB_ENV` must be the same value, and the CAM secret pair must both be configured.
 
@@ -75,7 +75,7 @@ Use `index-specs.json` as source of truth:
 ## 7) Manual deployment checklist
 
 1. Deploy cloud functions: `checkActiveTrip`, `endTrip`, `loginWithPhone`, `sendSms`, `unlockVehicle`, `updateTripData`, `wechatLogin`
-2. Deploy `mqtt-bridge` cloud hosting service
+2. Deploy `omo-mqtt-bridge` cloud hosting service
 3. Set cloud hosting env vars:
    - `MQTT_URL`
    - `MQTT_USERNAME`
