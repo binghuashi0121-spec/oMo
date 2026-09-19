@@ -109,6 +109,15 @@ test('vendor real profile boots blocked without credentials, topics or commands'
   assert.equal(isCommandRuntimeEnabled(config), false);
 });
 
+test('production image without runtime configuration fails closed', () => {
+  const config = resolveMqttRuntimeConfig({ NODE_ENV: 'production' });
+  assert.equal(config.profile, 'safe_blocked');
+  assert.equal(config.connectionEnabled, false);
+  assert.equal(config.commandsEnabled, false);
+  assert.deepEqual(config.subscribeTopics, []);
+  assert.ok(config.blockedReasons.includes('runtime_configuration_missing'));
+});
+
 test('vendor real profile uses exact vehicle topics and requires explicit plaintext approval', () => {
   const base = {
     OMO_STAGING_MODE: 'true',
