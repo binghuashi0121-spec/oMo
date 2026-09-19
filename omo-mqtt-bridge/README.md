@@ -25,6 +25,7 @@
 | `DEFAULT_SCENIC_AREA_ID` | 否 | 未预配置旧设备的兼容景区，默认 `tianmashan`；新设备应先在 `vehicles` 中显式绑定景区 |
 | `ALLOW_WX_DEVTOOLS` | 否 | 仅开发联调可设为 `true`，生产保持 `false` |
 | `TENCENTCLOUD_SECRETID` / `TENCENTCLOUD_SECRETKEY` | 仅本地 | 云内优先使用服务身份，不把固定密钥写入镜像 |
+| `CLOUDBASE_RUNTIME_AUTH` | 云托管必需 | 云托管内设为 `true`，使用工作负载身份并避免上传固定 CAM 密钥 |
 | `MQTT_SUB_TOPICS` | 否 | 默认 `ugv/+/device,ugv/+/response` |
 | `MQTT_PROFILE` | staging 必需 | 真实平台使用 `vendor_real`；旧模拟环境使用 `isolated_simulator` |
 | `MQTT_CONNECTION_ENABLED` | 真实平台必需 | 默认关闭；关闭时服务启动但不创建 MQTT 连接 |

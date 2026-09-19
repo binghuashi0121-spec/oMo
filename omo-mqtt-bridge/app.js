@@ -23,6 +23,7 @@ const DB_QUERY_TIMEOUT_MS = Number(process.env.DB_QUERY_TIMEOUT_MS || 8000);
 const VEHICLE_STATUS_STALE_MS = Number(process.env.VEHICLE_STATUS_STALE_MS || 60 * 1000);
 const VEHICLE_STATUS_FUTURE_TOLERANCE_MS = Number(process.env.VEHICLE_STATUS_FUTURE_TOLERANCE_MS || 5 * 1000);
 const TCB_DISABLE_METADATA_PROBE = process.env.TCB_DISABLE_METADATA_PROBE !== 'false';
+const CLOUDBASE_RUNTIME_AUTH = process.env.CLOUDBASE_RUNTIME_AUTH === 'true';
 const DEFAULT_SCENIC_AREA_ID = /^[A-Za-z0-9_-]{2,64}$/.test(String(process.env.DEFAULT_SCENIC_AREA_ID || ''))
   ? String(process.env.DEFAULT_SCENIC_AREA_ID)
   : 'tianmashan';
@@ -73,16 +74,15 @@ function getCloudbaseConfigStatus() {
   if (!TCB_ENV) {
     missingEnv.push('TCB_ENV');
   }
-  if (!TENCENTCLOUD_SECRETID) {
-    missingEnv.push('TENCENTCLOUD_SECRETID');
-  }
-  if (!TENCENTCLOUD_SECRETKEY) {
-    missingEnv.push('TENCENTCLOUD_SECRETKEY');
+  const secretPairConfigured = Boolean(TENCENTCLOUD_SECRETID && TENCENTCLOUD_SECRETKEY);
+  if (!secretPairConfigured && !CLOUDBASE_RUNTIME_AUTH) {
+    missingEnv.push('CLOUDBASE_RUNTIME_AUTH_OR_CAM_SECRET_PAIR');
   }
 
   return {
     env: TCB_ENV || '',
-    authMode: TENCENTCLOUD_SECRETID && TENCENTCLOUD_SECRETKEY ? 'secretPair' : 'none',
+    authMode: secretPairConfigured ? 'secretPair' : CLOUDBASE_RUNTIME_AUTH ? 'workloadIdentity' : 'none',
+    runtimeAuthEnabled: CLOUDBASE_RUNTIME_AUTH,
     secretIdConfigured: Boolean(TENCENTCLOUD_SECRETID),
     secretKeyConfigured: Boolean(TENCENTCLOUD_SECRETKEY),
     metadataProbeDisabled: TCB_DISABLE_METADATA_PROBE,
@@ -106,7 +106,7 @@ if (
   (!TENCENTCLOUD_SECRETID && TENCENTCLOUD_SECRETKEY)
 ) {
   console.warn('[WARN] CAM secret pair is incomplete. Both TENCENTCLOUD_SECRETID and TENCENTCLOUD_SECRETKEY are required.');
-} else if (!TENCENTCLOUD_SECRETID && !TENCENTCLOUD_SECRETKEY) {
+} else if (!TENCENTCLOUD_SECRETID && !TENCENTCLOUD_SECRETKEY && !CLOUDBASE_RUNTIME_AUTH) {
   console.warn('[WARN] CloudBase CAM auth is missing. Set both TENCENTCLOUD_SECRETID and TENCENTCLOUD_SECRETKEY.');
 }
 
