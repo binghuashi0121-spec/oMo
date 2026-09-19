@@ -6,6 +6,7 @@
     "bridge": { "name": "mqtt-bridge-staging", "source": "omo-mqtt-bridge", "port": 3000, "minInstances": 1, "maxInstances": 1, "healthPath": "/mqtt/health" },
     "adminApi": { "name": "admin-api-staging", "source": "omo-admin-api", "port": 3001, "minInstances": 1, "maxInstances": 1, "healthPath": "/api/admin/v1/live" }
   },
+  "cloudbase": { "runtimeAuth": true },
   "mqtt": {
     "profile": "vendor_real",
     "clientId": "omo-mqtt-bridge-staging",

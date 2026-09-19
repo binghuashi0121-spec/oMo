@@ -27,6 +27,7 @@ function validateStagingConfig(config = manifest, options = {}) {
   const api = config.services && config.services.adminApi;
   if (!bridge || bridge.name !== 'mqtt-bridge-staging' || bridge.port !== 3000 || bridge.minInstances !== 1 || bridge.maxInstances !== 1) errors.push('Bridge 服务名、端口或实例数不符合 staging 规格');
   if (!api || api.name !== 'admin-api-staging' || api.port !== 3001 || api.minInstances !== 1 || api.maxInstances !== 1) errors.push('Admin API 服务名、端口或实例数不符合 staging 规格');
+  if (config.cloudbase?.runtimeAuth !== true) errors.push('CloudBase 云托管必须启用工作负载身份');
   if (config.mqtt?.profile !== 'vendor_real') errors.push('staging MQTT profile 必须是 vendor_real');
   if (config.mqtt?.clientId !== 'omo-mqtt-bridge-staging') errors.push('MQTT Client ID 不符合 staging 规格');
   if (config.mqtt?.connectionEnabled !== false || config.mqtt?.commandsEnabled !== false) errors.push('当前阶段必须关闭 MQTT 连接与车辆指令');
