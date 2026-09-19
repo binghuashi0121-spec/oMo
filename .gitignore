@@ -12,6 +12,8 @@ omo-admin-api/.env
 omo-admin-api/.env.*
 !omo-admin-api/.env.example
 omo-admin-api/dist/
+omo-admin-api/public/*
+!omo-admin-api/public/.gitkeep
 coverage/
 *.tsbuildinfo
 .cloudbase-admin/
