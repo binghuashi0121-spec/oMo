@@ -1,0 +1,7 @@
+{
+  "envId": "omo-platform-staging-d5a30d0fd8f",
+  "$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
+  "cloudrun": {
+    "name": "mqtt-bridge-staging"
+  }
+}
