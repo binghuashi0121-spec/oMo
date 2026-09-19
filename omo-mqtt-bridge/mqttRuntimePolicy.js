@@ -1,7 +1,7 @@
 const STAGING_ENV_ID = 'omo-platform-staging-d5a30d0fd8f';
 const PRODUCTION_ENV_ID = 'omo-mqtt-prod-2g4zisao87d6ec54';
 const VEHICLE_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
-const VALID_PROFILES = new Set(['legacy', 'isolated_simulator', 'vendor_real']);
+const VALID_PROFILES = new Set(['legacy', 'safe_blocked', 'isolated_simulator', 'vendor_real']);
 const VALID_SPEED_UNITS = new Set(['unknown', 'mps', 'kph']);
 const VALID_COORD_SYSTEMS = new Set(['unknown', 'wgs84', 'gcj02']);
 
@@ -159,12 +159,41 @@ function resolveLegacyConfig(environment) {
   };
 }
 
+function resolveSafeBlockedConfig(environment) {
+  return {
+    profile: 'safe_blocked',
+    url: '',
+    username: '',
+    password: '',
+    clientId: String(environment.MQTT_CLIENT_ID || 'mqtt-bridge-safe-blocked'),
+    connectionEnabled: false,
+    connectionRequested: false,
+    blockedReasons: ['runtime_configuration_missing'],
+    allowedUgvIds: [],
+    subscribeTopics: [],
+    telemetrySpeedUnit: 'unknown',
+    coordSystem: 'unknown',
+    allowInsecure: false,
+    commandsRequested: false,
+    commandsEnabled: false,
+    commandBlockedReasons: ['commands_disabled', 'runtime_configuration_missing'],
+    controlWindowExpiresAt: '',
+    supervisionConfirmed: false,
+    allowedCommandTypes: new Set()
+  };
+}
+
 function resolveMqttRuntimeConfig(environment = process.env) {
-  const fallbackProfile = environment.OMO_STAGING_MODE === 'true' ? 'isolated_simulator' : 'legacy';
+  const fallbackProfile = environment.OMO_STAGING_MODE === 'true'
+    ? 'isolated_simulator'
+    : environment.NODE_ENV === 'production'
+      ? 'safe_blocked'
+      : 'legacy';
   const profile = String(environment.MQTT_PROFILE || fallbackProfile).trim();
   if (!VALID_PROFILES.has(profile)) throw new Error(`MQTT_PROFILE 无效: ${profile}`);
   if (profile === 'vendor_real') return resolveVendorRealConfig(environment);
   if (profile === 'isolated_simulator') return resolveIsolatedSimulatorConfig(environment);
+  if (profile === 'safe_blocked') return resolveSafeBlockedConfig(environment);
   return resolveLegacyConfig(environment);
 }
 
