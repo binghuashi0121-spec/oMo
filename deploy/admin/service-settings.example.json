@@ -12,17 +12,18 @@
     "DATA_DRIVER": "cloudbase",
     "COOKIE_SECURE": "true",
     "CLOUDBASE_ENV_ID": "omo-platform-staging-d5a30d0fd8f",
-    "CLOUDBASE_RUNTIME_AUTH": "true",
     "TCB_DISABLE_METADATA_PROBE": "true",
     "DEV_BOOTSTRAP_ADMIN_ENABLED": "false",
     "ADMIN_WEB_ORIGIN": "https://<staging-default-domain>",
     "MQTT_BRIDGE_HEALTH_URL": "<same-environment-private-health-url>"
   },
   "secretsExcluded": [
+    "CLOUDBASE_APIKEY",
     "BOOTSTRAP_ADMIN_PASSWORD",
     "TENCENTCLOUD_SECRETID",
     "TENCENTCLOUD_SECRETKEY",
     "MQTT_PASSWORD",
     "VITE_TENCENT_MAP_KEY"
-  ]
+  ],
+  "cloudbaseApiKeyInjection": "Enable API Key settings in CloudBase Run and select a staging-only server API Key. Never paste the key into this file."
 }
