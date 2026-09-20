@@ -33,8 +33,24 @@ export class RepositoryService implements OnModuleInit {
     if (this.driver !== 'cloudbase' || this.db) return;
     const env = this.config.get<string>('CLOUDBASE_ENV_ID');
     if (!env) throw new ServiceUnavailableException('DATA_DRIVER=cloudbase 时必须配置 CLOUDBASE_ENV_ID');
+    const secretId = this.config.get<string>('TENCENTCLOUD_SECRETID');
+    const secretKey = this.config.get<string>('TENCENTCLOUD_SECRETKEY');
+    const runtimeAuth = this.config.get('CLOUDBASE_RUNTIME_AUTH', 'false') === 'true';
+    if (Boolean(secretId) !== Boolean(secretKey)) throw new ServiceUnavailableException('CloudBase CAM 密钥对配置不完整');
+    if (!runtimeAuth && !(secretId && secretKey)) {
+      throw new ServiceUnavailableException('CloudBase 数据驱动需要 workload identity 或完整 CAM 密钥对');
+    }
+    if (this.config.get('TCB_DISABLE_METADATA_PROBE', 'true') !== 'false') {
+      try {
+        // CloudBase Run already supplies workload identity. Avoid an SDK metadata
+        // lookup that can hang behind the hosting proxy before the first DB query.
+        const metadataUtils = require('@cloudbase/node-sdk/dist/utils/metadata');
+        metadataUtils.lookupAppId = async () => '';
+      } catch (error) {
+        throw new ServiceUnavailableException(`CloudBase metadata probe guard 初始化失败: ${error instanceof Error ? error.message : 'unknown'}`);
+      }
+    }
     const options: Record<string, string> = { env };
-    const secretId = this.config.get<string>('TENCENTCLOUD_SECRETID'); const secretKey = this.config.get<string>('TENCENTCLOUD_SECRETKEY');
     if (secretId && secretKey) Object.assign(options, { secretId, secretKey });
     this.app = cloudbase.init(options as any); this.db = this.app.database();
   }
