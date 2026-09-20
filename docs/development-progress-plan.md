@@ -98,12 +98,12 @@ omo-platform/
 | 仓库重构 | 已完成 | 四个子项目已整理为同级目录并推送 GitHub |
 | A：交互前端原型 | 用户验收通过 | 当前 Web 视觉和页面结构已冻结，只允许联调、安全和部署修复 |
 | A+：前端质量优化 | 用户验收通过 | 自动刷新、请求竞态、旧数据状态、可访问性和包体优化已完成 |
-| B：真实 Admin API | 本地验证通过 | 总览接口、同进程开发管理员和真实 API 浏览器主流程已通过，尚未接入 staging |
-| B：CloudBase staging 环境 | 数据层部分完成 | 新环境 `omo-platform-staging-d5a30d0fd8f` 文档型数据库 RUNNING；16 个集合、22 条索引和 3 条测试种子已回读通过，管理员待创建 |
-| B：小程序与后台联合联调 | 未开始 | 等待隔离 MQTT Broker、管理员及服务部署 |
+| B：真实 Admin API | staging 验证中 | `admin-api-staging` 修订 008 已注入专用服务端 API Key；存活探针及连续无效登录稳定性门禁通过，首次改密和登录后接口待用户验证 |
+| B：CloudBase staging 环境 | 数据层已初始化 | 新环境 `omo-platform-staging-d5a30d0fd8f` 文档型数据库 RUNNING；16 个集合、22 条索引和 3 条测试种子已回读通过，`staging_admin` 已创建且必须首次改密 |
+| B：小程序与后台联合联调 | 进行中 | Admin API 已接通数据库；等待真实车辆只读 MQTT 资料、小程序 trial 和真机互联 |
 | C：安全整改 | 代码基本完成 | 云端重新部署、凭据轮换和真机验证尚未完成 |
 | 正式设计与使用文档 | 待开始 | 当前只有技术部署文档 |
-| D：开发环境部署 | 未开始 | 静态托管、CloudBase Run 和 HTTP 网关尚未执行 |
+| D：开发环境部署 | 部分完成 | Admin API CloudBase Run 已部署；Web 静态托管、小程序 trial 与真实车辆只读联调仍待完成 |
 | D：生产验收和上线 | 未开始 | 必须在开发环境稳定后再讨论 |
 
 ### 5.2 管理 Web
@@ -192,13 +192,13 @@ omo-platform/
 
 ## 6. 最近验证基线
 
-最近一次完整本地验证日期：2026-09-16。
+最近一次完整本地验证日期：2026-09-20。
 
 | 检查项 | 结果 |
 | --- | --- |
 | Web 单元测试 | 15/15 通过 |
 | Web TypeScript 与生产构建 | 通过 |
-| Admin API 单元/集成测试 | 27/27 通过 |
+| Admin API 单元/集成测试 | 32/32 通过 |
 | Admin API 构建和脚本类型检查 | 通过 |
 | MQTT Bridge 安全测试 | 6/6 通过 |
 | 小程序环境与云函数字段契约测试 | 7/7 通过 |
@@ -209,7 +209,7 @@ omo-platform/
 
 财务路由包含 ECharts，单独异步文件较大，但不进入地图、订单或系统页面的首屏主入口，目前不作为阻塞项。
 
-以上测试于 2026-09-17 在 Node 22.23.2 下复跑；浏览器使用 Edge 通道。它们不代表 CloudBase、微信真机、MQTT Broker 或真实车辆验收。staging 部署检查点提交为 `712c018`，未包含 `omo-mini-program/project.config.json`。
+Admin API 于 2026-09-20 在 staging 修订 008 完成运行门禁：`/live` 返回 200，三次独立无效登录均返回 401，且每次请求后 `/live` 仍为 200，不再出现实例重启导致的 502/503。该结果只证明 Admin API 与 CloudBase 认证链路稳定，不代表微信真机、MQTT Broker 或真实车辆验收。`omo-mini-program/project.config.json` 继续作为用户本地修改保留。
 
 ### 6.1 staging 环境只读核验（2026-09-17）
 

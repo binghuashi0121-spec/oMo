@@ -30,9 +30,10 @@ node scripts/staging/check-config.js deploy
 1. 设置并核对 staging 环境变量、`OMO_TCB_CLI_ENTRY` 后，运行 `npm run staging:nosql -- --verify` 进行无写入回读。已创建的 16 个集合、22 条索引和 3 条测试数据不可重新初始化或覆盖。
 2. 部署 `mqtt-bridge-staging`（端口 3000），只设置非敏感 blocked 配置：`OMO_STAGING_MODE=true`、`CLOUDBASE_RUNTIME_AUTH=true`、`MQTT_PROFILE=vendor_real`、`MQTT_CONNECTION_ENABLED=false`、`MQTT_COMMANDS_ENABLED=false`、`MQTT_ALLOWED_UGV_IDS=`、`MQTT_TELEMETRY_SPEED_UNIT=unknown`、`MQTT_COORD_SYSTEM=unknown`、`ALLOW_INSECURE_MQTT=false`。不得设置 Broker URL、用户名或密码。
 3. `/mqtt/health` 必须显示 `cloudbase.ready=true`、`mqtt.state=blocked`、`mqtt.connected=false`、车辆数为 0、命令关闭，并明确列出缺少车辆白名单和凭据。该阶段不以 MQTT 连接成功为验收条件。
-4. 只读核对已部署的 10 个云函数、`admin-api-staging` 和 Web；现有版本健康时不得无故重复发布。管理员忘记或暴露初始密码时，只能在本机隐藏输入运行 `npm run staging:admin:reset -- --apply`，随后完成首次改密。
-5. 获得授权 `deviceId`、Broker 选择、凭据使用授权、遥测单位和坐标系后，另行部署只读连接修订；连接前只生成 `ugv/{deviceId}/device` 与 `ugv/{deviceId}/response` 精确 Topic。
-6. 只读遥测稳定后才填写 trial 环境 ID、上传体验版并进行手机真机测试。车辆控制必须在现场监护、急停和短期控制窗口均确认后再次人工放行。
+4. `admin-api-staging` 使用 CloudBase Run 的“API Key 设置”选择 staging 专用服务端 Key，由平台注入 `CLOUDBASE_APIKEY`；不得把 Key 明文写入环境变量文本、命令、日志或仓库。仅设置 `CLOUDBASE_RUNTIME_AUTH=true` 不构成数据库授权。
+5. 只读核对已部署的 10 个云函数、`admin-api-staging` 和 Web；现有版本健康时不得无故重复发布。管理员忘记或暴露初始密码时，只能在本机隐藏输入运行 `npm run staging:admin:reset -- --apply`，随后完成首次改密。
+6. 获得授权 `deviceId`、Broker 选择、凭据使用授权、遥测单位和坐标系后，另行部署只读连接修订；连接前只生成 `ugv/{deviceId}/device` 与 `ugv/{deviceId}/response` 精确 Topic。
+7. 只读遥测稳定后才填写 trial 环境 ID、上传体验版并进行手机真机测试。车辆控制必须在现场监护、急停和短期控制窗口均确认后再次人工放行。
 
 每一步失败立即停止。云托管保留上一修订；第一次部署失败不切换生产。当前 blocked 部署只能标记“Bridge 已部署但未连接”，不能标记为真机、实车或 MQTT 联调通过。
 
