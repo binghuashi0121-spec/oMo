@@ -209,7 +209,9 @@ omo-platform/
 
 财务路由包含 ECharts，单独异步文件较大，但不进入地图、订单或系统页面的首屏主入口，目前不作为阻塞项。
 
-Admin API 于 2026-09-20 在 staging 修订 008 完成运行门禁：`/live` 返回 200，三次独立无效登录均返回 401，且每次请求后 `/live` 仍为 200，不再出现实例重启导致的 502/503。该结果只证明 Admin API 与 CloudBase 认证链路稳定，不代表微信真机、MQTT Broker 或真实车辆验收。`omo-mini-program/project.config.json` 继续作为用户本地修改保留。
+Admin API 于 2026-09-20 在 staging 修订 009 完成运行门禁：`/live` 返回 200，三次独立无效登录均返回 401，且每次请求后 `/live` 仍为 200，不再出现实例重启导致的 502/503。用户已成功登录，运营总览、车辆地图、订单、财务和系统诊断均完成只读页面验证；CloudBase 数据库探针健康。10 个小程序云函数均处于同一 staging 环境且状态为 `Active`。当前系统降级来自 MQTT 未连接及测试车辆心跳过期，不是 Admin API 故障。
+
+该结果只证明 Admin API、Web 只读页面、CloudBase 数据链路和云函数部署状态，不代表小程序 trial、MQTT Broker、真机或真实车辆验收。`omo-mini-program/project.config.json` 继续作为用户本地修改保留。
 
 ### 6.1 staging 环境只读核验（2026-09-17）
 
