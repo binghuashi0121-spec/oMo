@@ -12,6 +12,8 @@
     "DATA_DRIVER": "cloudbase",
     "COOKIE_SECURE": "true",
     "CLOUDBASE_ENV_ID": "omo-platform-staging-d5a30d0fd8f",
+    "CLOUDBASE_RUNTIME_AUTH": "true",
+    "TCB_DISABLE_METADATA_PROBE": "true",
     "DEV_BOOTSTRAP_ADMIN_ENABLED": "false",
     "ADMIN_WEB_ORIGIN": "https://<staging-default-domain>",
     "MQTT_BRIDGE_HEALTH_URL": "<same-environment-private-health-url>"
