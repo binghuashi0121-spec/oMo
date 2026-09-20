@@ -1,9 +1,8 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as argon2 from 'argon2';
 import { randomUUID } from 'node:crypto';
 import { RepositoryService } from '../database/repository.service';
-import { passwordHashOptions } from './auth.service';
+import { hashPassword } from './password-hash';
 
 @Injectable()
 export class DevelopmentAdminBootstrapService implements OnModuleInit {
@@ -28,7 +27,7 @@ export class DevelopmentAdminBootstrapService implements OnModuleInit {
     const now = new Date().toISOString();
     await this.repository.createAdmin({
       id: randomUUID(), username, displayName, role: 'super_admin',
-      passwordHash: await argon2.hash(password, passwordHashOptions),
+      passwordHash: await hashPassword(password),
       mustChangePassword: true, active: true, createdAt: now, updatedAt: now,
     });
   }

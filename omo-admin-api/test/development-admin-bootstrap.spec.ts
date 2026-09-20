@@ -1,7 +1,7 @@
 import { ConfigService } from '@nestjs/config';
-import * as argon2 from 'argon2';
 import { describe, expect, it } from 'vitest';
 import { DevelopmentAdminBootstrapService } from '../src/auth/development-admin-bootstrap.service';
+import { verifyPassword } from '../src/auth/password-hash';
 import { RepositoryService } from '../src/database/repository.service';
 
 function configured(nodeEnv = 'development') {
@@ -24,7 +24,7 @@ describe('development admin bootstrap', () => {
     await service.onModuleInit();
     const user = await repository.findAdminByUsername('localadmin');
     expect(user).toMatchObject({ username: 'localadmin', displayName: '本地管理员', mustChangePassword: true });
-    expect(await argon2.verify(user!.passwordHash, 'Local-Integration-A1')).toBe(true);
+    expect(await verifyPassword(user!.passwordHash, 'Local-Integration-A1')).toBe(true);
   });
 
   it('recreates memory state for a new process instance', async () => {

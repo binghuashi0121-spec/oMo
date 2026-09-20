@@ -1,5 +1,6 @@
 const path = require('node:path');
 const { createRequire } = require('node:module');
+const { randomBytes } = require('node:crypto');
 const { assertTarget, createCliRunner } = require('./provision-nosql');
 
 const username = 'staging_admin';
@@ -90,9 +91,10 @@ if (require.main === module) {
 
     const cliEntry = path.resolve(process.env.OMO_TCB_CLI_ENTRY || '');
     const run = createCliRunner(cliEntry);
-    const argon2 = createRequire(path.resolve(__dirname, '../../omo-admin-api/package.json'))('argon2');
-    const result = await resetStagingAdmin(run, readHidden, (secret) => argon2.hash(secret, {
-      type: argon2.argon2id, memoryCost: 19_456, timeCost: 2, parallelism: 1,
+    const { argon2id } = createRequire(path.resolve(__dirname, '../../omo-admin-api/package.json'))('hash-wasm');
+    const result = await resetStagingAdmin(run, readHidden, (secret) => argon2id({
+      password: secret, salt: randomBytes(16), memorySize: 19_456, iterations: 2,
+      parallelism: 1, hashLength: 32, outputType: 'encoded',
     }));
     console.log(`PASS: ${result.username} 已重置；首次登录需改密；已失效 ${result.sessionsInvalidated} 个旧会话。`);
   })().catch((error) => {
