@@ -1,5 +1,5 @@
 const path = require('node:path');
-const { randomUUID } = require('node:crypto');
+const { randomBytes, randomUUID } = require('node:crypto');
 const { createRequire } = require('node:module');
 const { assertTarget, createCliRunner } = require('./provision-nosql');
 
@@ -75,9 +75,10 @@ if (require.main === module) {
     }
     if (process.env.BOOTSTRAP_ADMIN_PASSWORD) throw new Error('请先清除 BOOTSTRAP_ADMIN_PASSWORD；本脚本只接受隐藏交互输入');
     const run = createCliRunner(path.resolve(process.env.OMO_TCB_CLI_ENTRY || ''));
-    const argon2 = createRequire(path.resolve(__dirname, '../../omo-admin-api/package.json'))('argon2');
-    const result = await createStagingAdmin(run, readHidden, (secret) => argon2.hash(secret, {
-      type: argon2.argon2id, memoryCost: 19_456, timeCost: 2, parallelism: 1,
+    const { argon2id } = createRequire(path.resolve(__dirname, '../../omo-admin-api/package.json'))('hash-wasm');
+    const result = await createStagingAdmin(run, readHidden, (secret) => argon2id({
+      password: secret, salt: randomBytes(16), memorySize: 19_456, iterations: 2,
+      parallelism: 1, hashLength: 32, outputType: 'encoded',
     }));
     console.log(`PASS: 一次性管理员 ${result.username} 已创建，首次登录须改密；请勿再次运行初始化。`);
   })().catch((error) => {
