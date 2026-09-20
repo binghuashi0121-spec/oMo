@@ -98,12 +98,12 @@ omo-platform/
 | 仓库重构 | 已完成 | 四个子项目已整理为同级目录并推送 GitHub |
 | A：交互前端原型 | 用户验收通过 | 当前 Web 视觉和页面结构已冻结，只允许联调、安全和部署修复 |
 | A+：前端质量优化 | 用户验收通过 | 自动刷新、请求竞态、旧数据状态、可访问性和包体优化已完成 |
-| B：真实 Admin API | staging 验证中 | `admin-api-staging` 修订 008 已注入专用服务端 API Key；存活探针及连续无效登录稳定性门禁通过，首次改密和登录后接口待用户验证 |
-| B：CloudBase staging 环境 | 数据层已初始化 | 新环境 `omo-platform-staging-d5a30d0fd8f` 文档型数据库 RUNNING；16 个集合、22 条索引和 3 条测试种子已回读通过，`staging_admin` 已创建且必须首次改密 |
-| B：小程序与后台联合联调 | 进行中 | Admin API 已接通数据库；等待真实车辆只读 MQTT 资料、小程序 trial 和真机互联 |
+| B：真实 Admin API | staging 验证通过 | `admin-api-staging` 修订 009 稳定运行；用户已登录并完成总览、地图、订单、财务和系统页面只读验证 |
+| B：CloudBase staging 环境 | 数据层已初始化 | 新环境 `omo-platform-staging-d5a30d0fd8f` 文档型数据库 RUNNING；16 个集合、22 条索引和 3 条测试种子已回读通过，`staging_admin` 已可正常登录 |
+| B：小程序与后台联合联调 | 进行中 | trial 代码版本 `staging-20260920-1455` 已上传；等待在微信公众平台设为体验版并进行手机与 Web 数据互联 |
 | C：安全整改 | 代码基本完成 | 云端重新部署、凭据轮换和真机验证尚未完成 |
 | 正式设计与使用文档 | 待开始 | 当前只有技术部署文档 |
-| D：开发环境部署 | 部分完成 | Admin API CloudBase Run 已部署；Web 静态托管、小程序 trial 与真实车辆只读联调仍待完成 |
+| D：开发环境部署 | 部分完成 | Admin API、Web、10 个云函数及 blocked Bridge 已部署；trial 代码已上传但尚未完成体验版设置和手机验证 |
 | D：生产验收和上线 | 未开始 | 必须在开发环境稳定后再讨论 |
 
 ### 5.2 管理 Web
@@ -127,7 +127,7 @@ omo-platform/
 当前状态：Web 前端已由用户验收并冻结。尚待完成：
 
 - 使用真实腾讯地图浏览器 Key 验证 Marker、域名白名单和地图加载。
-- 接入 staging CloudBase 数据并完成云端联调。
+- 完成小程序真机产生订单后与 Web 的 15 秒同步验证。
 
 ### 5.3 Admin API
 
@@ -150,8 +150,8 @@ omo-platform/
 
 当前缺口：
 
-- 本地 `DATA_DRIVER=memory` 真实 API 浏览器联调已通过，但数据仍只在进程内存在。
-- 尚未使用 staging CloudBase 验证集合、索引、权限和云端响应。
+- 小程序真机尚未产生订单，因此订单创建、取消与 Web 同步仍待验收。
+- 腾讯地图 Web Key 尚未配置，地图继续使用降级展示。
 
 ### 5.4 小程序
 
@@ -166,9 +166,9 @@ omo-platform/
 
 当前缺口：
 
-- development 和 staging 环境 ID 尚未提供，因此对应构建会明确报“环境未配置”。
+- development 仍保持未配置；trial 已固定指向 `omo-platform-staging-d5a30d0fd8f`，release 映射未变。
 - 多项取消、恢复、低电量、故障车、临时停车和弱网验收仍未打勾。
-- 云函数规范字段已完成本地静态契约验证，但尚未在独立 staging 环境部署和运行验证。
+- 10 个云函数已部署到 staging；trial 代码已上传，尚待设为体验版和手机验证。
 
 ### 5.5 MQTT Bridge
 
@@ -181,12 +181,13 @@ omo-platform/
 - `/health` 区分 HTTP、CloudBase 和 MQTT 状态。
 - `mqtt_logs`、`command_history`、车辆和行程运行数据写入逻辑。
 - 车辆遥测同步写入规范电量、WGS84/GCJ-02、速度和心跳字段；行程链路同步维护规范订单与结算字段。
+- `mqtt-bridge-staging` 已以 `vendor_real` 安全阻断配置部署，CloudBase ready，车辆白名单为空、订阅为空、命令关闭。
 
 尚待完成：
 
-- 部署独立 `mqtt-bridge-dev`。
-- 配置开发 MQTT Broker 和唯一 Client ID。
-- 验证 `cloudbase.ready=true` 与 `mqtt.connected=true`。
+- 取得一台明确授权真实车辆的 `deviceId` 和专用或获准使用的只读凭据。
+- 确认真实遥测的速度单位、坐标系、状态枚举和应答关联规则。
+- 部署只读连接修订并验证 `cloudbase.ready=true` 与 `mqtt.connected=true`。
 - 验证 MQTT 断开、恢复、重复订阅和消息落库。
 - 生产历史 MQTT 凭据外部轮换。
 
@@ -200,8 +201,9 @@ omo-platform/
 | Web TypeScript 与生产构建 | 通过 |
 | Admin API 单元/集成测试 | 32/32 通过 |
 | Admin API 构建和脚本类型检查 | 通过 |
-| MQTT Bridge 安全测试 | 6/6 通过 |
-| 小程序环境与云函数字段契约测试 | 7/7 通过 |
+| MQTT Bridge 安全测试 | 13/13 通过 |
+| 小程序环境、云函数字段与命令关闭反馈测试 | 12/12 通过 |
+| staging 配置与数据门禁测试 | 14/14 通过 |
 | Playwright 桌面端测试 | 24/24 通过 |
 | Playwright 分辨率 | 1280×900、1440×900、1920×1080 |
 | Playwright 本地真实 API 主流程 | 1/1 通过（登录、首次改密、总览、地图、订单、财务、系统、退出） |
@@ -211,7 +213,9 @@ omo-platform/
 
 Admin API 于 2026-09-20 在 staging 修订 009 完成运行门禁：`/live` 返回 200，三次独立无效登录均返回 401，且每次请求后 `/live` 仍为 200，不再出现实例重启导致的 502/503。用户已成功登录，运营总览、车辆地图、订单、财务和系统诊断均完成只读页面验证；CloudBase 数据库探针健康。10 个小程序云函数均处于同一 staging 环境且状态为 `Active`。当前系统降级来自 MQTT 未连接及测试车辆心跳过期，不是 Admin API 故障。
 
-该结果只证明 Admin API、Web 只读页面、CloudBase 数据链路和云函数部署状态，不代表小程序 trial、MQTT Broker、真机或真实车辆验收。`omo-mini-program/project.config.json` 继续作为用户本地修改保留。
+2026-09-20 已将小程序 trial 固定到 staging，并通过微信开发者工具上传 `staging-20260920-1455`（1.9 MB）。上传成功不等于体验版已发布：仍需在微信公众平台将该开发版本设为体验版、配置体验成员并完成手机测试。Bridge 同期回查为 `cloudbase.ready=true`、`mqtt.state=blocked`、订阅为空、允许车辆数 0、命令关闭。
+
+该结果证明 Admin API、Web 只读页面、CloudBase 数据链路、云函数部署和小程序代码上传状态，不代表手机真机、MQTT Broker 或真实车辆验收。`omo-mini-program/project.config.json` 继续作为用户本地修改保留。
 
 ### 6.1 staging 环境只读核验（2026-09-17）
 

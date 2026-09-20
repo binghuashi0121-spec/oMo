@@ -1,5 +1,6 @@
 const { buildModeCommand } = require('../../utils/vehicleControl');
 const { callBridge, isBridgeSuccess } = require('../../utils/bridgeApi');
+const { commandFailureFeedback } = require('../../utils/bridgeCommandFeedback');
 const {
   shibinghuaSafeObject,
   shibinghuaSafeStorage,
@@ -141,7 +142,7 @@ Page({
   async sendVehicleCommand(ugvID, messageType, command, onDone) {
     const shibinghuaUgvID = shibinghuaSafeString(ugvID).trim();
     if (!shibinghuaUgvID) {
-      if (typeof onDone === 'function') onDone(false);
+      if (typeof onDone === 'function') onDone(false, { code: 'BRIDGE_INVALID_VEHICLE', msg: '无车辆信息' });
       return;
     }
 
@@ -155,11 +156,54 @@ Page({
           command
         }
       });
-      if (typeof onDone === 'function') onDone(isBridgeSuccess(shibinghuaResult));
+      if (typeof onDone === 'function') onDone(isBridgeSuccess(shibinghuaResult), shibinghuaResult);
     } catch (shibinghuaErr) {
       console.warn('[MQTT] send command failed', { ugvID: shibinghuaUgvID, messageType, err: shibinghuaErr });
-      if (typeof onDone === 'function') onDone(false);
+      if (typeof onDone === 'function') {
+        onDone(false, { code: 'BRIDGE_REQUEST_FAILED', msg: '车辆指令请求失败' });
+      }
     }
+  },
+
+  openWaitingTrip(trip) {
+    wx.reLaunch({
+      url: `/pages/dengdaiquche/dengdaiquche?tripId=${encodeURIComponent(shibinghuaSafeString(trip.tripId))}&ugvID=${encodeURIComponent(shibinghuaSafeString(trip.ugvID))}`
+    });
+  },
+
+  handleVehicleCommandFailure(result, trip) {
+    const feedback = commandFailureFeedback(result);
+    wx.showModal({
+      ...feedback,
+      success: (modalResult) => {
+        if (!modalResult.confirm) {
+          this.openWaitingTrip(trip);
+          return;
+        }
+
+        wx.showLoading({ title: '正在取消...', mask: true });
+        callBridge({
+          path: '/trip/cancel',
+          method: 'POST',
+          data: { tripId: trip.tripId }
+        }).then((cancelResult) => {
+          wx.hideLoading();
+          if (!isBridgeSuccess(cancelResult)) {
+            wx.showToast({ title: (cancelResult && cancelResult.msg) || '取消失败', icon: 'none' });
+            this.openWaitingTrip(trip);
+            return;
+          }
+          wx.removeStorageSync('currentTripInfo');
+          wx.showToast({ title: '测试订单已取消', icon: 'success' });
+          setTimeout(() => wx.reLaunch({ url: '/pages/shouye2/shouye2' }), 800);
+        }).catch((error) => {
+          wx.hideLoading();
+          console.error('cancel waiting trip after command failure', error);
+          wx.showToast({ title: '取消失败，请在等待页重试', icon: 'none' });
+          this.openWaitingTrip(trip);
+        });
+      }
+    });
   },
 
   async unlockVehicle(ugvID) {
@@ -201,12 +245,18 @@ Page({
         shibinghuaResolvedUgvID,
         'ugvSetMode',
         buildModeCommand(shibinghuaResolvedUgvID, 1),
-        () => {
+        (commandSucceeded, commandResult) => {
+          const trip = {
+            tripId: shibinghuaPayload.tripId,
+            ugvID: shibinghuaResolvedUgvID
+          };
+          if (!commandSucceeded) {
+            this.handleVehicleCommandFailure(commandResult, trip);
+            return;
+          }
           wx.showToast({ title: '开锁成功', icon: 'success' });
           setTimeout(() => {
-            wx.reLaunch({
-              url: `/pages/dengdaiquche/dengdaiquche?tripId=${encodeURIComponent(shibinghuaSafeString(shibinghuaPayload.tripId))}&ugvID=${encodeURIComponent(shibinghuaSafeString(shibinghuaResolvedUgvID))}`
-            });
+            this.openWaitingTrip(trip);
           }, 1000);
         }
       );

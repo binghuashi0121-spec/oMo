@@ -33,7 +33,7 @@ node scripts/staging/check-config.js deploy
 4. `admin-api-staging` 使用 CloudBase Run 的“API Key 设置”选择 staging 专用服务端 Key，由平台注入 `CLOUDBASE_APIKEY`；不得把 Key 明文写入环境变量文本、命令、日志或仓库。仅设置 `CLOUDBASE_RUNTIME_AUTH=true` 不构成数据库授权。
 5. 只读核对已部署的 10 个云函数、`admin-api-staging` 和 Web；现有版本健康时不得无故重复发布。管理员忘记或暴露初始密码时，只能在本机隐藏输入运行 `npm run staging:admin:reset -- --apply`，随后完成首次改密。
 6. 获得授权 `deviceId`、Broker 选择、凭据使用授权、遥测单位和坐标系后，另行部署只读连接修订；连接前只生成 `ugv/{deviceId}/device` 与 `ugv/{deviceId}/response` 精确 Topic。
-7. 只读遥测稳定后才填写 trial 环境 ID、上传体验版并进行手机真机测试。车辆控制必须在现场监护、急停和短期控制窗口均确认后再次人工放行。
+7. 当前允许在 MQTT blocked 状态下将 trial 固定指向本 staging 环境并上传体验版，只验证登录、车辆读取、`waiting_pickup` 创建/取消及 Web 数据同步。车辆指令被拒绝是安全门禁的预期结果；遥测、行驶、完成订单和结算仍须等待真实车辆只读接入及后续现场测试。
 
 每一步失败立即停止。云托管保留上一修订；第一次部署失败不切换生产。当前 blocked 部署只能标记“Bridge 已部署但未连接”，不能标记为真机、实车或 MQTT 联调通过。
 

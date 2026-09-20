@@ -7,7 +7,7 @@ const ENVIRONMENT_DEFINITIONS = Object.freeze({
   }),
   trial: Object.freeze({
     name: 'staging',
-    cloudEnvId: '',
+    cloudEnvId: 'omo-platform-staging-d5a30d0fd8f',
     containerServiceName: 'mqtt-bridge-staging',
     containerPathPrefix: '/mqtt'
   }),
