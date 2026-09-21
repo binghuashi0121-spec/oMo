@@ -3,6 +3,7 @@ const path = require('node:path');
 
 const root = path.resolve(__dirname, '..', '..');
 const manifest = require('../../deploy/staging/manifest.json');
+const functionDeployConfig = require('../../deploy/staging/cloudbaserc.json');
 const { MINI_PROGRAM_APP_ID, ENVIRONMENT_DEFINITIONS } = require('../../omo-mini-program/config/environments');
 const productionEnvId = 'omo-mqtt-prod-2g4zisao87d6ec54';
 
@@ -39,6 +40,17 @@ function validateStagingConfig(config = manifest, options = {}) {
   const projectConfig = JSON.parse(fs.readFileSync(path.join(root, 'omo-mini-program', 'project.config.json'), 'utf8'));
   if (projectConfig.appid !== MINI_PROGRAM_APP_ID) errors.push('project.config.json 仍指向旧小程序 AppID');
   if (ENVIRONMENT_DEFINITIONS.trial.cloudEnvId !== config.environmentId) errors.push('小程序 trial 环境与 staging 清单不一致');
+  if (functionDeployConfig.envId !== config.environmentId) errors.push('云函数部署配置不得指向其他环境');
+  const deployFunctions = functionDeployConfig.functions || [];
+  if (deployFunctions.map((item) => item.name).sort().join(',') !== 'loginWithPhone,sendSms') {
+    errors.push('本轮云函数部署范围必须仅包含 loginWithPhone 和 sendSms');
+  }
+  const sendSmsDeploy = deployFunctions.find((item) => item.name === 'sendSms');
+  if (sendSmsDeploy?.envVariables?.SMS_DEBUG_CODE_ENABLED !== 'true' ||
+      sendSmsDeploy?.envVariables?.SMS_DEBUG_ENV_ID !== config.environmentId ||
+      sendSmsDeploy?.envVariables?.SMS_DEBUG_APP_ID !== MINI_PROGRAM_APP_ID) {
+    errors.push('sendSms 部署变量必须锁定 staging 环境和目标 AppID');
+  }
   if (config.mqtt?.profile !== 'vendor_real') errors.push('staging MQTT profile 必须是 vendor_real');
   if (config.mqtt?.clientId !== 'omo-mqtt-bridge-staging') errors.push('MQTT Client ID 不符合 staging 规格');
   if (config.mqtt?.connectionEnabled !== false || config.mqtt?.commandsEnabled !== false) errors.push('当前阶段必须关闭 MQTT 连接与车辆指令');

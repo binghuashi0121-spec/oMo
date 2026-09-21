@@ -27,6 +27,8 @@ node scripts/staging/check-config.js deploy
 
 体验版手机号联调使用 staging 调试验证码。`sendSms` 仅在 `SMS_DEBUG_CODE_ENABLED=true`、`SMS_DEBUG_ENV_ID=omo-platform-staging-d5a30d0fd8f`、`SMS_DEBUG_APP_ID=wx6443442c17eb3220` 与运行时 CloudBase 身份完全一致时返回 `debug_code`；其他环境、AppID 或未显式开启时均不得返回，正式发布前必须关闭。
 
+本轮只从 `deploy/staging/cloudbaserc.json` 部署 `sendSms` 与 `loginWithPhone`。该文件不含秘密，并将函数根目录、staging 环境、运行时和调试码门禁固定下来；不得使用 `--all` 覆盖其他 8 个健康函数。
+
 ## 3. 按顺序发布与停机门禁
 
 1. 设置并核对 staging 环境变量、`OMO_TCB_CLI_ENTRY` 后，运行 `npm run staging:nosql -- --verify` 进行无写入回读。已创建的 16 个集合、22 条索引和 3 条测试数据不可重新初始化或覆盖。
