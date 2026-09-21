@@ -1,6 +1,6 @@
 # oMo staging 发布门禁
 
-本目录只有不含密钥的发布意图。唯一可用的环境显示名为 `omo-platform-staging`，当前文档型数据库环境 ID 为 `omo-platform-staging-d5a30d0fd8f`；其他环境 ID 和现有生产 ID 均被本地检查拒绝。不要运行天马山历史迁移脚本、导入生产备份或修改 `omo-mini-program/project.config.json`。
+本目录只有不含密钥的发布意图。唯一可用的环境显示名为 `omo-platform-staging`，当前文档型数据库环境 ID 为 `omo-platform-staging-d5a30d0fd8f`；目标小程序 AppID 为 `wx6443442c17eb3220`。其他环境 ID、旧小程序 AppID 和现有生产 ID 均被本地检查拒绝。不要运行天马山历史迁移脚本或导入生产备份；`project.config.json` 只允许把 AppID 定向改为上述目标值，其余用户本地设置必须保留。
 
 ## 1. 检查点与准备
 
@@ -24,6 +24,8 @@ node scripts/staging/check-config.js deploy
 ```
 
 当前部署是 `vendor_real` blocked Bridge，禁止设置 `OMO_STAGING_MQTT_URL`、Broker 凭据或车辆白名单。不打印、提交或记录 MQTT 密码、CAM 密钥、管理员密码、地图 Key、微信上传私钥。`MQTT_CLIENT_ID=omo-mqtt-bridge-staging`，`WECHAT_APP_ID` 与小程序 AppID 一致。Bridge 和 API 固定 `min=1,max=1`。
+
+体验版手机号联调使用 staging 调试验证码。`sendSms` 仅在 `SMS_DEBUG_CODE_ENABLED=true`、`SMS_DEBUG_ENV_ID=omo-platform-staging-d5a30d0fd8f`、`SMS_DEBUG_APP_ID=wx6443442c17eb3220` 与运行时 CloudBase 身份完全一致时返回 `debug_code`；其他环境、AppID 或未显式开启时均不得返回，正式发布前必须关闭。
 
 ## 3. 按顺序发布与停机门禁
 

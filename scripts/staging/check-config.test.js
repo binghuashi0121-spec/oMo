@@ -42,8 +42,25 @@ test('staging manifest keeps unknown vendor units and disables MQTT', () => {
 });
 
 test('trial must resolve to the same staging environment', () => {
+  assert.equal(manifest.miniProgram.appId, 'wx6443442c17eb3220');
+  assert.deepEqual(manifest.miniProgram.smsDebug, {
+    enabled: true,
+    environmentId: manifest.environmentId,
+    appId: manifest.miniProgram.appId,
+  });
   assert.match(validateStagingConfig(manifest, { ...valid, phase: 'trial', trialEnvironmentId: '' }).join(' '), /trial/);
   assert.deepEqual(validateStagingConfig(manifest, { ...valid, phase: 'trial', trialEnvironmentId: valid.environmentId }), []);
+});
+
+test('staging SMS debug mode cannot be redirected to another environment or AppID', () => {
+  assert.match(validateStagingConfig({
+    ...manifest,
+    miniProgram: { ...manifest.miniProgram, smsDebug: { ...manifest.miniProgram.smsDebug, environmentId: manifest.forbiddenEnvironmentId } }
+  }).join(' '), /调试验证码/);
+  assert.match(validateStagingConfig({
+    ...manifest,
+    miniProgram: { ...manifest.miniProgram, smsDebug: { ...manifest.miniProgram.smsDebug, appId: 'wx840d0cae0a1be322' } }
+  }).join(' '), /调试验证码/);
 });
 
 test('simulator only connects to the isolated TLS Broker and staging vehicle', () => {

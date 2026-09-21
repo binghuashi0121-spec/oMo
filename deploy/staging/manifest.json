@@ -7,6 +7,15 @@
     "adminApi": { "name": "admin-api-staging", "source": "omo-admin-api", "port": 3001, "minInstances": 1, "maxInstances": 1, "healthPath": "/api/admin/v1/live" }
   },
   "cloudbase": { "runtimeAuth": true },
+  "miniProgram": {
+    "appId": "wx6443442c17eb3220",
+    "trialEnvironmentId": "omo-platform-staging-d5a30d0fd8f",
+    "smsDebug": {
+      "enabled": true,
+      "environmentId": "omo-platform-staging-d5a30d0fd8f",
+      "appId": "wx6443442c17eb3220"
+    }
+  },
   "mqtt": {
     "profile": "vendor_real",
     "clientId": "omo-mqtt-bridge-staging",

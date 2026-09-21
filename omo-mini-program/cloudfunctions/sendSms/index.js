@@ -1,5 +1,6 @@
 ﻿// cloudfunctions/sendSms/index.js
 const cloud = require('wx-server-sdk');
+const { canReturnDebugCode } = require('./debugPolicy');
 
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 
@@ -11,11 +12,8 @@ exports.main = async (event, context) => {
   // 1. 生成6位随机验证码
   const code = Math.floor(100000 + Math.random() * 900000).toString();
 
-  // 只有明确打开开关的非生产开发环境才返回 debug_code。
-  const envName = String((wxContext && wxContext.ENV) || '').toLowerCase();
-  const isDevEnv = process.env.NODE_ENV !== 'production' &&
-    (envName.includes('dev') || envName.includes('test') || envName.includes('local'));
-  const debugCodeEnabled = process.env.SMS_DEBUG_CODE_ENABLED === 'true';
+  // 调试码只允许目标 staging 环境与目标小程序 AppID，正式环境始终关闭。
+  const debugCodeEnabled = canReturnDebugCode(wxContext, process.env);
 
   try {
     // 2. 将验证码存入 SmsCode 集合
@@ -34,7 +32,7 @@ exports.main = async (event, context) => {
       msg: '验证码发送成功'
     };
 
-    if (isDevEnv && debugCodeEnabled) {
+    if (debugCodeEnabled) {
       result.debug_code = code;
     }
 

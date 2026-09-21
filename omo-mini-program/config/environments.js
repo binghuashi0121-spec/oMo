@@ -1,3 +1,5 @@
+const MINI_PROGRAM_APP_ID = 'wx6443442c17eb3220';
+
 const ENVIRONMENT_DEFINITIONS = Object.freeze({
   develop: Object.freeze({
     name: 'development',
@@ -24,7 +26,12 @@ function detectEnvVersion(wxApi = wx) {
     throw new Error('无法识别小程序版本环境');
   }
   const accountInfo = wxApi.getAccountInfoSync();
-  const envVersion = accountInfo && accountInfo.miniProgram && accountInfo.miniProgram.envVersion;
+  const miniProgram = accountInfo && accountInfo.miniProgram;
+  const envVersion = miniProgram && miniProgram.envVersion;
+  const appId = miniProgram && miniProgram.appId;
+  if (appId && appId !== MINI_PROGRAM_APP_ID) {
+    throw new Error(`小程序 AppID 不匹配：${appId}`);
+  }
   if (!envVersion || !Object.prototype.hasOwnProperty.call(ENVIRONMENT_DEFINITIONS, envVersion)) {
     throw new Error(`不支持的小程序版本环境：${envVersion || 'unknown'}`);
   }
@@ -40,4 +47,4 @@ function resolveRuntimeEnvironment(envVersion, definitions = ENVIRONMENT_DEFINIT
   return { envVersion, ...config };
 }
 
-module.exports = { ENVIRONMENT_DEFINITIONS, detectEnvVersion, resolveRuntimeEnvironment };
+module.exports = { MINI_PROGRAM_APP_ID, ENVIRONMENT_DEFINITIONS, detectEnvVersion, resolveRuntimeEnvironment };

@@ -42,3 +42,11 @@ test('MQTT telemetry persists canonical vehicle presentation fields', () => {
   const text = fs.readFileSync(path.join(__dirname, '..', '..', 'omo-mqtt-bridge', 'app.js'), 'utf8');
   includesFields(text, ['batteryPercent', 'positionGcj02', 'positionWgs84', 'speedKph', 'heartbeatAt']);
 });
+
+test('phone login safely rebinds a user after mini-program AppID migration', () => {
+  const text = source('cloudfunctions/loginWithPhone/index.js');
+  includesFields(text, ['currentOpenid', 'openidHistory', 'lastLoginTime', 'updateTime']);
+  assert.match(text, /openid:\s*_\.neq\(currentOpenid\)/);
+  assert.doesNotMatch(text, /console\.log\([^\n]*token/);
+  assert.doesNotMatch(text, /data:\s*\{[\s\S]*?openid:\s*wxContext\.OPENID[\s\S]*?userInfo:/);
+});

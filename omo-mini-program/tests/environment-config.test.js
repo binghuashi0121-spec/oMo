@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { ENVIRONMENT_DEFINITIONS, detectEnvVersion, resolveRuntimeEnvironment } = require('../config/environments');
+const { MINI_PROGRAM_APP_ID, ENVIRONMENT_DEFINITIONS, detectEnvVersion, resolveRuntimeEnvironment } = require('../config/environments');
 
 test('maps WeChat versions to isolated logical environments', () => {
   assert.equal(ENVIRONMENT_DEFINITIONS.develop.name, 'development');
@@ -12,8 +12,9 @@ test('maps WeChat versions to isolated logical environments', () => {
 });
 
 test('detects only known envVersion values', () => {
-  assert.equal(detectEnvVersion({ getAccountInfoSync: () => ({ miniProgram: { envVersion: 'trial' } }) }), 'trial');
+  assert.equal(detectEnvVersion({ getAccountInfoSync: () => ({ miniProgram: { appId: MINI_PROGRAM_APP_ID, envVersion: 'trial' } }) }), 'trial');
   assert.throws(() => detectEnvVersion({ getAccountInfoSync: () => ({ miniProgram: { envVersion: 'preview' } }) }), /不支持/);
+  assert.throws(() => detectEnvVersion({ getAccountInfoSync: () => ({ miniProgram: { appId: 'wx840d0cae0a1be322', envVersion: 'trial' } }) }), /AppID 不匹配/);
 });
 
 test('blocks unconfigured environments instead of falling back to production', () => {

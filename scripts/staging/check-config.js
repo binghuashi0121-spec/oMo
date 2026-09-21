@@ -3,6 +3,7 @@ const path = require('node:path');
 
 const root = path.resolve(__dirname, '..', '..');
 const manifest = require('../../deploy/staging/manifest.json');
+const { MINI_PROGRAM_APP_ID, ENVIRONMENT_DEFINITIONS } = require('../../omo-mini-program/config/environments');
 const productionEnvId = 'omo-mqtt-prod-2g4zisao87d6ec54';
 
 function validateStagingConfig(config = manifest, options = {}) {
@@ -28,6 +29,16 @@ function validateStagingConfig(config = manifest, options = {}) {
   if (!bridge || bridge.name !== 'mqtt-bridge-staging' || bridge.port !== 3000 || bridge.minInstances !== 1 || bridge.maxInstances !== 1) errors.push('Bridge 服务名、端口或实例数不符合 staging 规格');
   if (!api || api.name !== 'admin-api-staging' || api.port !== 3001 || api.minInstances !== 1 || api.maxInstances !== 1) errors.push('Admin API 服务名、端口或实例数不符合 staging 规格');
   if (config.cloudbase?.runtimeAuth !== true) errors.push('CloudBase 云托管必须启用工作负载身份');
+  if (config.miniProgram?.appId !== MINI_PROGRAM_APP_ID) errors.push('小程序 AppID 与目标账号不一致');
+  if (config.miniProgram?.trialEnvironmentId !== config.environmentId) errors.push('清单中的 trial 环境必须指向 staging');
+  if (config.miniProgram?.smsDebug?.enabled !== true ||
+      config.miniProgram?.smsDebug?.environmentId !== config.environmentId ||
+      config.miniProgram?.smsDebug?.appId !== MINI_PROGRAM_APP_ID) {
+    errors.push('体验版调试验证码必须同时锁定 staging 环境和目标 AppID');
+  }
+  const projectConfig = JSON.parse(fs.readFileSync(path.join(root, 'omo-mini-program', 'project.config.json'), 'utf8'));
+  if (projectConfig.appid !== MINI_PROGRAM_APP_ID) errors.push('project.config.json 仍指向旧小程序 AppID');
+  if (ENVIRONMENT_DEFINITIONS.trial.cloudEnvId !== config.environmentId) errors.push('小程序 trial 环境与 staging 清单不一致');
   if (config.mqtt?.profile !== 'vendor_real') errors.push('staging MQTT profile 必须是 vendor_real');
   if (config.mqtt?.clientId !== 'omo-mqtt-bridge-staging') errors.push('MQTT Client ID 不符合 staging 规格');
   if (config.mqtt?.connectionEnabled !== false || config.mqtt?.commandsEnabled !== false) errors.push('当前阶段必须关闭 MQTT 连接与车辆指令');

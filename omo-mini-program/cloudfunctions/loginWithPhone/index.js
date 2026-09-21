@@ -6,12 +6,16 @@ cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 exports.main = async (event, context) => {
   const { phone, code } = event;
   const wxContext = cloud.getWXContext()
+  const currentOpenid = String(wxContext.OPENID || '').trim();
   const db = cloud.database();
   const _ = db.command;
 
   // 1. 参数校验
   if (!phone || !code) {
     return { code: 400, msg: '手机号和验证码不能为空' }
+  }
+  if (!currentOpenid) {
+    return { code: 401, msg: '无法识别微信身份' }
   }
 
   try {
@@ -48,7 +52,8 @@ exports.main = async (event, context) => {
       // 注册新用户
       const newUser = {
         phone: phone,
-        openid: wxContext.OPENID,
+        openid: currentOpenid,
+        openidHistory: [],
         createTime: db.serverDate(),
         updateTime: db.serverDate(),
         nickname: '微信用户_' + phone.slice(-4),
@@ -65,37 +70,44 @@ exports.main = async (event, context) => {
       if (user.status === 'banned') {
         return { code: 403, msg: '账号已被禁用' };
       }
-      // 更新登录时间
+      // 手机验证码是重新绑定身份的唯一依据。更换 AppID 后 OpenID 会变化，
+      // 因此保留旧值用于审计，并把该手机号安全绑定到当前小程序身份。
+      const openidHistory = Array.isArray(user.openidHistory) ? [...user.openidHistory] : [];
+      if (user.openid && user.openid !== currentOpenid && !openidHistory.includes(user.openid)) {
+        openidHistory.push(user.openid);
+      }
       await usersCollection.doc(user._id).update({
-        data: { lastLoginTime: db.serverDate() }
+        data: {
+          openid: currentOpenid,
+          openidHistory,
+          lastLoginTime: db.serverDate(),
+          updateTime: db.serverDate()
+        }
       });
+      user = { ...user, openid: currentOpenid, openidHistory };
     }
 
     // 5. 创建会话 (Session)
+    // 旧 AppID 下的会话不能继续代表当前身份。
+    await db.collection('Session').where({
+      userId: user._id,
+      openid: _.neq(currentOpenid)
+    }).remove();
+
     // 生成自定义 Token (这里简单使用 UUID 逻辑或时间戳组合)
-    const token = 'session_' + wxContext.OPENID + '_' + Date.now() + '_' + Math.random().toString(36).substr(2);
+    const token = 'session_' + currentOpenid + '_' + Date.now() + '_' + Math.random().toString(36).substr(2);
     // 30天过期
     
-    // 【调试日志】打印即将写入的 Session 数据
-    console.log('正在创建 Session:', { token, userId: user._id, openid: wxContext.OPENID });
-
-    try {
-        await db.collection('Session').add({
-          data: {
-            token: token,
-            userId: user._id,
-            openid: wxContext.OPENID,
-            createTime: db.serverDate(),
-            expireTime: db.serverDate({ offset: 30 * 24 * 60 * 60 * 1000 }),
-            deviceInfo: event.deviceInfo || {} // 可扩展记录设备信息
-          }
-        });
-        console.log('Session 创建成功');
-    } catch (sessionErr) {
-        console.error('Session 创建失败:', sessionErr);
-        // 即使 Session 创建失败，也让用户登录成功，但返回错误警告
-        // 或者你可以选择直接抛出错误
-    }
+    await db.collection('Session').add({
+      data: {
+        token: token,
+        userId: user._id,
+        openid: currentOpenid,
+        createTime: db.serverDate(),
+        expireTime: db.serverDate({ offset: 30 * 24 * 60 * 60 * 1000 }),
+        deviceInfo: event.deviceInfo || {}
+      }
+    });
 
     // 6. 返回结果
     return {
@@ -103,7 +115,6 @@ exports.main = async (event, context) => {
       msg: '登录成功',
       data: {
         token: token,
-        openid: wxContext.OPENID,
         userInfo: {
           _id: user._id,
           phone: user.phone,

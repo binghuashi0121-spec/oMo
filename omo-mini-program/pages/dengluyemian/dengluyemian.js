@@ -111,11 +111,10 @@ Page({
         const shibinghuaResult = shibinghuaRes && shibinghuaRes.result;
         if (shibinghuaResult && shibinghuaResult.code === 0) {
           wx.showToast({ title: '验证码已发送', icon: 'none' });
-          // 开发环境调试：自动填充验证码或打印到控制台
+          // staging 体验版调试：只在服务端严格门禁通过后返回并显示。
           if (shibinghuaResult.debug_code) {
-             console.log('【开发调试】收到验证码:', shibinghuaResult.debug_code);
              wx.showModal({
-               title: '开发调试模式',
+               title: '体验版调试验证码',
                content: '收到验证码：' + shibinghuaResult.debug_code,
                showCancel: false,
                confirmText: '填入',
