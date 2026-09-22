@@ -2,9 +2,9 @@ const MINI_PROGRAM_APP_ID = 'wx6443442c17eb3220';
 
 const ENVIRONMENT_DEFINITIONS = Object.freeze({
   develop: Object.freeze({
-    name: 'development',
-    cloudEnvId: '',
-    containerServiceName: 'mqtt-bridge-development',
+    name: 'staging',
+    cloudEnvId: 'omo-platform-staging-d5a30d0fd8f',
+    containerServiceName: 'mqtt-bridge-staging',
     containerPathPrefix: '/mqtt'
   }),
   trial: Object.freeze({

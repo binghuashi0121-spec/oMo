@@ -43,6 +43,7 @@
         scale="{{previewScale}}"
         markers="{{previewMarkers}}"
         polyline="{{previewPolyline}}"
+        bindmarkertap="onPreviewMarkerTap"
         show-location="true"
       ></map>
     </view>

@@ -23,11 +23,30 @@ function buildContainerHeaders(header = {}) {
 
 function normalizeBridgeBody(raw) {
   let payload = raw;
+
+  if (typeof payload === 'string') {
+    const text = payload.trim();
+    if (!text) {
+      return { code: 500, msg: 'Empty bridge response', data: { responseType: 'string' } };
+    }
+    try {
+      payload = JSON.parse(text);
+    } catch (error) {
+      return {
+        code: 500,
+        msg: 'Invalid bridge response',
+        data: {
+          responseType: 'string',
+          responsePreview: text.slice(0, 300)
+        }
+      };
+    }
+  }
   
   // Handle wx.cloud.callContainer response wrapping
-  if (raw && typeof raw === 'object' && raw.data && typeof raw.data === 'object' && 
-      raw.data.code !== undefined && !Array.isArray(raw.data)) {
-    payload = raw.data;
+  if (payload && typeof payload === 'object' && payload.data && typeof payload.data === 'object' &&
+      payload.data.code !== undefined && !Array.isArray(payload.data)) {
+    payload = payload.data;
   }
 
   if (!payload || typeof payload !== 'object') {
@@ -95,9 +114,20 @@ function callBridge(options = {}) {
         'content-type': 'application/json',
         ...header
       }),
+      dataType: 'json',
       timeout,
       success: (res) => {
-        resolve(normalizeBridgeBody(res && res.data ? res.data : res));
+        const hasData = res && Object.prototype.hasOwnProperty.call(res, 'data');
+        const rawBody = hasData ? res.data : res;
+        const result = normalizeBridgeBody(rawBody);
+        if (result.code === 500 && /bridge response/i.test(result.msg || '')) {
+          console.error('[bridgeApi] invalid response', {
+            statusCode: res && res.statusCode,
+            errMsg: res && res.errMsg,
+            diagnostics: result.data
+          });
+        }
+        resolve(result);
       },
       fail: (err) => {
         reject(err);

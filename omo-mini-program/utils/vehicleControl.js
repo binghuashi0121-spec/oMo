@@ -106,16 +106,17 @@ function buildMoveCommand(ugvID, speed, angle = MOVE_STRAIGHT_ANGLE) {
 function buildAutoDrivingCommand(ugvID, optMode, extra = {}) {
   const command = {
     ugvID,
-    opt_mode: optMode
+    opt_mode: optMode,
+    // The vehicle-side reference client sends this field for every
+    // autoDriving operation, including start/stop/continue/exit.
+    upload: Number.isFinite(Number(extra.upload)) ? Number(extra.upload) : 0
   };
 
   if (optMode === AUTO_DRIVING_OPT_PLAN) {
     command.longitude = Number(extra.longitude);
     command.latitude = Number(extra.latitude);
-    command.upload = Number.isFinite(Number(extra.upload)) ? Number(extra.upload) : 0;
-    if (command.upload === 1 && extra.file_url) {
-      command.file_url = extra.file_url;
-    }
+    // Some vehicle firmware expects file_url to exist even when upload is 0.
+    command.file_url = typeof extra.file_url === 'string' ? extra.file_url : '';
   }
 
   if (optMode === AUTO_DRIVING_OPT_START) {

@@ -330,7 +330,7 @@ Page({
       wx.setStorageSync('tempParkingState', { isParking: true, startTime: now });
       this.startParkingTimer();
 
-      this.enterParkingLockMode();
+      this.resumeManualDrivingMode();
       this.reportParkingAction('start');
 
     } else {
@@ -479,22 +479,6 @@ Page({
     });
   },
 
-  enterParkingLockMode(onDone) {
-    const ugvID = this.data.trackedUgvID;
-    if (!ugvID) {
-      if (typeof onDone === 'function') onDone(false);
-      return;
-    }
-
-    this.sendVehicleCommand(
-      'ugvSetMode',
-      buildModeCommand(ugvID, 0),
-      (modeOk) => {
-        if (typeof onDone === 'function') onDone(!!modeOk);
-      }
-    );
-  },
-
   resumeManualDrivingMode(onDone) {
     const ugvID = this.data.trackedUgvID;
     if (!ugvID) {
@@ -512,19 +496,10 @@ Page({
   },
 
   activateManualDrivingMode() {
-    if (this.data.isTempParking) {
-      this.enterParkingLockMode();
-      return;
-    }
-
     this.resumeManualDrivingMode();
   },
 
   syncVehicleModeState() {
-    if (this.data.isTempParking) {
-      this.enterParkingLockMode();
-      return;
-    }
     this.resumeManualDrivingMode();
   },
 
@@ -770,10 +745,6 @@ Page({
       wx.setStorageSync('lastRouteTrackPoints', routePoints);
       wx.setStorageSync('lastRouteMapCenter', routeCenter);
 
-      this.sendVehicleCommand(
-        'ugvSetMode',
-        buildModeCommand(this.data.trackedUgvID, 0)
-      );
       wx.showToast({ title: '用车结束', icon: 'success' });
 
       clearInterval(this.data.tripTimer);

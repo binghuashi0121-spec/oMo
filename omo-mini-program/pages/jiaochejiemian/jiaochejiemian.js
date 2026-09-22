@@ -1,6 +1,5 @@
 ﻿const { callBridge, isBridgeSuccess } = require('../../utils/bridgeApi');
 
-const LOW_BATTERY_THRESHOLD = 20;
 const VEHICLE_REPORT_STALE_MS = 60 * 1000;
 const VEHICLE_REPORT_FUTURE_TOLERANCE_MS = 5 * 1000;
 const DEFAULT_VEHICLE_MODEL = 'oMo_Standard';
@@ -132,15 +131,13 @@ function normalizeVehicleDoc(vehicle, markerId) {
     availabilityStatus,
     latitude,
     longitude,
-    battery,
-    lowBattery: battery !== null && battery < LOW_BATTERY_THRESHOLD
+    battery
   };
 }
 
 function isVehicleSelectable(vehicle) {
   if (!vehicle.ugvID) return false;
   if (!Number.isFinite(vehicle.latitude) || !Number.isFinite(vehicle.longitude)) return false;
-  if (vehicle.lowBattery) return false;
   if (vehicle.runtimeStatus === 'faulty') return false;
   if (vehicle.runtimeStatus === 'maintenance') return false;
   if (vehicle.runtimeStatus === 'in_use') return false;
@@ -332,11 +329,6 @@ Page({
 
     if (!ugvID) {
       wx.showToast({ title: '请先选择有效车辆', icon: 'none' });
-      return;
-    }
-
-    if (selectedCar.lowBattery) {
-      wx.showToast({ title: '车辆电量过低', icon: 'none' });
       return;
     }
 

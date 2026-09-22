@@ -6,7 +6,6 @@ const REALTIME_ERROR_LOG_WINDOW_MS = 15000;
 const VEHICLE_REPORT_STALE_MS = 60 * 1000;
 const VEHICLE_REPORT_FUTURE_TOLERANCE_MS = 5 * 1000;
 
-const LOW_BATTERY_THRESHOLD = 20;
 const DEFAULT_VEHICLE_MODEL = 'oMo_Standard';
 const DEFAULT_CAPACITY_TEXT = '2人';
 const DEFAULT_FULL_RANGE_KM = 30;
@@ -211,7 +210,6 @@ function normalizeHomepageVehicleDoc(vehicle) {
     latitude: coordinates ? coordinates.latitude : null,
     longitude: coordinates ? coordinates.longitude : null,
     battery,
-    lowBattery: battery !== null && battery < LOW_BATTERY_THRESHOLD,
     runtimeStatus,
     availabilityStatus
   };
@@ -220,7 +218,6 @@ function normalizeHomepageVehicleDoc(vehicle) {
 function isHomepageVehicleSelectable(vehicle) {
   if (!vehicle || !vehicle.ugvID) return false;
   if (!Number.isFinite(vehicle.latitude) || !Number.isFinite(vehicle.longitude)) return false;
-  if (vehicle.lowBattery) return false;
   if (vehicle.runtimeStatus === 'faulty') return false;
   if (vehicle.runtimeStatus === 'maintenance') return false;
   if (vehicle.runtimeStatus === 'in_use') return false;
@@ -364,11 +361,7 @@ Page({
         title: '车辆服务超时，请重试',
         icon: 'none'
       });
-      this.setData({
-        carMarkers: [],
-        carInfoMap: {},
-        selectedCar: null
-      });
+      // Keep the last known marker on a transient service failure.
     });
   },
 
@@ -579,11 +572,8 @@ Page({
         this.logRealtimeErrorWithThrottle('[Realtime] fetch vehicle status failed', err);
       }
 
-      this.setData({
-        carMarkers: [],
-        carInfoMap: {},
-        selectedCar: null
-      });
+      // Keep the last known marker on transient/auth failures. This endpoint
+      // is ownership-bound and must not clear a vehicle from the map.
     }).finally(() => {
       this._vehicleStatusRequesting = false;
       this.scheduleNextVehicleStatusPoll(this._vehicleStatusBackoffMs || VEHICLE_POLL_INTERVAL_MS);
@@ -682,7 +672,6 @@ Page({
       trackedMarkerId: markerId,
       trackedUgvID: nextTrackedUgvID
     });
-    this.fetchRealtimeVehicleStatus();
   },
   onMapTap() {
     if (this._lastTapFromMarker) {
@@ -736,7 +725,7 @@ Page({
     const isLoggedIn = app.isLoggedIn();
     this.setData({ isLoggedIn });
 
-    this.startVehicleStatusPolling();
+    this.stopVehicleStatusPolling();
 
     if (!isLoggedIn) {
       this.clearSuspendedTripEntry();
@@ -789,7 +778,8 @@ Page({
     this.setData({
       suspendedTrip: normalizedTrip,
       showSuspendedTripEntry: true,
-      suspendedTripStatusText: RESUMABLE_TRIP_STATUS_LABELS[normalizedTrip.tripStatus] || '订单进行中'
+      suspendedTripStatusText: RESUMABLE_TRIP_STATUS_LABELS[normalizedTrip.tripStatus] || '订单进行中',
+      trackedUgvID: normalizedTrip.ugvID || this.data.trackedUgvID
     });
   },
 
@@ -819,17 +809,21 @@ Page({
       const serverTrip = normalizeSuspendedTrip(result && result.data ? result.data : null);
       if (serverTrip) {
         this.setSuspendedTripEntry(serverTrip, { syncStorage: true });
+        this.startVehicleStatusPolling();
         return;
       }
 
+      this.stopVehicleStatusPolling();
       this.clearSuspendedTripEntry({ clearStorage: true });
     }).catch((err) => {
       console.warn('refresh suspended trip failed', err);
       const fallbackTrip = this.getStoredSuspendedTrip();
       if (fallbackTrip) {
         this.setSuspendedTripEntry(fallbackTrip);
+        this.startVehicleStatusPolling();
         return;
       }
+      this.stopVehicleStatusPolling();
       this.clearSuspendedTripEntry();
     });
   },

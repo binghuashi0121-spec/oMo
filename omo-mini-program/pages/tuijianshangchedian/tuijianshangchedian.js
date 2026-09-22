@@ -94,7 +94,6 @@ function buildRecommendedSpots(baseLatitude, baseLongitude, sourceType) {
       )
     }))
     .sort((a, b) => a.distanceMeters - b.distanceMeters)
-    .slice(0, 4)
     .map((point, index) => {
       const distanceMeters = point.distanceMeters;
       const distanceText = distanceMeters < 1000
@@ -338,6 +337,10 @@ Page({
 
   onSelectSpot(e) {
     const index = Number(e.currentTarget.dataset.index);
+    this.selectSpotByIndex(index);
+  },
+
+  selectSpotByIndex(index) {
     const item = this.data.items[index];
     if (!item) return;
 
@@ -352,17 +355,28 @@ Page({
     this.refreshPreviewMap();
   },
 
+  onPreviewMarkerTap(e) {
+    const markerId = Number(e && e.detail && e.detail.markerId);
+    const routeKey = this._previewMarkerRouteKeys && this._previewMarkerRouteKeys[markerId];
+    if (!routeKey) return;
+    const index = this.data.items.findIndex((item) => item.routeKey === routeKey);
+    if (index >= 0) this.selectSpotByIndex(index);
+  },
+
   refreshPreviewMap() {
     const currentLocation = this.data.currentLocation;
     const referenceLocation = this.data.referenceLocation;
     const selectedLocation = this.data.selectedLocation;
 
     const previewMarkers = [];
+    const previewMarkerRouteKeys = {};
     let markerId = 1;
 
     ROUTE_NETWORK_POINTS.forEach((point) => {
+      const currentMarkerId = markerId++;
+      previewMarkerRouteKeys[currentMarkerId] = point.key;
       previewMarkers.push(buildMarker(
-        markerId++,
+        currentMarkerId,
         { latitude: point.gcj02Latitude, longitude: point.gcj02Longitude },
         '',
         '',
@@ -376,8 +390,10 @@ Page({
     });
 
     this.data.items.forEach((item) => {
+      const currentMarkerId = markerId++;
+      previewMarkerRouteKeys[currentMarkerId] = item.routeKey;
       previewMarkers.push(buildMarker(
-        markerId++,
+        currentMarkerId,
         { latitude: item.latitude, longitude: item.longitude },
         item.name,
         item.tag === '推荐' ? '#ff9f43' : '#ef5b24'
@@ -427,6 +443,8 @@ Page({
       latitude: this.data.previewLatitude,
       longitude: this.data.previewLongitude
     };
+
+    this._previewMarkerRouteKeys = previewMarkerRouteKeys;
 
     this.setData({
       previewLatitude: focusPoint.latitude,

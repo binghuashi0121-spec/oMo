@@ -6,7 +6,6 @@ cloud.init({
 
 const db = cloud.database();
 const _ = db.command;
-const LOW_BATTERY_THRESHOLD = 20;
 
 function buildOrderNo(now = Date.now()) {
   return `OM${now}${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
@@ -117,17 +116,6 @@ function getVehicleLatestStatus(vehicle) {
     : {};
 }
 
-function getVehicleBattery(vehicle) {
-  const statusInfo = getVehicleStatusInfo(vehicle);
-  const latestStatus = getVehicleLatestStatus(vehicle);
-
-  const battery = Number(
-    vehicle.battery ?? statusInfo.electiricQuantity ?? latestStatus.electiricQuantity
-  );
-
-  return Number.isFinite(battery) ? battery : null;
-}
-
 function getVehicleRuntimeStatus(vehicle) {
   const statusInfo = getVehicleStatusInfo(vehicle);
   const latestStatus = getVehicleLatestStatus(vehicle);
@@ -212,11 +200,6 @@ exports.main = async (event, context) => {
       return { code: 1007, msg: '车辆故障，暂不可用' };
     }
 
-    const battery = getVehicleBattery(vehicle);
-    if (battery !== null && battery < LOW_BATTERY_THRESHOLD) {
-      return { code: 1006, msg: '电量过低，无法使用' };
-    }
-
     if (availabilityStatus !== 'available') {
       return { code: 1004, msg: '车辆暂不可用', status: availabilityStatus };
     }
@@ -228,11 +211,6 @@ exports.main = async (event, context) => {
       const latestAvailabilityStatus = getVehicleAvailabilityStatus(v.data);
       if (latestAvailabilityStatus !== 'available') {
         await transaction.rollback('vehicle_busy');
-      }
-
-      const latestBattery = getVehicleBattery(v.data);
-      if (latestBattery !== null && latestBattery < LOW_BATTERY_THRESHOLD) {
-        await transaction.rollback('vehicle_low_battery');
       }
 
       await transaction.collection('vehicles').doc(vehicleDocId).update({
@@ -325,10 +303,6 @@ exports.main = async (event, context) => {
 
     if (err.message === 'vehicle_busy') {
       return { code: 1005, msg: '车辆已被他人扫码' };
-    }
-
-    if (err.message === 'vehicle_low_battery') {
-      return { code: 1006, msg: '电量过低，无法使用' };
     }
 
     if (err.errMsg && err.errMsg.includes('document not exist')) {

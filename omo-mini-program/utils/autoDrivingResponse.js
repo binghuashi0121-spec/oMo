@@ -15,8 +15,6 @@ function matchesPendingResponse(response, pending, handledKeys, now = Date.now()
   if (!key || handledKeys.has(key)) return false;
   if (pending.commandMessageNo && response.correlationMessageNo &&
       response.correlationMessageNo !== pending.commandMessageNo) return false;
-  if (response.retCode === 0 && pending.stage === 'plan_wait' &&
-      !(Number.isFinite(response.totalDistance) && response.totalDistance > 0)) return false;
   if (response.retCode === 0 && pending.stage === 'start_wait' &&
       Number.isFinite(response.totalDistance) && response.totalDistance > 0) return false;
   return true;

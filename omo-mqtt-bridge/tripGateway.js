@@ -1,7 +1,6 @@
 
 const { requireCloudBaseIdentity } = require('./cloudbaseIdentity');
 
-const LOW_BATTERY_THRESHOLD = 20;
 const POSITION_STALE_MS = 60 * 1000;
 const POSITION_FUTURE_TOLERANCE_MS = 5 * 1000;
 
@@ -143,13 +142,6 @@ function getLatestStatus(vehicle) {
     : {};
 }
 
-function getVehicleBattery(vehicle) {
-  const statusInfo = getStatusInfo(vehicle);
-  const latestStatus = getLatestStatus(vehicle);
-  const battery = Number(vehicle?.battery ?? statusInfo.electiricQuantity ?? latestStatus.electiricQuantity);
-  return Number.isFinite(battery) ? battery : null;
-}
-
 function getVehicleRuntimeStatus(vehicle) {
   const statusInfo = getStatusInfo(vehicle);
   const latestStatus = getLatestStatus(vehicle);
@@ -273,15 +265,54 @@ function registerTripGatewayRoutes(app, deps) {
 
       const now = Date.now();
 
-      const data = Array.isArray(query?.data)
-        ? query.data
-            .filter((vehicle) => getVehicleAvailabilityStatus(vehicle) === 'available')
-            .filter((vehicle) => isVehicleTelemetryFresh(vehicle, POSITION_STALE_MS, now))
-            .filter((vehicle) => Boolean(getVehicleCoordinates(vehicle)))
-            .sort((a, b) => getTimestamp(b.lastReportAt) - getTimestamp(a.lastReportAt))
-        : [];
+      const vehicles = Array.isArray(query?.data) ? query.data : [];
+      const evaluations = vehicles.map((vehicle) => {
+        const availabilityStatus = getVehicleAvailabilityStatus(vehicle);
+        const reportAt = getVehicleReportAt(vehicle);
+        const ageMs = getVehicleAgeMs(vehicle, now);
+        const coordinatesPresent = Boolean(getVehicleCoordinates(vehicle));
+        const reasons = [];
+        if (availabilityStatus !== 'available') reasons.push(`status:${availabilityStatus}`);
+        if (!Number.isFinite(reportAt) || reportAt <= 0) reasons.push('timestamp_missing');
+        else if (ageMs < 0) reasons.push('timestamp_in_future');
+        else if (ageMs > POSITION_STALE_MS) reasons.push('timestamp_stale');
+        if (!coordinatesPresent) reasons.push('coordinates_missing');
+        return {
+          vehicle,
+          ugvID: String(vehicle?.ugvID || vehicle?._id || ''),
+          availabilityStatus,
+          runtimeStatus: getVehicleRuntimeStatus(vehicle),
+          reportAt,
+          ageMs: Number.isFinite(ageMs) ? ageMs : null,
+          coordinatesPresent,
+          included: reasons.length === 0,
+          reasons
+        };
+      });
 
-      ok(res, requestId, 'ok', data);
+      const data = evaluations
+        .filter((entry) => entry.included)
+        .map((entry) => entry.vehicle)
+        .sort((a, b) => getTimestamp(b.lastReportAt) - getTimestamp(a.lastReportAt));
+
+      const stagingDiagnosticsEnabled = /(?:^|[-_])(dev|test|stage|staging)(?:[-_]|$)/i.test(
+        String(process.env.TCB_ENV || '')
+      );
+      if (!stagingDiagnosticsEnabled) {
+        ok(res, requestId, 'ok', data);
+        return;
+      }
+
+      const debug = {
+        evaluatedAt: now,
+        freshnessWindowMs: POSITION_STALE_MS,
+        totalVehicles: vehicles.length,
+        includedVehicles: data.length,
+        excludedVehicles: evaluations.length - data.length,
+        vehicles: evaluations.slice(0, 50).map(({ vehicle, ...diagnostic }) => diagnostic)
+      };
+      console.info('[VEHICLES] availability diagnostics', { requestId, ...debug });
+      sendApi(res, 200, { code: 0, msg: 'ok', data, debug, requestId });
     } catch (err) {
       if (err && err.code === 'DB_TIMEOUT') {
         fail(res, requestId, 'DB_TIMEOUT', 'Database query timeout', 504);
@@ -368,12 +399,6 @@ function registerTripGatewayRoutes(app, deps) {
         return;
       }
 
-      const battery = getVehicleBattery(vehicle);
-      if (battery !== null && battery < LOW_BATTERY_THRESHOLD) {
-        fail(res, requestId, 1006, 'battery too low');
-        return;
-      }
-
       if (!isVehicleTelemetryFresh(vehicle)) {
         fail(res, requestId, 'BRIDGE_VEHICLE_STATUS_STALE', 'vehicle status stale', 409, {
           reportAt: getVehicleReportAt(vehicle),
@@ -396,9 +421,6 @@ function registerTripGatewayRoutes(app, deps) {
 
         const latestAvailabilityStatus = getVehicleAvailabilityStatus(latestVehicle);
         if (latestAvailabilityStatus !== 'available') throw new Error('vehicle_busy');
-
-        const latestBattery = getVehicleBattery(latestVehicle);
-        if (latestBattery !== null && latestBattery < LOW_BATTERY_THRESHOLD) throw new Error('vehicle_low_battery');
 
         if (!isVehicleTelemetryFresh(latestVehicle)) throw new Error('vehicle_stale');
         const latestStatusInfo = getStatusInfo(latestVehicle);
@@ -480,10 +502,6 @@ function registerTripGatewayRoutes(app, deps) {
     } catch (err) {
       if (err.message === 'vehicle_busy') {
         fail(res, requestId, 1005, 'vehicle already in use');
-        return;
-      }
-      if (err.message === 'vehicle_low_battery') {
-        fail(res, requestId, 1006, 'battery too low');
         return;
       }
       if (err.message === 'vehicle_stale') {

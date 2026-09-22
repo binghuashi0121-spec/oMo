@@ -4,6 +4,12 @@ const VEHICLE_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
 const VALID_PROFILES = new Set(['legacy', 'safe_blocked', 'isolated_simulator', 'vendor_real']);
 const VALID_SPEED_UNITS = new Set(['unknown', 'mps', 'kph']);
 const VALID_COORD_SYSTEMS = new Set(['unknown', 'wgs84', 'gcj02']);
+const VENDOR_PROTOCOL_TYPES = new Set([
+  'ugvSetMode', 'ugvSetMove', 'getVersion', 'gstUdpStart', 'gstUdpStop',
+  'gstRtmpStart', 'gstRtmpStop', 'gstVideoStart', 'gstVideoStop',
+  'gstTakePhoto', 'osmDownload', 'autoDriving'
+]);
+const VENDOR_DEFAULT_TYPES = [...VENDOR_PROTOCOL_TYPES].filter((type) => type !== 'ugvSetMove');
 
 function csv(value) {
   return [...new Set(String(value || '').split(',').map((item) => item.trim()).filter(Boolean))];
@@ -11,6 +17,17 @@ function csv(value) {
 
 function enabled(value) {
   return String(value || '').trim().toLowerCase() === 'true';
+}
+
+function resolveVendorCommandTypes(environment) {
+  const configured = csv(environment.MQTT_ALLOWED_COMMAND_TYPES);
+  const selected = configured.length ? configured : VENDOR_DEFAULT_TYPES;
+  const invalid = selected.find((type) => !VENDOR_PROTOCOL_TYPES.has(type));
+  if (invalid) throw new Error(`MQTT_ALLOWED_COMMAND_TYPES contains unsupported type: ${invalid}`);
+  if (selected.includes('ugvSetMove') && !enabled(environment.MQTT_MOVE_CONTROL_ENABLED)) {
+    throw new Error('ugvSetMove requires MQTT_MOVE_CONTROL_ENABLED=true');
+  }
+  return new Set(selected);
 }
 
 function parseBrokerUrl(rawValue) {
@@ -95,7 +112,7 @@ function resolveVendorRealConfig(environment) {
       ? new Date(controlWindowExpiresAt).toISOString()
       : '',
     supervisionConfirmed,
-    allowedCommandTypes: new Set(['ugvSetMode', 'autoDriving'])
+    allowedCommandTypes: resolveVendorCommandTypes(environment)
   };
 }
 
@@ -125,7 +142,7 @@ function resolveIsolatedSimulatorConfig(environment) {
     commandBlockedReasons: [],
     controlWindowExpiresAt: '',
     supervisionConfirmed: true,
-    allowedCommandTypes: new Set(['ugvSetMode', 'ugvSetMove', 'autoDriving'])
+    allowedCommandTypes: new Set(VENDOR_PROTOCOL_TYPES)
   };
 }
 
@@ -155,7 +172,7 @@ function resolveLegacyConfig(environment) {
     commandBlockedReasons: [],
     controlWindowExpiresAt: '',
     supervisionConfirmed: true,
-    allowedCommandTypes: new Set(['ugvSetMode', 'ugvSetMove', 'autoDriving'])
+    allowedCommandTypes: new Set(VENDOR_PROTOCOL_TYPES)
   };
 }
 
@@ -213,6 +230,7 @@ module.exports = {
   STAGING_ENV_ID,
   PRODUCTION_ENV_ID,
   VEHICLE_ID_PATTERN,
+  VENDOR_PROTOCOL_TYPES,
   resolveMqttRuntimeConfig,
   isCommandRuntimeEnabled,
   getCommandRuntimeBlockedReasons

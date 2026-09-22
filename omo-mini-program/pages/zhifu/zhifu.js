@@ -15,7 +15,7 @@ function buildTripPageUrl(trip) {
 
   const shibinghuaTripId = encodeURIComponent(shibinghuaSafeString(shibinghuaTrip.tripId));
   const shibinghuaUgvID = encodeURIComponent(shibinghuaSafeString(shibinghuaTrip.ugvID || shibinghuaTrip.vehicleId));
-  const shibinghuaTripStatus = shibinghuaTrip.status || 'active';
+  const shibinghuaTripStatus = shibinghuaTrip.status || shibinghuaTrip.tripStatus || 'active';
 
   return shibinghuaTripStatus === 'waiting_pickup'
     ? `/pages/dengdaiquche/dengdaiquche?tripId=${shibinghuaTripId}&ugvID=${shibinghuaUgvID}`
@@ -49,12 +49,16 @@ Page({
   },
 
   onClick() {
+    if (this._unlockSubmitting) return;
+
+    this._unlockSubmitting = true;
     wx.showLoading({ title: '支付中...' });
 
     setTimeout(() => {
       if (this.data.ugvID) {
         this.unlockVehicle(this.data.ugvID);
       } else {
+        this._unlockSubmitting = false;
         wx.hideLoading();
         wx.showToast({ title: '参数错误：无车辆信息', icon: 'none' });
       }
@@ -62,11 +66,24 @@ Page({
   },
 
   enterExistingTrip(trip) {
-    const shibinghuaUrl = buildTripPageUrl(trip);
+    const shibinghuaTrip = shibinghuaSafeObject(trip);
+    const shibinghuaUrl = buildTripPageUrl(shibinghuaTrip);
     if (!shibinghuaUrl) {
+      this._unlockSubmitting = false;
       wx.showToast({ title: '未找到未结束行程', icon: 'none' });
       return;
     }
+
+    const shibinghuaStoredTrip = getStoredTripInfo() || {};
+    const shibinghuaUgvID = shibinghuaTrip.ugvID || shibinghuaTrip.vehicleId || shibinghuaStoredTrip.ugvID || '';
+    const shibinghuaTripStatus = shibinghuaTrip.status || shibinghuaTrip.tripStatus || 'active';
+    wx.setStorageSync('currentTripInfo', {
+      ...shibinghuaStoredTrip,
+      ...shibinghuaTrip,
+      vehicleId: shibinghuaUgvID,
+      ugvID: shibinghuaUgvID,
+      tripStatus: shibinghuaTripStatus
+    });
 
     wx.reLaunch({ url: shibinghuaUrl });
   },
@@ -94,12 +111,14 @@ Page({
 
       const shibinghuaTrip = shibinghuaSafeObject(shibinghuaResult && shibinghuaResult.data);
       if (!shibinghuaTrip.tripId) {
+        this._unlockSubmitting = false;
         wx.showToast({ title: '未找到未结束行程', icon: 'none' });
         return;
       }
 
       this.enterExistingTrip(shibinghuaTrip);
     } catch (shibinghuaErr) {
+      this._unlockSubmitting = false;
       wx.hideLoading();
       console.error('checkActiveTrip failed', shibinghuaErr);
       wx.showToast({ title: '获取行程失败，请重试', icon: 'none' });
@@ -112,25 +131,24 @@ Page({
     const shibinghuaMessage = shibinghuaResult.msg || '未知错误';
     const shibinghuaExistingTrip = shibinghuaResult.data ? shibinghuaResult.data : null;
 
+    if (String(shibinghuaCode) === '1002') {
+      console.info('[trip/unlock] resume unfinished trip', {
+        requestId: shibinghuaResult.requestId ? shibinghuaResult.requestId : '',
+        tripId: shibinghuaExistingTrip && shibinghuaExistingTrip.tripId,
+        status: shibinghuaExistingTrip && shibinghuaExistingTrip.status
+      });
+      wx.showToast({ title: '正在恢复原行程', icon: 'none' });
+      this.navigateToExistingTrip(shibinghuaExistingTrip);
+      return;
+    }
+
+    this._unlockSubmitting = false;
     console.warn('[trip/unlock] failed', {
       code: shibinghuaCode,
       message: shibinghuaMessage,
       requestId: shibinghuaResult.requestId ? shibinghuaResult.requestId : '',
       data: shibinghuaResult.data ? shibinghuaResult.data : null
     });
-
-    if (String(shibinghuaCode) === '1002') {
-      wx.showModal({
-        title: '开锁失败',
-        content: '您有未结束的行程，请先处理。点击确定后将跳转到对应行程页面。',
-        showCancel: false,
-        confirmText: '去处理',
-        success: () => {
-          this.navigateToExistingTrip(shibinghuaExistingTrip);
-        }
-      });
-      return;
-    }
 
     wx.showModal({
       title: '开锁失败',
@@ -209,6 +227,7 @@ Page({
   async unlockVehicle(ugvID) {
     const shibinghuaUgvID = shibinghuaSafeString(ugvID).trim();
     if (!shibinghuaUgvID) {
+      this._unlockSubmitting = false;
       wx.hideLoading();
       wx.showToast({ title: '参数错误：无车辆信息', icon: 'none' });
       return;
@@ -244,7 +263,7 @@ Page({
       this.sendVehicleCommand(
         shibinghuaResolvedUgvID,
         'ugvSetMode',
-        buildModeCommand(shibinghuaResolvedUgvID, 1),
+        buildModeCommand(shibinghuaResolvedUgvID, 3),
         (commandSucceeded, commandResult) => {
           const trip = {
             tripId: shibinghuaPayload.tripId,
@@ -261,6 +280,7 @@ Page({
         }
       );
     } catch (shibinghuaErr) {
+      this._unlockSubmitting = false;
       wx.hideLoading();
       console.error('trip/unlock failed', shibinghuaErr);
       wx.showToast({ title: '网络异常，请重试', icon: 'none' });

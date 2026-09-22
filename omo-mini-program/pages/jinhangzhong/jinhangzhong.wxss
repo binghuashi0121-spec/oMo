@@ -2,11 +2,19 @@
   margin-top: 13.36rpx;
 }
 
+page {
+  height: auto;
+  min-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
 .page {
   background-color: #f9f9f9ff;
   width: 100%;
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;
+  height: auto;
+  overflow: visible;
   display: flex;
   flex-direction: column;
   opacity: 0;
@@ -18,6 +26,7 @@
   box-shadow: 0 4rpx 8rpx #0000000d;
   border: none;
   z-index: 20;
+  flex-shrink: 0;
 }
 
 .image-wrapper,
@@ -86,6 +95,7 @@
   align-items: flex-start;
   padding-top: 20rpx;
   position: relative;
+  flex-shrink: 0;
 }
 
 .map-frame {
@@ -171,7 +181,6 @@
 }
 
 .bottom-panel {
-  flex: 1;
   background-color: #ffffff;
   border-top-left-radius: 48rpx;
   border-top-right-radius: 48rpx;

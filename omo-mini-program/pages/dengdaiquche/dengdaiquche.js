@@ -1,6 +1,6 @@
 const VEHICLE_POLL_INTERVAL_MS = 5000;
 const PLAN_REFRESH_INTERVAL_MS = 30000;
-const AUTO_ENTER_RADIUS_METERS = 30;
+const AUTO_ENTER_RADIUS_METERS = 8;
 const WAIT_TIMEOUT_MS = 5 * 60 * 1000;
 const {
   buildModeCommand,
@@ -9,6 +9,7 @@ const {
   convertGcj02ToWgs84,
   AUTO_DRIVING_OPT_PLAN,
   AUTO_DRIVING_OPT_START,
+  AUTO_DRIVING_OPT_STOP,
   AUTO_DRIVING_OPT_EXIT,
   AUTO_DRIVING_DEFAULT_MAX_SPEED
 } = require('../../utils/vehicleControl');
@@ -16,7 +17,7 @@ const { callBridge, isBridgeSuccess } = require('../../utils/bridgeApi');
 const { RESPONSE_TIMEOUT_MS, responseKey, matchesPendingResponse } = require('../../utils/autoDrivingResponse');
 
 
-function shouldShowDevArrivalShortcut() {
+function shouldShowDevControls() {
   try {
     if (!wx.getAccountInfoSync) return false;
     const accountInfo = wx.getAccountInfoSync();
@@ -104,7 +105,8 @@ Page({
     userLng: null,
     liveDistanceText: '--',
     latestResponseText: '',
-    showDevArrivalShortcut: false,
+    showDevControls: false,
+    emergencyStopSending: false,
     showBoardingConfirm: false,
     manualModeConfirming: false
   },
@@ -119,12 +121,13 @@ Page({
     this._handledResponseKeys = new Set();
     this._autoDrivingPending = null;
     this._autoDrivingResponseTimer = null;
+    this._emergencyStopped = false;
     this._pageBootstrapped = false;
     this._tripValidationRedirecting = false;
     this.setData({
       tripId,
       trackedUgvID,
-      showDevArrivalShortcut: shouldShowDevArrivalShortcut()
+      showDevControls: shouldShowDevControls()
     });
     this.logTripContext('onLoad');
     this.validateWaitingTripOwnership().then((valid) => {
@@ -329,7 +332,6 @@ Page({
     this._autoDrivingResponseTimer = setTimeout(() => {
       if (!this._autoDrivingPending || this._autoDrivingPending.stage !== stage) return;
       this.failAutoDrivingFlow('车辆响应超时，自动驾驶状态未确认，请返回后检查车辆');
-      if (stage === 'start_wait') this.stopAutoDriving();
     }, RESPONSE_TIMEOUT_MS);
   },
 
@@ -368,6 +370,19 @@ Page({
       return;
     }
 
+    console.info('[waiting-trip] autoDriving goal', {
+      ugvID: this.data.trackedUgvID,
+      displayGcj02: {
+        latitude: this.data.pickupLat,
+        longitude: this.data.pickupLng
+      },
+      mqttWgs84: {
+        latitude: wgs84Point.latitude,
+        longitude: wgs84Point.longitude
+      },
+      usedStoredWgs84: hasStoredWgs84
+    });
+
     this._autoDrivingPlanSentAt = Date.now();
     this.waitForAutoDrivingResponse('plan_wait', 'autoDriving', this._autoDrivingPlanSentAt);
     this.sendVehicleCommand(
@@ -388,12 +403,62 @@ Page({
     }
 
     this._autoDrivingStartSentAt = Date.now();
-    this.waitForAutoDrivingResponse('start_wait', 'autoDriving', this._autoDrivingStartSentAt);
     this.sendVehicleCommand(
       'autoDriving',
       buildAutoDrivingCommand(this.data.trackedUgvID, AUTO_DRIVING_OPT_START, {
         max_speed: AUTO_DRIVING_DEFAULT_MAX_SPEED
       }),
+      onDone
+    );
+  },
+
+  onDevEmergencyStop() {
+    if (!this.data.showDevControls || this.data.emergencyStopSending) return;
+    if (!this.data.trackedUgvID) {
+      wx.showToast({ title: '缺少车辆信息', icon: 'none' });
+      return;
+    }
+
+    this._emergencyStopped = true;
+    this._autoDrivingStarting = false;
+    this._autoDrivingStarted = false;
+    this._autoDrivingStage = 'emergency_stopped';
+    this._autoDrivingPending = null;
+    if (this._autoDrivingResponseTimer) clearTimeout(this._autoDrivingResponseTimer);
+    this._autoDrivingResponseTimer = null;
+    this.stopMoveHeartbeat();
+    this.setData({
+      emergencyStopSending: true,
+      statusText: '正在发送紧急停车指令...'
+    });
+
+    this.sendVehicleCommand(
+      'autoDriving',
+      buildAutoDrivingCommand(this.data.trackedUgvID, AUTO_DRIVING_OPT_STOP),
+      (ok) => {
+        this.setData({
+          emergencyStopSending: false,
+          statusText: ok
+            ? '紧急停车指令已发送，请现场确认车辆已停止。'
+            : '紧急停车指令发送失败，请立即采取现场安全措施。'
+        });
+        wx.showToast({
+          title: ok ? '停车指令已发送' : '停车指令发送失败',
+          icon: 'none'
+        });
+      }
+    );
+  },
+
+  sendAutoDrivingMode(onDone) {
+    if (!this.data.trackedUgvID) {
+      if (typeof onDone === 'function') onDone(false);
+      return;
+    }
+
+    this.sendVehicleCommand(
+      'ugvSetMode',
+      buildModeCommand(this.data.trackedUgvID, 2),
       onDone
     );
   },
@@ -416,6 +481,7 @@ Page({
       this._autoDrivingStarted ||
       this._autoDrivingStarting ||
       this._autoDrivingStage === 'failed' ||
+      this._emergencyStopped ||
       !this.data.trackedUgvID ||
       !Number.isFinite(this.data.pickupLat) ||
       !Number.isFinite(this.data.pickupLng)
@@ -431,25 +497,25 @@ Page({
     this._autoDrivingStartSentAt = 0;
     this._handledResponseKey = '';
     this._handledResponseKeys = new Set();
-    this.setData({ statusText: '正在请求车辆进入自动驾驶模式...' });
+    this.setData({ statusText: '正在请求车辆进入自动驾驶模式...', latestResponseText: '' });
 
-    this.waitForAutoDrivingResponse('mode_wait', 'ugvSetMode', this._autoDrivingFlowStartedAt);
-
-    this.sendVehicleCommand(
-      'ugvSetMode',
-      buildModeCommand(this.data.trackedUgvID, 2),
-      (modeOk, messageNo) => {
-        if (!modeOk) {
-          this.failAutoDrivingFlow('自动驾驶模式切换指令发送失败，请返回后重试');
+    this.sendAutoDrivingMode((modeOk) => {
+      if (this._emergencyStopped) return;
+      if (!modeOk) {
+        this.failAutoDrivingFlow('自动驾驶模式切换指令发送失败，请返回后重试');
+        return;
+      }
+      this.setData({ statusText: '模式切换指令已发送，正在请求规划路线...' });
+      this.sendAutoDrivingPlan((planOk, messageNo) => {
+        if (this._emergencyStopped) return;
+        if (!planOk) {
+          this.failAutoDrivingFlow('路径规划请求发送失败，请返回后重试');
           return;
         }
-        if (this._autoDrivingPending?.stage === 'mode_wait') this._autoDrivingPending.commandMessageNo = messageNo;
-        this.setData({
-          statusText: '已发送自动驾驶模式切换，等待车辆响应...',
-          latestResponseText: ''
-        });
-      }
-    );
+        if (this._autoDrivingPending?.stage === 'plan_wait') this._autoDrivingPending.commandMessageNo = messageNo;
+        this.setData({ statusText: '已发送路径规划请求，等待车辆响应...' });
+      });
+    });
   },
 
   activateVehicleControl() {
@@ -746,22 +812,15 @@ Page({
       return;
     }
 
-    if (stage === 'mode_wait') {
-      this.sendAutoDrivingPlan((ok, messageNo) => {
-        if (!ok) return this.failAutoDrivingFlow('路径规划请求发送失败，请返回后重试');
-        if (this._autoDrivingPending?.stage === 'plan_wait') this._autoDrivingPending.commandMessageNo = messageNo;
-        this.setData({ statusText: '已发送路径规划请求，等待车辆响应...' });
-      });
-    } else if (stage === 'plan_wait') {
-      this.sendAutoDrivingStart((ok, messageNo) => {
+    if (stage === 'plan_wait') {
+      this.sendAutoDrivingStart((ok) => {
+        if (this._emergencyStopped) return;
         if (!ok) return this.failAutoDrivingFlow('自动驾驶启动指令发送失败，请返回后重试');
-        if (this._autoDrivingPending?.stage === 'start_wait') this._autoDrivingPending.commandMessageNo = messageNo;
-        this.setData({ statusText: '已发送自动驾驶启动请求，等待车辆响应...' });
+        this._autoDrivingStarting = false;
+        this._autoDrivingStarted = true;
+        this._autoDrivingStage = 'running';
+        this.setData({ statusText: '路径规划成功，自动驾驶启动指令已发送' });
       });
-    } else if (stage === 'start_wait') {
-      this._autoDrivingStarting = false;
-      this._autoDrivingStarted = true;
-      this._autoDrivingStage = 'running';
     }
   },
 
@@ -890,9 +949,19 @@ Page({
 
   tryAutoEnterTrip(distanceMeters) {
     if (this._entering) return;
+    // Vehicle telemetry starts polling as soon as the page opens. Do not treat
+    // proximity as an arrival until mode switch, route planning and auto-drive
+    // start have all been acknowledged by the vehicle.
+    if (!this._autoDrivingStarted || this._autoDrivingStage !== 'running') return;
     if (!Number.isFinite(distanceMeters) || distanceMeters > AUTO_ENTER_RADIUS_METERS) return;
     if (this.data.showBoardingConfirm) return;
 
+    console.info('[waiting-trip] vehicle reached pickup', {
+      tripId: this.data.tripId,
+      ugvID: this.data.trackedUgvID,
+      distanceMeters,
+      autoDrivingStage: this._autoDrivingStage
+    });
     this.stopAutoDriving();
     this.setData({
       showBoardingConfirm: true,

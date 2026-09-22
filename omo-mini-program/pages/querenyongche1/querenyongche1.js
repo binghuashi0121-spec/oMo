@@ -1,7 +1,6 @@
 const { callBridge, isBridgeSuccess } = require('../../utils/bridgeApi');
 const DEFAULT_CAPACITY_TEXT = '2人';
 const DEFAULT_FULL_RANGE_KM = 30;
-const LOW_BATTERY_THRESHOLD = 20;
 
 function isObjectIdLike(value) {
   return typeof value === 'string' && /^[a-f0-9]{24}$/i.test(value.trim());
@@ -116,16 +115,6 @@ Page({
       return;
     }
 
-    if (Number.isFinite(battery) && battery < LOW_BATTERY_THRESHOLD) {
-      wx.showModal({
-        title: '车辆不可用',
-        content: '车辆电量过低，暂不可用。',
-        showCancel: false,
-        success: () => this.exitUnavailableVehicle()
-      });
-      return;
-    }
-
     this.setData({
       vehicleId: resolvedUgvID,
       vehicleDocId: vehicle._id || '',
@@ -159,29 +148,34 @@ Page({
   async fetchVehicleInfo(ugvID) {
     try {
       const result = await callBridge({
-        path: '/vehicleStatus',
-        method: 'GET',
-        data: { ugvID }
+        path: '/vehicles/available',
+        method: 'GET'
       });
 
-      if (!isBridgeSuccess(result) || !result.data) {
+      const vehicles = isBridgeSuccess(result) && Array.isArray(result.data) ? result.data : [];
+      const vehicle = vehicles.find((item) => item && (item.ugvID === ugvID || item._id === ugvID));
+      if (!vehicle) {
+        console.warn('[querenyongche1] selected vehicle is no longer available', {
+          ugvID,
+          code: result && result.code,
+          availableUgvIds: vehicles.map((item) => item && item.ugvID).filter(Boolean)
+        });
         wx.showModal({
-          title: 'NOT FOUND',
-          content: 'NOT FOUND',
+          title: '车辆暂不可用',
+          content: '车辆状态已变化，请返回重新选择。',
           showCancel: false,
           success: () => this.exitUnavailableVehicle()
         });
         return;
       }
 
-      const vehicle = result.data;
       console.log('获取车辆信息成功', vehicle);
       this.applyVehicleInfo(vehicle, ugvID);
     } catch (err) {
       console.error('获取车辆信息失败', err);
       wx.showModal({
-        title: 'NOT FOUND',
-        content: 'NOT FOUND',
+        title: '车辆信息获取失败',
+        content: '车辆服务暂时不可用，请稍后重试。',
         showCancel: false
       });
 

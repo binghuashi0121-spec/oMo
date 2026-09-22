@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { getTrustedCloudBaseIdentity } = require('../cloudbaseIdentity');
+const { diagnoseCloudBaseIdentity, getTrustedCloudBaseIdentity } = require('../cloudbaseIdentity');
 const { validateProtocolCommand, getTripVehicleIdentity } = require('../commandPolicy');
 const { assertStagingMqttConfig } = require('../stagingMqttPolicy');
 const { resolveMqttRuntimeConfig, isCommandRuntimeEnabled, getCommandRuntimeBlockedReasons } = require('../mqttRuntimePolicy');
@@ -33,6 +33,29 @@ test('production identity rejects developer-tools source', () => {
   }
 });
 
+test('unknown CloudBase source can only be enabled explicitly outside production', () => {
+  const previousEnv = process.env.TCB_ENV;
+  const previousAppId = process.env.WECHAT_APP_ID;
+  const previousFlag = process.env.ALLOW_UNKNOWN_WX_SOURCE;
+  process.env.WECHAT_APP_ID = 'wx_expected';
+  process.env.ALLOW_UNKNOWN_WX_SOURCE = 'true';
+  const headers = {
+    'x-wx-openid': 'trusted_user_123',
+    'x-wx-source': 'cloudbase_gateway',
+    'x-wx-appid': 'wx_expected'
+  };
+  try {
+    process.env.TCB_ENV = 'omo-staging';
+    assert.equal(getTrustedCloudBaseIdentity({ headers: { ...headers, 'x-wx-env': 'omo-staging' } }).source, 'cloudbase_gateway');
+    process.env.TCB_ENV = 'omo-prod';
+    assert.equal(getTrustedCloudBaseIdentity({ headers: { ...headers, 'x-wx-env': 'omo-prod' } }), null);
+  } finally {
+    if (previousEnv === undefined) delete process.env.TCB_ENV; else process.env.TCB_ENV = previousEnv;
+    if (previousAppId === undefined) delete process.env.WECHAT_APP_ID; else process.env.WECHAT_APP_ID = previousAppId;
+    if (previousFlag === undefined) delete process.env.ALLOW_UNKNOWN_WX_SOURCE; else process.env.ALLOW_UNKNOWN_WX_SOURCE = previousFlag;
+  }
+});
+
 test('command policy rejects arbitrary message types and fields', () => {
   assert.match(validateProtocolCommand('OMO_1', 'rawTopic', { ugvID: 'OMO_1' }), /not allowed/);
   assert.match(validateProtocolCommand('OMO_1', 'ugvSetMode', { ugvID: 'OTHER', mode: 1, speedMode: 2 }), /must match/);
@@ -44,6 +67,64 @@ test('auto driving policy bounds coordinates and HTTPS uploads', () => {
   assert.match(validateProtocolCommand('OMO_1', 'autoDriving', { ugvID: 'OMO_1', opt_mode: 1, longitude: 200, latitude: 28, upload: 0 }), /longitude/);
   assert.match(validateProtocolCommand('OMO_1', 'autoDriving', { ugvID: 'OMO_1', opt_mode: 1, longitude: 112, latitude: 28, upload: 1, file_url: 'http://unsafe' }), /HTTPS/);
   assert.equal(validateProtocolCommand('OMO_1', 'autoDriving', { ugvID: 'OMO_1', opt_mode: 1, longitude: 112, latitude: 28, upload: 0 }), '');
+});
+
+test('identity diagnostics expose only presence and match flags', () => {
+  const previousEnv = process.env.TCB_ENV;
+  const previousAppId = process.env.WECHAT_APP_ID;
+  process.env.TCB_ENV = 'omo-staging';
+  process.env.WECHAT_APP_ID = 'wx_expected';
+  try {
+    const diagnosis = diagnoseCloudBaseIdentity({ headers: {
+      'x-wx-env': 'wrong-env',
+      'x-wx-source': 'wx_devtools',
+      'x-wx-appid': 'wx_other'
+    } });
+    assert.deepEqual(diagnosis, {
+      openidPresent: false,
+      openidFormatValid: false,
+      envPresent: true,
+      envMatchesExpected: false,
+      expectedEnvConfigured: true,
+      sourcePresent: true,
+      sourceValue: 'wx_devtools',
+      sourceAccepted: true,
+      platformValue: '',
+      devtoolsAllowed: true,
+      unknownSourceAllowed: false,
+      appidPresent: true,
+      appidMatchesExpected: false,
+      expectedAppIdConfigured: true
+    });
+    assert.equal(JSON.stringify(diagnosis).includes('wrong-env'), false);
+    assert.equal(JSON.stringify(diagnosis).includes('wx_other'), false);
+  } finally {
+    if (previousEnv === undefined) delete process.env.TCB_ENV; else process.env.TCB_ENV = previousEnv;
+    if (previousAppId === undefined) delete process.env.WECHAT_APP_ID; else process.env.WECHAT_APP_ID = previousAppId;
+  }
+});
+
+test('PDF protocol command policy covers version, GST and OSM messages', () => {
+  assert.equal(validateProtocolCommand('OMO_1', 'getVersion', { ugvID: 'OMO_1' }), '');
+  assert.equal(validateProtocolCommand('OMO_1', 'gstUdpStart', {
+    ugvID: 'OMO_1', camera_id: 1, udp_ip: '127.0.0.1', udp_port: 5000
+  }), '');
+  assert.match(validateProtocolCommand('OMO_1', 'gstUdpStart', {
+    ugvID: 'OMO_1', camera_id: 3, udp_ip: '127.0.0.1', udp_port: 5000
+  }), /camera_id/);
+  assert.equal(validateProtocolCommand('OMO_1', 'gstRtmpStart', {
+    ugvID: 'OMO_1', camera_id: 2, rtmp_url: 'rtmps://media.example.test/live/OMO_1'
+  }), '');
+  assert.match(validateProtocolCommand('OMO_1', 'gstVideoStop', {
+    ugvID: 'OMO_1', camera_id: 1, upload: 1, file_url: 'http://unsafe.example/upload'
+  }), /HTTPS/);
+  assert.equal(validateProtocolCommand('OMO_1', 'gstTakePhoto', {
+    ugvID: 'OMO_1', camera_id: 1, photo_path: '/data/photo.jpg', upload: 0
+  }), '');
+  assert.equal(validateProtocolCommand('OMO_1', 'osmDownload', {
+    ugvID: 'OMO_1', opt_mode: 1, osm_id: 'tianmashan', osm_name: '天马山',
+    file_url: 'https://files.example.test/tianmashan.osm', version: '1.0.0'
+  }), '');
 });
 
 test('trip ownership identity is deterministic', () => {
@@ -140,6 +221,22 @@ test('vendor real profile uses exact vehicle topics and requires explicit plaint
     'ugv/OMO_REAL_02/device', 'ugv/OMO_REAL_02/response'
   ]);
   assert.equal(config.allowedCommandTypes.has('ugvSetMove'), false);
+  assert.equal(config.allowedCommandTypes.has('gstRtmpStart'), true);
+  assert.equal(config.allowedCommandTypes.has('osmDownload'), true);
+});
+
+test('vendor real move control requires a separate explicit switch', () => {
+  const base = {
+    OMO_STAGING_MODE: 'true', TCB_ENV: 'omo-platform-staging-d5a30d0fd8f',
+    MQTT_PROFILE: 'vendor_real', MQTT_CONNECTION_ENABLED: 'true', MQTT_COMMANDS_ENABLED: 'false',
+    MQTT_ALLOWED_UGV_IDS: 'OMO_REAL_01', MQTT_URL: 'mqtt://vendor.example.test:1883',
+    MQTT_USERNAME: 'local-secret-user', MQTT_PASSWORD: 'local-secret-password',
+    MQTT_TELEMETRY_SPEED_UNIT: 'unknown', MQTT_COORD_SYSTEM: 'unknown', ALLOW_INSECURE_MQTT: 'true',
+    MQTT_ALLOWED_COMMAND_TYPES: 'ugvSetMode,ugvSetMove'
+  };
+  assert.throws(() => resolveMqttRuntimeConfig(base), /MQTT_MOVE_CONTROL_ENABLED/);
+  const enabled = resolveMqttRuntimeConfig({ ...base, MQTT_MOVE_CONTROL_ENABLED: 'true' });
+  assert.equal(enabled.allowedCommandTypes.has('ugvSetMove'), true);
 });
 
 test('vendor real commands require supervision and a live control window', () => {

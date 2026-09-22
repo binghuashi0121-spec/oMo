@@ -8,6 +8,7 @@ const cloudbase = require('@cloudbase/node-sdk');
 const { registerTripGatewayRoutes } = require('./tripGateway');
 const { getTrustedCloudBaseIdentity } = require('./cloudbaseIdentity');
 const { validateProtocolCommand, getTripVehicleIdentity } = require('./commandPolicy');
+const { PLATFORM_COMMAND_QOS, buildPlatformCommandEnvelope } = require('./protocolEnvelope');
 const { speedToKph } = require('./telemetryPolicy');
 const { resolveMqttRuntimeConfig, isCommandRuntimeEnabled, getCommandRuntimeBlockedReasons } = require('./mqttRuntimePolicy');
 
@@ -16,6 +17,7 @@ app.use(express.json({ limit: '64kb' }));
 
 const PORT = Number(process.env.PORT || 3000);
 const TCB_ENV = process.env.TCB_ENV;
+const CLOUDBASE_APIKEY = String(process.env.CLOUDBASE_APIKEY || '').trim();
 const TENCENTCLOUD_SECRETID = process.env.TENCENTCLOUD_SECRETID || '';
 const TENCENTCLOUD_SECRETKEY = process.env.TENCENTCLOUD_SECRETKEY || '';
 const TCB_TIMEOUT_MS = Number(process.env.TCB_TIMEOUT_MS || 10000);
@@ -74,15 +76,17 @@ function getCloudbaseConfigStatus() {
   if (!TCB_ENV) {
     missingEnv.push('TCB_ENV');
   }
+  const apiKeyConfigured = Boolean(CLOUDBASE_APIKEY);
   const secretPairConfigured = Boolean(TENCENTCLOUD_SECRETID && TENCENTCLOUD_SECRETKEY);
-  if (!secretPairConfigured && !CLOUDBASE_RUNTIME_AUTH) {
-    missingEnv.push('CLOUDBASE_RUNTIME_AUTH_OR_CAM_SECRET_PAIR');
+  if (!apiKeyConfigured && !secretPairConfigured) {
+    missingEnv.push('CLOUDBASE_APIKEY_OR_CAM_SECRET_PAIR');
   }
 
   return {
     env: TCB_ENV || '',
-    authMode: secretPairConfigured ? 'secretPair' : CLOUDBASE_RUNTIME_AUTH ? 'workloadIdentity' : 'none',
+    authMode: apiKeyConfigured ? 'apiKey' : secretPairConfigured ? 'secretPair' : 'none',
     runtimeAuthEnabled: CLOUDBASE_RUNTIME_AUTH,
+    apiKeyConfigured,
     secretIdConfigured: Boolean(TENCENTCLOUD_SECRETID),
     secretKeyConfigured: Boolean(TENCENTCLOUD_SECRETKEY),
     metadataProbeDisabled: TCB_DISABLE_METADATA_PROBE,
@@ -106,8 +110,8 @@ if (
   (!TENCENTCLOUD_SECRETID && TENCENTCLOUD_SECRETKEY)
 ) {
   console.warn('[WARN] CAM secret pair is incomplete. Both TENCENTCLOUD_SECRETID and TENCENTCLOUD_SECRETKEY are required.');
-} else if (!TENCENTCLOUD_SECRETID && !TENCENTCLOUD_SECRETKEY && !CLOUDBASE_RUNTIME_AUTH) {
-  console.warn('[WARN] CloudBase CAM auth is missing. Set both TENCENTCLOUD_SECRETID and TENCENTCLOUD_SECRETKEY.');
+} else if (!CLOUDBASE_APIKEY && !TENCENTCLOUD_SECRETID && !TENCENTCLOUD_SECRETKEY) {
+  console.warn('[WARN] CloudBase database auth is missing. Inject CLOUDBASE_APIKEY or set a complete CAM secret pair.');
 }
 
 const tcbInitConfig = {
@@ -115,7 +119,9 @@ const tcbInitConfig = {
   timeout: TCB_TIMEOUT_MS
 };
 
-if (TENCENTCLOUD_SECRETID && TENCENTCLOUD_SECRETKEY) {
+if (CLOUDBASE_APIKEY) {
+  tcbInitConfig.accessKey = CLOUDBASE_APIKEY;
+} else if (TENCENTCLOUD_SECRETID && TENCENTCLOUD_SECRETKEY) {
   tcbInitConfig.secretId = TENCENTCLOUD_SECRETID;
   tcbInitConfig.secretKey = TENCENTCLOUD_SECRETKEY;
 }
@@ -332,9 +338,13 @@ function normalizeTelemetryCoordinates(rawLatitude, rawLongitude, coordSystem) {
 
 // ---- MQTT client ----
 let mqttClient = null;
-let mqttState = mqttRuntime.connectionEnabled ? 'connecting' : 'blocked';
+let mqttState = mqttRuntime.connectionEnabled && cloudbaseConfigStatus.ready ? 'connecting' : 'blocked';
 
-if (mqttRuntime.connectionEnabled) {
+if (mqttRuntime.connectionEnabled && !cloudbaseConfigStatus.ready) {
+  console.warn('[MQTT] connection blocked because CloudBase database authentication is not configured.');
+}
+
+if (mqttRuntime.connectionEnabled && cloudbaseConfigStatus.ready) {
 mqttClient = mqtt.connect(MQTT_URL, {
   protocolVersion: 5,
   clientId: MQTT_CLIENT_ID,
@@ -628,6 +638,7 @@ function handleHealth(req, res) {
     },
     commands: {
       enabled: commandsEnabled,
+      allowedTypes: [...mqttRuntime.allowedCommandTypes],
       blockedReasons: commandsEnabled ? [] : getCommandRuntimeBlockedReasons(mqttRuntime),
       controlWindowExpiresAt: mqttRuntime.controlWindowExpiresAt
     },
@@ -694,15 +705,7 @@ async function handleSendCommand(req, res) {
     }
 
     const topic = `ugv/${ugvID}/platform`;
-    const timestamp = Date.now();
-    const payload = {
-      header: {
-        messageNo: `cmd-${timestamp}-${Math.floor(Math.random() * 1000)}`,
-        messageType,
-        timestamp
-      },
-      payload: command
-    };
+    const payload = buildPlatformCommandEnvelope(messageType, command);
 
     if (!topic || typeof topic !== 'string') {
       return res.status(400).json({
@@ -740,7 +743,7 @@ async function handleSendCommand(req, res) {
     const payloadString = JSON.stringify(payload);
     const publishedAt = Date.now();
 
-    mqttClient.publish(topic, payloadString, { qos: 0, retain: false }, async (err) => {
+    mqttClient.publish(topic, payloadString, { qos: PLATFORM_COMMAND_QOS, retain: false }, async (err) => {
       if (err) {
         console.error(`[MQTT] publish failed requestId=${requestId}:`, err.message);
 

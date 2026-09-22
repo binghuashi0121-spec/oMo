@@ -69,7 +69,7 @@
         <view class="temp-switch-row">
           <view class="temp-info">
             <text class="temp-title">临时停车</text>
-            <text class="temp-desc">停车期间正常计费，请确保车辆落锁</text>
+            <text class="temp-desc">停车期间正常计费，请确保车辆停稳</text>
           </view>
           <switch checked="{{isTempParking}}" bindchange="onTempParkingChange" color="#ef5b24" />
         </view>

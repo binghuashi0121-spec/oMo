@@ -22,10 +22,12 @@
 | `MQTT_CLIENT_ID` | 是 | 每个实例唯一 |
 | `TCB_ENV` | 是 | CloudBase 环境 ID，也用于核对平台身份头 |
 | `WECHAT_APP_ID` | 生产建议 | 配置后同时核对平台注入的 AppID |
+| `CLOUDBASE_APIKEY` | 云托管必需 | 在 CloudBase Run 的“API Key 设置”选择服务端 Key，由平台注入；不要把值写入仓库或普通环境变量文本 |
 | `DEFAULT_SCENIC_AREA_ID` | 否 | 未预配置旧设备的兼容景区，默认 `tianmashan`；新设备应先在 `vehicles` 中显式绑定景区 |
 | `ALLOW_WX_DEVTOOLS` | 否 | 仅开发联调可设为 `true`，生产保持 `false` |
+| `ALLOW_UNKNOWN_WX_SOURCE` | 否 | 仅 dev/test/staging 临时兼容非标准但非空的 `X-WX-SOURCE`；生产环境即使设为 `true` 也不会生效 |
 | `TENCENTCLOUD_SECRETID` / `TENCENTCLOUD_SECRETKEY` | 仅本地 | 云内优先使用服务身份，不把固定密钥写入镜像 |
-| `CLOUDBASE_RUNTIME_AUTH` | 云托管必需 | 云托管内设为 `true`，使用工作负载身份并避免上传固定 CAM 密钥 |
+| `CLOUDBASE_RUNTIME_AUTH` | 云托管标记 | 云托管内设为 `true`；该标记本身不授予数据库访问权限，仍需平台注入 `CLOUDBASE_APIKEY` |
 | `MQTT_SUB_TOPICS` | 否 | 默认 `ugv/+/device,ugv/+/response` |
 | `MQTT_PROFILE` | staging 必需 | 真实平台使用 `vendor_real`；旧模拟环境使用 `isolated_simulator` |
 | `MQTT_CONNECTION_ENABLED` | 真实平台必需 | 默认关闭；关闭时服务启动但不创建 MQTT 连接 |
