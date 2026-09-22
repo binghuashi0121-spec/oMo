@@ -36,6 +36,14 @@ node scripts/staging/check-config.js deploy
 3. `/mqtt/health` 必须显示 `cloudbase.ready=true`、`mqtt.state=blocked`、`mqtt.connected=false`、车辆数为 0、命令关闭，并明确列出缺少车辆白名单和凭据。该阶段不以 MQTT 连接成功为验收条件。
 4. `admin-api-staging` 使用 CloudBase Run 的“API Key 设置”选择 staging 专用服务端 Key，由平台注入 `CLOUDBASE_APIKEY`；不得把 Key 明文写入环境变量文本、命令、日志或仓库。仅设置 `CLOUDBASE_RUNTIME_AUTH=true` 不构成数据库授权。
 5. 只读核对已部署的 10 个云函数、`admin-api-staging` 和 Web；现有版本健康时不得无故重复发布。管理员忘记或暴露初始密码时，只能在本机隐藏输入运行 `npm run staging:admin:reset -- --apply`，随后完成首次改密。
+
+## staging 地图与静态 Web
+
+1. 腾讯位置服务创建独立 Web Key，只启用 JavaScript API GL，并将域名白名单限制为最终 CloudBase HTTPS 域名。Key 不进入聊天、命令参数、日志或 Git。
+2. 在仓库根目录运行 `npm run staging:web:build`，通过交互终端隐藏输入 Key。脚本固定使用 `VITE_USE_MOCK=false`，成功后只输出文件数和 `dist/index.html` 的 SHA-256。
+3. 发布前下载并校验当前静态托管版本；将 `omo-admin-web/dist` 发布到 staging 静态托管根目录。
+4. CloudBase HTTP 访问使用同一域名：`/api` 转发至 `admin-api-staging` 并保留路径，`/` 转发至静态托管；静态托管错误页设置为 `index.html`，以支持 SPA 子路由刷新。
+5. 发布后验证 `/`、`/overview`、`/map`、`/orders`、`/finance`、`/system` 和 `/api/admin/v1/live`。地图必须加载腾讯底图；失败时恢复上一静态版本，不调整生产环境。
 6. 获得授权 `deviceId`、Broker 选择、凭据使用授权、遥测单位和坐标系后，另行部署只读连接修订；连接前只生成 `ugv/{deviceId}/device` 与 `ugv/{deviceId}/response` 精确 Topic。
 7. 当前允许在 MQTT blocked 状态下将 trial 固定指向本 staging 环境并上传体验版，只验证登录、车辆读取、`waiting_pickup` 创建/取消及 Web 数据同步。车辆指令被拒绝是安全门禁的预期结果；遥测、行驶、完成订单和结算仍须等待真实车辆只读接入及后续现场测试。
 
