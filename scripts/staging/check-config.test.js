@@ -2,6 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { validateStagingConfig } = require('./check-config');
 const manifest = require('../../deploy/staging/manifest.json');
+const { validateMapKey } = require('./build-admin-web-cli');
 const { resolveSimulatorConfig } = require('./simulator-config');
 const { assertTarget, collections, indexSpecs, seeds, indexDefinition, verify } = require('./provision-nosql');
 const { validatePassword, createStagingAdmin } = require('./bootstrap-admin-cli');
@@ -39,6 +40,12 @@ test('staging manifest keeps unknown vendor units and disables MQTT', () => {
   assert.equal(manifest.mqtt.connectionEnabled, false);
   assert.equal(manifest.mqtt.commandsEnabled, false);
   assert.match(validateStagingConfig({ ...manifest, mqtt: { ...manifest.mqtt, telemetrySpeedUnit: 'kph' } }).join(' '), /unknown/);
+});
+
+test('staging map build accepts only a non-empty key without whitespace', () => {
+  assert.doesNotThrow(() => validateMapKey('ABCDE-FGHIJ-KLMNO-PQRST-UVWXY'));
+  assert.throws(() => validateMapKey('short'));
+  assert.throws(() => validateMapKey('ABCDE FGHIJ KLMNO PQRST'));
 });
 
 test('trial must resolve to the same staging environment', () => {
