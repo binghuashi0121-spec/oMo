@@ -1,0 +1,69 @@
+.page-data-state { min-width: 0; }
+.page-loading { min-height: 430px; border: 1px solid var(--omo-border); border-radius: 15px; background: var(--omo-surface); }
+.stale-notice { min-height: 42px; margin-bottom: 14px; padding: 9px 13px; display: flex; align-items: center; gap: 9px; border: 1px solid #f0d7a8; border-radius: 10px; color: #80500e; background: #fff8e9; font-size: 12px; }
+.stale-notice > span { flex: 1; }
+.stale-notice .app-icon { font-size: 16px; }
+
+.map-toolbar { min-height: 92px; }
+.map-toolbar > div:first-child { min-width: 300px; }
+.vehicle-legend { margin-top: 9px; display: flex; align-items: center; flex-wrap: wrap; gap: 8px 14px; color: var(--omo-muted); font-size: 11px; }
+.vehicle-legend span { display: inline-flex; align-items: center; }
+.filter-result { white-space: nowrap; color: var(--omo-muted); font-size: 12px; }
+.map-workspace { height: calc(100vh - 371px); min-height: 430px; }
+.fallback-marker-label { font-size: 10px; }
+.map-key-notice span { font-size: 12px; }
+.map-watermark { font-size: 11px; }
+.vehicle-main strong { font-size: 13px; }
+.vehicle-main span { font-size: 11px; }
+.vehicle-list-head small { font-size: 11px; }
+.vehicle-list-item > small { font-size: 11px; }
+
+.order-primary { display: grid; gap: 5px; }
+.order-primary > small, .table-secondary { color: var(--omo-muted); font-size: 11px; }
+.order-table .el-table__cell { padding-left: 0; padding-right: 0; }
+.order-table .cell { padding-left: 10px; padding-right: 10px; }
+.order-table td + td { border-left: 1px solid rgba(231, 226, 220, .45); }
+
+.chart-summary { margin: -2px 0 8px; color: var(--omo-muted); font-size: 12px; line-height: 1.6; }
+.health-grid { grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+.health-score small { font-size: 11px; }
+.demo-scenario span { font-size: 12px; }
+.health-card-head > span { font-size: 11px; }
+.health-card p { font-size: 12px; }
+.health-card > small { font-size: 11px; }
+.incident-item p { font-size: 12px; }
+.incident-item small { font-size: 11px; }
+.incident-item .incident-advice { margin-top: 8px; padding: 8px 10px; border-left: 3px solid currentColor; border-radius: 4px; color: #80500e; background: #fff9ed; }
+.rule-grid span { font-size: 12px; }
+.panel-toolbar p, .panel-title p { font-size: 12px; }
+.muted-text { font-size: 11px; }
+.detail-grid span, .coordinate-box p, .finance-equation span { font-size: 11px; }
+.date-box small, .login-security, .login-panel footer { font-size: 11px; }
+
+.vehicle-list-item:focus-visible,
+.fallback-marker:focus-visible,
+.user-button:focus-visible,
+.el-button:focus-visible,
+.nav-menu .el-menu-item:focus-visible,
+a:focus-visible {
+  outline: 3px solid rgba(239, 91, 36, .45);
+  outline-offset: 2px;
+}
+
+@media (max-width: 1366px) {
+  .map-toolbar { align-items: flex-start; flex-direction: column; gap: 12px; }
+  .map-toolbar .toolbar-controls { width: 100%; }
+  .map-toolbar .filter-result { margin-right: auto; }
+  .map-workspace { height: calc(100vh - 408px); min-height: 410px; }
+  .topbar { padding-left: 20px; padding-right: 20px; }
+  .page-content { padding: 18px 20px 28px; }
+  .metric-card { min-height: 104px; }
+  .health-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .health-card { min-height: 158px; }
+}
+
+@media (min-width: 1760px) {
+  .login-visual { padding-left: 64px; padding-right: 64px; }
+  .login-message { max-width: 700px; }
+  .login-form-wrap { width: 430px; }
+}

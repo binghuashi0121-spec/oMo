@@ -1,0 +1,30 @@
+{
+  "$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
+  "envId": "omo-platform-staging-d5a30d0fd8f",
+  "functionRoot": "../../omo-mini-program/cloudfunctions",
+  "functions": [
+    {
+      "name": "sendSms",
+      "type": "Event",
+      "handler": "index.main",
+      "timeout": 3,
+      "runtime": "Nodejs20.19",
+      "memorySize": 256,
+      "installDependency": true,
+      "envVariables": {
+        "SMS_DEBUG_CODE_ENABLED": "true",
+        "SMS_DEBUG_ENV_ID": "omo-platform-staging-d5a30d0fd8f",
+        "SMS_DEBUG_APP_ID": "wx6443442c17eb3220"
+      }
+    },
+    {
+      "name": "loginWithPhone",
+      "type": "Event",
+      "handler": "index.main",
+      "timeout": 3,
+      "runtime": "Nodejs20.19",
+      "memorySize": 256,
+      "installDependency": true
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "indexes": [
+    { "collection": "admin_users", "name": "uniq_username", "unique": true, "fields": [{ "field": "username", "order": "asc" }] },
+    { "collection": "admin_sessions", "name": "uniq_token_hash", "unique": true, "fields": [{ "field": "tokenHash", "order": "asc" }] },
+    { "collection": "admin_sessions", "name": "user_expiry", "fields": [{ "field": "userId", "order": "asc" }, { "field": "absoluteExpiresAt", "order": "desc" }] },
+    { "collection": "admin_audit_logs", "name": "actor_created", "fields": [{ "field": "actorId", "order": "asc" }, { "field": "createdAt", "order": "desc" }] },
+    { "collection": "admin_order_notes", "name": "order_created", "fields": [{ "field": "orderId", "order": "asc" }, { "field": "createdAt", "order": "asc" }] },
+    { "collection": "financial_adjustments", "name": "uniq_adjustment_idempotency", "unique": true, "fields": [{ "field": "idempotencyKey", "order": "asc" }] },
+    { "collection": "financial_adjustments", "name": "settlement_created", "fields": [{ "field": "settlementId", "order": "asc" }, { "field": "createdAt", "order": "asc" }] },
+    { "collection": "vehicle_commands", "name": "uniq_command_idempotency", "unique": true, "fields": [{ "field": "idempotencyKey", "order": "asc" }] },
+    { "collection": "vehicle_commands", "name": "scenic_created", "fields": [{ "field": "scenicAreaId", "order": "asc" }, { "field": "createdAt", "order": "desc" }] },
+    { "collection": "vehicles", "name": "scenic_status", "fields": [{ "field": "scenicAreaId", "order": "asc" }, { "field": "status", "order": "asc" }] },
+    { "collection": "trips", "name": "scenic_status_created", "fields": [{ "field": "scenicAreaId", "order": "asc" }, { "field": "status", "order": "asc" }, { "field": "createTime", "order": "desc" }] },
+    { "collection": "trip_runtime", "name": "scenic_trip", "fields": [{ "field": "scenicAreaId", "order": "asc" }, { "field": "tripId", "order": "asc" }] },
+    { "collection": "trip_settlements", "name": "scenic_settled", "fields": [{ "field": "scenicAreaId", "order": "asc" }, { "field": "settledAt", "order": "desc" }] },
+    { "collection": "mqtt_logs", "name": "scenic_vehicle_created", "fields": [{ "field": "scenicAreaId", "order": "asc" }, { "field": "ugvID", "order": "asc" }, { "field": "createdAt", "order": "desc" }] },
+    { "collection": "command_history", "name": "scenic_created", "fields": [{ "field": "scenicAreaId", "order": "asc" }, { "field": "createdAt", "order": "desc" }] }
+  ]
+}

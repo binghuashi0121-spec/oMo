@@ -8,7 +8,7 @@ function formatCount(count) {
 }
 
 function main() {
-  const backupDir = resolveProjectPath('database_import');
+  const backupDir = resolveProjectPath('omo-mini-program', 'database_import');
   if (!fs.existsSync(backupDir)) {
     throw new Error(`Backup directory does not exist: ${backupDir}`);
   }

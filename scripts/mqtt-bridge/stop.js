@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { resolveProjectPath } = require('../cloudbase/utils');
 
-const PID_FILE = resolveProjectPath('mqtt-bridge', 'run', 'mqtt-bridge.pid');
+const PID_FILE = resolveProjectPath('omo-mqtt-bridge', 'run', 'mqtt-bridge.pid');
 
 function readPid() {
   if (!fs.existsSync(PID_FILE)) return null;

@@ -23,7 +23,7 @@ function info(message) {
 }
 
 function main() {
-  const backupDir = resolveProjectPath('database_import');
+  const backupDir = resolveProjectPath('omo-mini-program', 'database_import');
   const requiredUgvId = process.argv[2] || 'AB101';
 
   const data = {};

@@ -1,13 +1,13 @@
-# oMo 微信小程序
+# oMo 共享车平台
 
 ## 项目说明
 
-这是一个围绕共享无人车/漫步车业务的小程序项目，包含：
+这是一个围绕共享无人车/漫步车业务的单仓库平台，四个可独立开发和构建的项目在仓库根目录同级排列：
 
-- 小程序前端页面与业务流程
-- 云函数
-- `mqtt-bridge` 云托管服务
-- CloudBase 云数据库读写链路
+- `omo-mini-program/`：微信小程序、云函数和数据库初始化数据
+- `omo-admin-web/`：Vue 3 桌面端运营管理台
+- `omo-admin-api/`：NestJS 管理 API
+- `omo-mqtt-bridge/`：MQTT 到 CloudBase 的桥接服务
 
 当前联调重点流程为：
 
@@ -15,17 +15,21 @@
 
 ## 目录结构
 
-- `pages/`：小程序页面
-- `components/`：小程序组件
-- `cloudfunctions/`：云函数
-- `mqtt-bridge/`：MQTT 到 CloudBase 的桥接服务
+- `omo-mini-program/pages/`：小程序页面
+- `omo-mini-program/components/`：小程序组件
+- `omo-mini-program/cloudfunctions/`：云函数
+- `omo-mini-program/database_import/`：云数据库初始化/导入数据
+- `omo-mqtt-bridge/`：MQTT 到 CloudBase 的桥接服务
+- `omo-admin-web/`：Vue 3 桌面端运营管理台
+- `omo-admin-api/`：NestJS 管理 API
+- `docs/admin-system.md`：后台本地运行、迁移、部署与验收说明
 - `scripts/`：本地检查、启动、辅助脚本
-- `database_import/`：云数据库初始化/导入数据
 
 ## 开发备注
 
-- `mqtt-bridge` 的本地联调、部署和检查说明见 [mqtt-bridge/README.md](/d:/oMo/oMo_code/mqtt-bridge/README.md)
-- 小程序调用云托管时，容器路径前缀在 [app.js](/d:/oMo/oMo_code/app.js) 中配置为 `/mqtt`
+- `omo-mqtt-bridge` 的安全联调与部署说明见 [omo-mqtt-bridge/README.md](omo-mqtt-bridge/README.md)
+- 管理后台实施与 CloudBase dev 部署说明见 [docs/admin-system.md](docs/admin-system.md)
+- 小程序调用云托管时，容器路径前缀在 [omo-mini-program/app.js](omo-mini-program/app.js) 中配置为 `/mqtt`
 - 车辆搜索主键当前按 `ugvID` 使用，不按文档 `_id` 直接给用户暴露
 
 ## 上线前逐项打勾的测试清单
