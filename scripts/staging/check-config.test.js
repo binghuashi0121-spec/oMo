@@ -42,8 +42,8 @@ test('staging manifest keeps unknown vendor units and disables MQTT', () => {
   assert.match(validateStagingConfig({ ...manifest, mqtt: { ...manifest.mqtt, telemetrySpeedUnit: 'kph' } }).join(' '), /unknown/);
 });
 
-test('staging map build accepts only a non-empty key without whitespace', () => {
-  assert.doesNotThrow(() => validateMapKey('ABCDE-FGHIJ-KLMNO-PQRST-UVWXY'));
+test('staging map build accepts only the Tencent Web Key shape', () => {
+  assert.doesNotThrow(() => validateMapKey('ABCDE-FGHIJ-KLMNO-PQRST-UVWXY-12345'));
   assert.throws(() => validateMapKey('short'));
   assert.throws(() => validateMapKey('ABCDE FGHIJ KLMNO PQRST'));
 });
